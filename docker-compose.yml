@@ -1,0 +1,19 @@
+services:
+  database:
+    image: postgres:latest
+    container_name: stashify-database
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=stashify
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data/pgdata
+    networks:
+      - stashify-net
+
+networks:
+  stashify-net:
+    driver: bridge
