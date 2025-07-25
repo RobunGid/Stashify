@@ -2,6 +2,8 @@ import asyncio
 
 from config.bot_config import dp, bot
 from routers import common
+from database.orm import init_models
+from database.models import user
 
 async def main():
     dp.include_routers(common.router)
@@ -9,4 +11,5 @@ async def main():
     await dp.start_polling(bot)
     
 if __name__ == "__main__":
+    asyncio.run(init_models())
     asyncio.run(main())

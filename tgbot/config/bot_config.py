@@ -9,10 +9,10 @@ env_path = Path(__file__).parent.parent / '.env'
 
 config = dotenv_values(dotenv_path=env_path)
 
-TOKEN = config["TOKEN"]
-
-if TOKEN is None:
+if config["TOKEN"] is None:
 	raise ValueError("Bot token is required in /tgbot/.env")
+
+TOKEN = config["TOKEN"]
 
 bot = Bot(TOKEN)
 storage = MemoryStorage()
