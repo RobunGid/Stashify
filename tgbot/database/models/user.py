@@ -24,4 +24,5 @@ class UserModel(Base):
     connection_date = Column(DateTime, default=datetime.now)
     
     quiz_results = relationship("QuizResultModel", back_populates="user")
+    quiz_ratings = relationship("QuizRatingModel", back_populates="user")
     

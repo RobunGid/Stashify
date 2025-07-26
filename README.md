@@ -3,7 +3,7 @@
 ## Project Roadmap
 
 - [x] Set up project structure with aiogram, sqlalchemy, docker, basic config
-- [x] Initialize PostgreSQL schema: 
+- [x] Initialize PostgreSQL models: 
 	- [x] Users
 	- [x] Resources
 	- [x] Quizes
@@ -11,6 +11,7 @@
 	- [x] Quiz results
 	- [x] Ratings
 	- [x] Categories
+- [x] Initialize Pydantic schemas
 
 - [ ] User registration, role and language assignment 
 - [ ] Role system: admin, manager, user 
