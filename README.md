@@ -13,12 +13,13 @@
 	- [x] Categories
 - [x] Initialize Pydantic schemas
 
-- [ ] User registration, role and language assignment 
-- [ ] Role system: admin, manager, user 
+- [x] User registration, role and language assignment 
+- [x] Role system: admin, manager, user 
 
-- [ ] View resource list with pagination
-- [ ] View resource details
 - [ ] Adding new resource
+- [ ] Adding new category
+- [ ] View resource list pagination by categories
+- [ ] View resource details
 - [ ] Search resources by tags, verification by author
 - [ ] Rate resource
 
