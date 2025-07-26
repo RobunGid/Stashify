@@ -14,5 +14,5 @@ class QuizResultSchema(BaseModel):
     completed_at: datetime
     percent: int
     
-from user_schema import UserSchema
-from quiz_schema import QuizSchema
+from .user_schema import UserSchema
+from .quiz_schema import QuizSchema

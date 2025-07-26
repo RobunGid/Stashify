@@ -16,3 +16,4 @@ class QuizModel(Base):
     resource = relationship("ResourceModel", back_populates="quizes")
     
     questions = relationship("QuizQuestionModel", back_populates="quiz")
+    ratings = relationship("QuizRatingModel", back_populates="quiz")

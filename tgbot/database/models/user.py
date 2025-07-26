@@ -20,6 +20,7 @@ class UserModel(Base):
     tg_id = Column(String, unique=True)
     
     role = Column(Enum(Role))
+    language = Column(String, nullable=False)
     
     connection_date = Column(DateTime, default=datetime.now)
     

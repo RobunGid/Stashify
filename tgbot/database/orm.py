@@ -5,7 +5,7 @@ from config.database_config import DATABASE_URL
 
 Base = declarative_base()
 engine = create_async_engine(DATABASE_URL)
-AsyncSessionLocal = async_sessionmaker(bind=engine, expore_on_commit=True, class_=AsyncSession)
+AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=True, class_=AsyncSession)
 
 async def init_models():
     async with engine.begin() as conn:

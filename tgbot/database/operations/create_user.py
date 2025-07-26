@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from schemas.user_schema import UserSchema
 from database.orm import AsyncSessionLocal
 from database.models.user import UserModel

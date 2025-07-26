@@ -19,5 +19,5 @@ class ResourceSchema(BaseModel):
     
     created_at: datetime
     
-from category_schema import CategorySchema
-from quiz_schema import QuizSchema
+from .category_schema import CategorySchema
+from .quiz_schema import QuizSchema

@@ -10,4 +10,4 @@ class CategorySchema(BaseModel):
 
     resources: "List[ResourceSchema]"
     
-from resource_schema import ResourceSchema
+from .resource_schema import ResourceSchema

@@ -10,5 +10,5 @@ class QuizSchema(BaseModel):
     
     questions: "List[QuizQuestionSchema]"
     
-from resource_schema import ResourceSchema
-from quiz_question_schema import QuizQuestionSchema
+from .resource_schema import ResourceSchema
+from .quiz_question_schema import QuizQuestionSchema

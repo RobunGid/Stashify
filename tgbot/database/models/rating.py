@@ -7,13 +7,13 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from database.orm import Base
 
-class RatingModel(Base):
+class QuizRatingModel(Base):
     __tablename__ = "rating"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     
     quiz_id = Column(UUID(as_uuid=True), ForeignKey('quiz.id'), nullable=False)
-    quiz = relationship("QuizModel", back_populates="questions")
+    quiz = relationship("QuizModel", back_populates="ratings")
     
     user_id = Column(UUID(as_uuid=True), ForeignKey('user.id'), nullable=False)
     user = relationship("UserModel", back_populates="quiz_ratings")

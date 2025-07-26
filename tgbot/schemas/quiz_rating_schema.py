@@ -14,5 +14,5 @@ class QuizRatingSchema(BaseModel):
     created_at: datetime
     rating: int
     
-from user_schema import UserSchema
-from quiz_schema import QuizSchema
+from .user_schema import UserSchema
+from .quiz_schema import QuizSchema

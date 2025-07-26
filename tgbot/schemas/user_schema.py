@@ -7,13 +7,15 @@ from database.models.user import Role
 
 class UserSchema(BaseModel):
     id: str
-    tg_id: str = Field(exclude=True)
+    tg_id: str = Field()
     
     role: Role
-    connection_date: datetime
+    language: str
     
-    quiz_results: "List[QuizResultSchema]"
-    quiz_ratings: "List[QuizRatingSchema]"
+    connection_date: datetime = Field(default_factory=datetime.now)
     
-from quiz_result_schema import QuizResultSchema
-from quiz_rating_schema import QuizRatingSchema
+    quiz_results: "List[QuizResultSchema]" = Field(default_factory=list)
+    quiz_ratings: "List[QuizRatingSchema]" = Field(default_factory=list)
+    
+from .quiz_result_schema import QuizResultSchema
+from .quiz_rating_schema import QuizRatingSchema

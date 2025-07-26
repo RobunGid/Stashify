@@ -12,4 +12,4 @@ class QuizQuestionSchema(BaseModel):
     options: List[str]
     answer: str
     
-from quiz_schema import QuizSchema
+from .quiz_schema import QuizSchema
