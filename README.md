@@ -2,26 +2,28 @@
 
 ## Project Roadmap
 
-- [ ] Set up project structure with aiogram, sqlalchemy, docker, basic config
-- [ ] Initialize PostgreSQL schema: 
-	- [ ] Users
-	- [ ] Resources
-	- [ ] Tests
-	- [ ] Results
-	- [ ] Votes
+- [x] Set up project structure with aiogram, sqlalchemy, docker, basic config
+- [x] Initialize PostgreSQL schema: 
+	- [x] Users
+	- [x] Resources
+	- [x] Quizes
+	- [x] Quizes questions
+	- [x] Quiz results
+	- [x] Ratings
+	- [x] Categories
 
 - [ ] User registration, role and language assignment 
 - [ ] Role system: admin, manager, user 
 
-- [ ] Adding new resource
 - [ ] View resource list with pagination
 - [ ] View resource details
+- [ ] Adding new resource
 - [ ] Search resources by tags, verification by author
-- [ ] Like / dislike resource
+- [ ] Rate resource
 
-- [ ] Add mini-test to resource: multiple-choice questions
-- [ ] Take test for a resource
-- [ ] Store user test results
+- [ ] Add quiz to resource: multiple-choice questions
+- [ ] Complete quiz for a resource
+- [ ] Store user quiz results
 
 - [ ] Report a resource (spam, incorrect, etc)
 - [ ] Admin view of reported resources and resolution

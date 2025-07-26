@@ -1,9 +1,12 @@
-from dotenv import dotenv_values
+import logging
 from pathlib import Path
 
+from dotenv import dotenv_values
 from aiogram import Dispatcher
 from aiogram import Bot
 from aiogram.fsm.storage.memory import MemoryStorage
+
+logging.basicConfig(level=logging.INFO)
 
 env_path = Path(__file__).parent.parent / '.env'
 
@@ -16,4 +19,4 @@ TOKEN = config["TOKEN"]
 
 bot = Bot(TOKEN)
 storage = MemoryStorage()
-dp = Dispatcher(storage=storage)
+dp = Dispatcher(storage=storage, echo=True)
