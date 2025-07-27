@@ -11,17 +11,24 @@
 	- [x] Quiz results
 	- [x] Ratings
 	- [x] Categories
+	- [ ] Favorites
 - [x] Initialize Pydantic schemas
 
 - [x] User registration, role and language assignment 
 - [x] Role system: admin, manager, user 
 
+- [x] Main menu
 - [ ] Adding new resource
+- [ ] Deleting resource
+- [ ] Editing resource
 - [ ] Adding new category
+- [ ] Deleting category
+- [ ] Editing category
 - [ ] View resource list pagination by categories
 - [ ] View resource details
 - [ ] Search resources by tags, verification by author
 - [ ] Rate resource
+- [ ] Add resource to favorite
 
 - [ ] Add quiz to resource: multiple-choice questions
 - [ ] Complete quiz for a resource
