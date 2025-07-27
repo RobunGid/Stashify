@@ -27,11 +27,3 @@ async def start_command(message: Message):
     reply_keyboard = main_menu_keyboard(user_role, message.from_user.language_code)
     await message.answer(t("main_menu.welcome", message.from_user.language_code), reply_markup=reply_keyboard)
     
-@router.message(Command("menu"))
-async def main_menu_command(message: Message):
-    if not message.from_user or not message.from_user.id: return
-
-    user_role = await get_user_role(str(message.from_user.id))
-    
-    reply_keyboard = main_menu_keyboard(user_role, message.from_user.language_code)
-    await message.answer(t("main_menu.text", message.from_user.language_code), reply_markup=reply_keyboard)

@@ -2,7 +2,6 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardButton
 
 from database.models.user import Role
-from i18n import translations
 from i18n.translate import t
 
 def main_menu_keyboard(user_role: Role, user_lang: str | None):
