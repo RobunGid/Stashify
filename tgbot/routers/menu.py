@@ -20,7 +20,7 @@ async def main_menu_command(message: Message):
     await message.answer(t("main_menu.text", message.from_user.language_code), reply_markup=reply_keyboard)
     
 @router.callback_query(F.data=="menu")
-async def main_menu_callback_handler(callback: CallbackQuery):
+async def main_menu(callback: CallbackQuery):
     if not callback.from_user or not callback.message: return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     

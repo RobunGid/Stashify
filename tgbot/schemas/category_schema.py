@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class CategorySchema(BaseModel):
@@ -8,6 +8,6 @@ class CategorySchema(BaseModel):
     
     name: str
 
-    resources: "List[ResourceSchema]"
+    resources: "List[ResourceSchema]" = Field(default_factory=list)
     
 from .resource_schema import ResourceSchema
