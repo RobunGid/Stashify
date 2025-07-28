@@ -1,6 +1,11 @@
 translations = {
 	"en": {
 		"common.back": "⬅️ Back",
+		"items.end": "⏩",
+		"items.start": "⏪",
+		"items.back": "⬅️",
+		"items.forward": "➡️",
+  
 		"main_menu.text": "🏠 Main Menu\nChoose action:",
 		"main_menu.welcome": "🏠 Main Menu\nWelcome to the bot with \nlots of resources on \nprogramming, web, cybersecurity, etc.\nChoose action:",
 		"main_menu_keyboard.categories": "🗂️ Categories",
@@ -23,7 +28,11 @@ translations = {
 		"manage_categories_keyboard.delete": "🗑️ Delete Category",
 		"manage_categories.create.text": "📤 Send category name",
 		"manage_categories.create.success": "✅ Category created successfully\n\nCategory name: {category_name}",
-		"manage_categories.create.fail": "❌ Category with this name already exist\n\nCategory name: {category_name}",
+		"manage_categories.create.fail": "❌ Category with this name already exists\n\nCategory name: {category_name}",
+  		"manage_categories.edit.choose": "📤 Choose category to edit",
+  		"manage_categories.edit.text": "📤 Send new category name",
+		"manage_categories.edit.success": "✅ Category name changed successfully\n\nCategory name: {category_name}",
+		"manage_categories.edit.fail": "❌ Category with this name already exists\n\nCategory name: {category_name}",
   
   		"manage_quizes.text": "🛠️ Manage Quizes\nChoose action:",
 		"manage_quizes_keyboard.create": "➕ Create Quiz",
