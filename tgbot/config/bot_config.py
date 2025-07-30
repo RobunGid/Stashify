@@ -19,8 +19,7 @@ if config["TOKEN"] is None:
 
 TOKEN = config["TOKEN"]
 
-DefaultBotProperties(parse_mode=ParseMode.HTML)
 
-bot = Bot(TOKEN)
+bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage, echo=True)

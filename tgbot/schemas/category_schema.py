@@ -8,7 +8,7 @@ class CategorySchema(BaseModel):
     
     name: str
 
-    resources: "List[ResourceSchema]" = Field(default_factory=list)
-    model_config = ConfigDict(from_attributes=True)
+    resources: "List[ResourceSchemaWithoutCategory]" = Field(default_factory=list, exclude=("category",))
+    model_config = ConfigDict(from_attributes=True, recursive=False)
     
-from .resource_schema import ResourceSchema
+from .resource_schema import ResourceSchemaWithoutCategory

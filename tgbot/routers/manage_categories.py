@@ -1,6 +1,5 @@
 from math import ceil
 from uuid import uuid4
-from re import findall
 
 from aiogram import F, Router
 from aiogram.types import CallbackQuery, Message
@@ -87,10 +86,10 @@ async def edit_category_callback_handler(callback: CallbackQuery, state: FSMCont
     await state.set_state("category_id")
     
 @router.callback_query(EditCategoryIdCallbackFactory.filter(F.action == "change_page"), UserRoleFilter([Role.admin]))
-async def edit_category_page(callback: CallbackQuery, state: FSMContext):
+async def edit_category_page(callback: CallbackQuery, state: FSMContext, callback_data: EditCategoryIdCallbackFactory):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
-    current_page=int(findall(r'\d+', callback.data)[-1])
+    current_page=callback_data.page
     
     await state.update_data(current_page=current_page)
     
@@ -161,10 +160,10 @@ async def delete_category_callback_handler(callback: CallbackQuery, state: FSMCo
     await state.set_state("category_id")
     
 @router.callback_query(DeleteCategoryIdCallbackFactory.filter(F.action == "change_page"), UserRoleFilter([Role.admin]))
-async def delete_category_page(callback: CallbackQuery, state: FSMContext):
+async def delete_category_page(callback: CallbackQuery, state: FSMContext, callback_data: EditCategoryIdCallbackFactory):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
-    current_page=int(findall(r'\d+', callback.data)[-1])
+    current_page = callback_data.page
     
     await state.update_data(current_page=current_page)
     

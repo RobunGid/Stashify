@@ -18,7 +18,7 @@
 - [x] Role system: admin, manager, user 
 
 - [x] Main menu
-- [ ] Adding new resource
+- [x] Adding new resource
 - [ ] Deleting resource
 - [ ] Editing resource
 - [x] Adding new category
