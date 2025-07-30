@@ -65,10 +65,10 @@ async def create_category_final(message: Message):
         )
         
 class EditCategoryState(StatesGroup):
-    category_id = State()
     total_pages = State()
     categories = State()
     new_category_name = State()
+    category_id = State()
 
 @router.callback_query(F.data=="edit_category", UserRoleFilter([Role.admin]))
 async def edit_category_callback_handler(callback: CallbackQuery, state: FSMContext):
@@ -85,7 +85,7 @@ async def edit_category_callback_handler(callback: CallbackQuery, state: FSMCont
     )
     await state.set_state("category_id")
     
-@router.callback_query(F.data.contains("edit_category_page_"), UserRoleFilter([Role.admin]))
+@router.callback_query(CategoryIdCallbackFactory.filter(F.action == "change_page"), UserRoleFilter([Role.admin]))
 async def edit_category_page(callback: CallbackQuery, state: FSMContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
@@ -105,19 +105,18 @@ async def edit_category_page(callback: CallbackQuery, state: FSMContext):
             total_pages=total_pages, 
             page=int(current_page))
     )
-    await state.set_state("category_id")
     
-@router.callback_query(CategoryIdCallbackFactory.filter(), UserRoleFilter([Role.admin]))
+@router.callback_query(CategoryIdCallbackFactory.filter(F.action=="select"), UserRoleFilter([Role.admin]))
 async def edit_category_choose(callback: CallbackQuery, callback_data: CategoryIdCallbackFactory, state: FSMContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     
-    category_id = callback_data.value
-    await state.update_data(category_id=category_id)
     await callback.message.answer(
         text=t("manage_categories.edit.text", callback.from_user.language_code),
         reply_markup=manage_categories_back_keyboard(callback.from_user.language_code)
     )
+    
+    await state.update_data(category_id=callback_data.category_id)
     await state.set_state(EditCategoryState.new_category_name)
     
 @router.message(EditCategoryState.new_category_name)
