@@ -33,6 +33,9 @@ translations = {
   		"manage_categories.edit.text": "📤 Send new category name",
 		"manage_categories.edit.success": "✅ Category name changed successfully\n\nCategory name: {category_name}",
 		"manage_categories.edit.fail": "❌ Category with this name already exists\n\nCategory name: {category_name}",
+		"manage_categories.delete.choose": "📤 Choose category to delete",
+		"manage_categories.delete.success": "✅ Category deleted successfully\n\nCategory name: {category_name}",
+		"manage_categories.delete.fail": "❌ Category with this name already deleted or something went wrong\n\nCategory name: {category_name}",
   
   		"manage_quizes.text": "🛠️ Manage Quizes\nChoose action:",
 		"manage_quizes_keyboard.create": "➕ Create Quiz",

@@ -21,9 +21,9 @@
 - [ ] Adding new resource
 - [ ] Deleting resource
 - [ ] Editing resource
-- [ ] Adding new category
-- [ ] Deleting category
-- [ ] Editing category
+- [x] Adding new category
+- [x] Deleting category
+- [x] Editing category
 - [ ] View resource list pagination by categories
 - [ ] View resource details
 - [ ] Search resources by tags, verification by author
