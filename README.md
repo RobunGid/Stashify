@@ -20,7 +20,7 @@
 - [x] Main menu
 - [x] Adding new resource
 - [ ] Deleting resource
-- [ ] Editing resource
+- [x] Editing resource
 - [x] Adding new category
 - [x] Deleting category
 - [x] Editing category

@@ -5,7 +5,7 @@ from uuid import uuid4
 from pydantic import UUID4, BaseModel, Field, ConfigDict
 
 def default_category():
-    return CategorySchema(id=uuid4(), name='')
+    return CategorySchemaWithoutResources(id=uuid4(), name='')
 
 class ResourceSchemaWithoutCategory(BaseModel):
     id: UUID4
@@ -23,7 +23,7 @@ class ResourceSchemaWithoutCategory(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class ResourceSchema(ResourceSchemaWithoutCategory):
-    category: "CategorySchema" = Field(default_factory=default_category)
+    category: "CategorySchemaWithoutResources" = Field(default_factory=default_category)
     
-from .category_schema import CategorySchema
+from .category_schema import CategorySchemaWithoutResources
 from .quiz_schema import QuizSchema
