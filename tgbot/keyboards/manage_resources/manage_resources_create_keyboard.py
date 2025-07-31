@@ -40,5 +40,5 @@ def manage_resources_create_keyboard(user_lang: str | None, categories: List[Cat
     elif page == 1 and total_pages == 1:
             builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
             builder.adjust(*[*([1]*len(categories)), 1, 1])
-    builder.row(InlineKeyboardButton(text=t("common.back", user_lang), callback_data="manage_categories"))
+    builder.row(InlineKeyboardButton(text=t("common.back", user_lang), callback_data="manage_resources"))
     return builder.as_markup()
