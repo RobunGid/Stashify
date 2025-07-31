@@ -1,8 +1,10 @@
 import asyncio
 
 from config.bot_config import dp, bot
-from routers import common, menu, manage_categories, manage_quizes, manage_users
+from routers import common, menu, manage_users
 from routers.manage_resources.router import router as manage_resources_router
+from routers.manage_categories.router import router as manage_categories_router
+from routers.manage_quizes.router import router as manage_quizes_router
 from database.orm import init_models
 from database.models import *
 
@@ -12,8 +14,8 @@ async def main():
         common.router, 
         menu.router,
         manage_resources_router,
-        manage_categories.router,
-        manage_quizes.router,
+        manage_categories_router,
+        manage_quizes_router,
         manage_users.router,
     )
     

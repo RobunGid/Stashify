@@ -119,6 +119,7 @@ async def new_resource_tags_choose(message: Message, state: FSMContext):
         image=state_data["image"],
         tags=message.html_text, 
     )
+    category_name = next((category.name for category in state_data["categories"]), "Unknown")
     try:
         await create_resource(resource_data)
     except IntegrityError as e:
@@ -129,6 +130,7 @@ async def new_resource_tags_choose(message: Message, state: FSMContext):
                                 resource_name=resource_data.name,
                                 resource_description=resource_data.description,
                                 resource_tags=resource_data.tags,
+                                category_name=category_name,
                                 ),
             reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
         )
@@ -140,6 +142,7 @@ async def new_resource_tags_choose(message: Message, state: FSMContext):
                                 resource_name=resource_data.name,
                                 resource_description=resource_data.description,
                                 resource_tags=resource_data.tags,
+                                category_name=category_name,
                                 ),
             reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
         )

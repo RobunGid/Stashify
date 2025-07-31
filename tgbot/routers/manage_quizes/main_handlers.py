@@ -1,13 +1,12 @@
-from aiogram import F, Router
+from aiogram import F
 from aiogram.types import CallbackQuery
 
 from database.models.user import Role
-from filters.user_role_filter import UserRoleFilter
-from i18n.translate import t
-from keyboards.manage_quizes_keyboard import manage_quizes_keyboard
+from .router import router
 from config.bot_config import bot
-
-router = Router()
+from keyboards.manage_quizes_keyboard import manage_quizes_keyboard
+from filters.user_role_filter import UserRoleFilter
+from i18n import t
 
 @router.callback_query(F.data=="manage_quizes", UserRoleFilter([Role.admin, Role.manager]))
 async def manage_quizes(callback: CallbackQuery):
