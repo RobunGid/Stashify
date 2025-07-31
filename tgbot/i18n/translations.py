@@ -24,6 +24,7 @@ translations = {
   		"manage_resources.create.choose_category": "📤 Select category",
 		"manage_resources.create.wait_name": "📤 Send resource name",
 		"manage_resources.create.wait_description": "📤 Send resource description",
+		"manage_resources.create.wait_image": "📤 Send resource image",
 		"manage_resources.create.wait_tags": "📤 Send resource tags",
   		"manage_resources.create.success": "✅ Resource created successfully\n\nResource name: {resource_name}\n\nResource description: {resource_description}\n\nResource tags: {resource_tags}",
 		"manage_resources.create.fail": "❌ Resource with this name already exists or something went wrong\n\nResource name: {resource_name}\n\nResource description: {resource_description}\n\nResource tags: {resource_tags}",

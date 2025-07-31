@@ -8,9 +8,9 @@ class QuizSchema(BaseModel):
     resource_id: str
     resource: "ResourceSchema"
     
-    questions: "List[QuizQuestionSchema]" = Field(exclude=("quiz",))
+    questions: "List[QuizQuestionSchema]"
     
-    model_config = ConfigDict(from_attributes=True, recursive=False)
+    model_config = ConfigDict(from_attributes=True)
     
 from .resource_schema import ResourceSchema
 from .quiz_question_schema import QuizQuestionSchema

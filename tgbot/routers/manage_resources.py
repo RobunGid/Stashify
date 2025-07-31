@@ -2,7 +2,7 @@ from math import ceil
 from uuid import uuid4
 
 from aiogram import F, Router
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, PhotoSize
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.exc import IntegrityError
@@ -33,9 +33,10 @@ async def manage_resources(callback: CallbackQuery):
 class CreateResourceState(StatesGroup):
     total_pages = State()
     categories = State()
-    name = State()
     category_id = State()
+    name = State()
     description = State()
+    image = State()
     tags = State()
 
 @router.callback_query(F.data=="create_resource", UserRoleFilter([Role.admin]))
@@ -87,7 +88,7 @@ async def create_resource_choose(callback: CallbackQuery, callback_data: CreateR
     await state.update_data(category_id=callback_data.category_id)
     await state.set_state(CreateResourceState.name)
     
-@router.message(CreateResourceState.name)
+@router.message(CreateResourceState.name, F.text)
 async def new_resource_name_choose(message: Message, state: FSMContext):
     if not message.from_user or not message.from_user.language_code: return
     await state.update_data(name=message.html_text)
@@ -97,26 +98,37 @@ async def new_resource_name_choose(message: Message, state: FSMContext):
     )
     await state.set_state(CreateResourceState.description)
     
-@router.message(CreateResourceState.description)
+@router.message(CreateResourceState.description, F.text)
 async def new_resource_description_choose(message: Message, state: FSMContext):
     if not message.from_user or not message.from_user.language_code: return
     await state.update_data(description=message.html_text)
+    await message.answer(
+        text=t("manage_resources.create.wait_image", message.from_user.language_code),
+        reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
+    )
+    await state.set_state(CreateResourceState.image)
+    
+@router.message(CreateResourceState.image, F.photo[-1].as_("resource_image"))
+async def new_resource_image_choose(message: Message, state: FSMContext, resource_image: PhotoSize):
+    if not message.from_user or not message.from_user.language_code: return
+    await state.update_data(image=resource_image.file_id)
     await message.answer(
         text=t("manage_resources.create.wait_tags", message.from_user.language_code),
         reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
     )
     await state.set_state(CreateResourceState.tags)
     
-@router.message(CreateResourceState.tags)
+@router.message(CreateResourceState.tags, F.text)
 async def new_resource_tags_choose(message: Message, state: FSMContext):
     if not message.from_user or not message.from_user.language_code: return
     state_data = await state.get_data()
     resource_data = ResourceSchema(
+        category_id=state_data["category_id"],
+        id=uuid4(), 
         name=state_data["name"], 
         description=state_data["description"], 
+        image=state_data["image"],
         tags=message.html_text, 
-        id=uuid4(), 
-        category_id=state_data["category_id"]
     )
     try:
         await create_resource(resource_data)
@@ -132,8 +144,9 @@ async def new_resource_tags_choose(message: Message, state: FSMContext):
             reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
         )
     else:
-        await message.answer(
-            text=t("manage_resources.create.success", message.from_user.language_code)
+        await message.answer_photo(
+            photo=resource_data.image,
+            caption=t("manage_resources.create.success", message.from_user.language_code)
                             .format(
                                 resource_name=resource_data.name,
                                 resource_description=resource_data.description,

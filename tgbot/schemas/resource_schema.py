@@ -14,15 +14,16 @@ class ResourceSchemaWithoutCategory(BaseModel):
     description: str
     tags: str
     verified: bool = Field(default_factory=lambda: False)
+    image: str
     
     category_id: UUID4
-    quizes: "List[QuizSchema]" = Field(default_factory=list, exclude=("resource",))
+    quizes: "List[QuizSchema]" = Field(default_factory=lambda: [])
     
     created_at: datetime = Field(default_factory=datetime.now)
-    model_config = ConfigDict(from_attributes=True, recursive=False)
+    model_config = ConfigDict(from_attributes=True)
 
 class ResourceSchema(ResourceSchemaWithoutCategory):
-    category: "CategorySchema" = Field(default_factory=default_category, exclude=("resources",))
+    category: "CategorySchema" = Field(default_factory=default_category)
     
 from .category_schema import CategorySchema
 from .quiz_schema import QuizSchema

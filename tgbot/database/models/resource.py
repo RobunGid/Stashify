@@ -12,15 +12,16 @@ class ResourceModel(Base):
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     
-    name = Column(String, unique=True)
-    description = Column(String, unique=True)
-    tags = Column(String, unique=True)
-    verified = Column(Boolean(), default=False)
+    name = Column(String, unique=True, nullable=False)
+    description = Column(String, nullable=False)
+    tags = Column(String, nullable=False)
+    verified = Column(Boolean(), default=False, nullable=False)
+    image = Column(String, nullable=False)
     
-    category_id = Column(UUID(as_uuid=True), ForeignKey('category.id'))
+    category_id = Column(UUID(as_uuid=True), ForeignKey('category.id'), nullable=False)
     category = relationship("CategoryModel", back_populates="resources")
     
     quizes = relationship("QuizModel", back_populates="resource")
     
-    created_at = Column(DateTime, default=datetime.now)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
     
