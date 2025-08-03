@@ -14,7 +14,7 @@ class EditResourceCallbackFactory(CallbackData, prefix="edit_resource"):
     page: int
 
 
-def manage_resources_edit_resources_keyboard(user_lang: str | None, resources: List[ResourceSchema], page: int, total_pages: int):
+def manage_resources_edit_resource_list_keyboard(user_lang: str | None, resources: List[ResourceSchema], page: int, total_pages: int):
     user_lang = user_lang or "en"
     builder = InlineKeyboardBuilder()
     

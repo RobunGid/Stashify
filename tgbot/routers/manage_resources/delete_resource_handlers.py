@@ -11,7 +11,7 @@ from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
 from i18n.translate import t
 from keyboards.manage_resources.manage_resources_back_keyboard import manage_resources_back_keyboard
-from keyboards.manage_resources.manage_resources_delete_keyboard import DeleteResourceCallbackFactory, manage_resources_delete_keyboard
+from keyboards.manage_resources.manage_resources_delete_resource_list_keyboard import DeleteResourceCallbackFactory, manage_resources_delete_resource_list_keyboard
 from keyboards.manage_resources.manage_resources_delete_keyboard_confirm import manage_resources_delete_keyboard_confirm
 from config.bot_config import bot
 from config.var_config import EDIT_RESOURCE_RESOURCES_ON_PAGE, DELETE_RESOURCE_RESOURCES_ON_PAGE
@@ -36,7 +36,7 @@ async def delete_resource_callback_handler(callback: CallbackQuery, state: FSMCo
     
     await callback.message.answer(
         text=t("manage_resources.delete.choose_resource", callback.from_user.language_code), 
-        reply_markup=manage_resources_delete_keyboard(resources=resources[0:5], user_lang=callback.from_user.language_code, total_pages=total_pages, page=1)
+        reply_markup=manage_resources_delete_resource_list_keyboard(resources=resources[0:5], user_lang=callback.from_user.language_code, total_pages=total_pages, page=1)
     )
     await state.set_state("resource_id")
     
@@ -54,7 +54,7 @@ async def delete_resource_page(callback: CallbackQuery, state: FSMContext, callb
     
     await callback.message.answer(
         text=t("manage_resources.delete.choose_to_delete", callback.from_user.language_code), 
-        reply_markup=manage_resources_delete_keyboard(
+        reply_markup=manage_resources_delete_resource_list_keyboard(
             resources=resources, 
             user_lang=callback.from_user.language_code, 
             total_pages=total_pages, 

@@ -14,7 +14,7 @@ class DeleteResourceCallbackFactory(CallbackData, prefix="delete_resource"):
     page: int
 
 
-def manage_resources_delete_keyboard(user_lang: str | None, resources: List[ResourceSchema], page: int, total_pages: int):
+def manage_resources_delete_resource_list_keyboard(user_lang: str | None, resources: List[ResourceSchema], page: int, total_pages: int):
     user_lang = user_lang or "en"
     builder = InlineKeyboardBuilder()
     

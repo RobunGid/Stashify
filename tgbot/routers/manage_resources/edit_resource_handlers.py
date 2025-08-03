@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
 from i18n.translate import t
-from keyboards.manage_resources.manage_resources_edit_resources_keyboard import manage_resources_edit_resources_keyboard, EditResourceCallbackFactory
+from keyboards.manage_resources.manage_resources_edit_resource_list_keyboard import manage_resources_edit_resource_list_keyboard, EditResourceCallbackFactory
 from keyboards.manage_resources.manage_resources_edit_keyboard import manage_resources_edit_keyboard
 from keyboards.manage_resources.manage_resources_back_keyboard import manage_resources_back_keyboard
 from config.bot_config import bot
@@ -39,7 +39,7 @@ async def edit_resource_callback_handler(callback: CallbackQuery, state: FSMCont
     
     await callback.message.answer(
         text=t("manage_resources.edit.choose_resource", callback.from_user.language_code), 
-        reply_markup=manage_resources_edit_resources_keyboard(resources=resources[0:5], user_lang=callback.from_user.language_code, total_pages=total_pages, page=1)
+        reply_markup=manage_resources_edit_resource_list_keyboard(resources=resources[0:5], user_lang=callback.from_user.language_code, total_pages=total_pages, page=1)
     )
     await state.set_state("resource_id")
     
@@ -57,7 +57,7 @@ async def edit_resource_page(callback: CallbackQuery, state: FSMContext, callbac
     
     await callback.message.answer(
         text=t("manage_resources.edit.choose", callback.from_user.language_code), 
-        reply_markup=manage_resources_edit_resources_keyboard(
+        reply_markup=manage_resources_edit_resource_list_keyboard(
             resources=resources, 
             user_lang=callback.from_user.language_code, 
             total_pages=total_pages, 
