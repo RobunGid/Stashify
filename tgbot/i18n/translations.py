@@ -29,6 +29,7 @@ translations = {
   		"manage_resources.create.success": "✅ Resource created successfully\n\nResource name: {resource_name}\n\nCategory name: {category_name}\n\nResource description: {resource_description}\n\nResource tags: {resource_tags}",
 		"manage_resources.create.fail": "❌ Resource with this name already exists or something went wrong\n\nResource name: {resource_name}\n\nCategory name: {category_name}\n\nResource description: {resource_description}\n\nResource tags: {resource_tags}",
   		"manage_resources.edit.choose_resource": "📤 Select resource",
+		"manage_resources.edit.choose_category": "📤 Select resource category",
   		"manage_resources.edit.choose_to_change": "📤 Choose what to edit",
 		"manage_resources.edit.name.choose": "✏️ Edit name",
 		"manage_resources.edit.description.choose": "📝 Edit description",

@@ -1,4 +1,5 @@
 from math import ceil
+from unicodedata import category
 from uuid import uuid4
 
 from aiogram import F
@@ -10,18 +11,21 @@ from sqlalchemy.exc import IntegrityError
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
 from i18n.translate import t
-from keyboards.manage_resources.manage_resources_edit_resource_list_keyboard import manage_resources_edit_resource_list_keyboard, EditResourceCallbackFactory
+from keyboards.manage_resources.manage_resources_edit_resource_list_keyboard import manage_resources_edit_resource_list_keyboard, EditResourceChooseResourceCallbackFactory
+from keyboards.manage_resources.manage_resources_edit_category_list_keyboard import manage_resources_edit_category_list_keyboard, EditResourceChooseCategoryCallbackFactory
 from keyboards.manage_resources.manage_resources_edit_keyboard import manage_resources_edit_keyboard
 from keyboards.manage_resources.manage_resources_back_keyboard import manage_resources_back_keyboard
 from config.bot_config import bot
-from config.var_config import EDIT_RESOURCE_RESOURCES_ON_PAGE
+from config.var_config import EDIT_RESOURCE_RESOURCES_ON_PAGE, EDIT_RESOURCE_CATEGORIES_ON_PAGE
 from database.operations.get_resources import get_resources
 from database.operations.edit_resource import edit_resource
+from database.operations.get_categories import get_categories
 from .router import router
 
 class EditResourceState(StatesGroup):
     total_pages = State()
     resources = State()
+    categories = State()
     resource_id = State()
     name = State()
     description = State()
@@ -33,18 +37,57 @@ async def edit_resource_callback_handler(callback: CallbackQuery, state: FSMCont
     if not callback.from_user or not callback.from_user.language_code or not callback.message: return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     
-    resources = await get_resources()
-    total_pages = ceil(len(resources)/EDIT_RESOURCE_RESOURCES_ON_PAGE)
-    await state.update_data(total_pages=total_pages, resources=resources)
+    categories = await get_categories()
+    total_pages = ceil(len(categories)/EDIT_RESOURCE_CATEGORIES_ON_PAGE)
+    await state.update_data(total_pages=total_pages, categories=categories)
     
     await callback.message.answer(
-        text=t("manage_resources.edit.choose_resource", callback.from_user.language_code), 
-        reply_markup=manage_resources_edit_resource_list_keyboard(resources=resources[0:5], user_lang=callback.from_user.language_code, total_pages=total_pages, page=1)
+        text=t("manage_resources.edit.choose_category", callback.from_user.language_code), 
+        reply_markup=manage_resources_edit_category_list_keyboard(categories=categories[0:5], user_lang=callback.from_user.language_code, total_pages=total_pages, page=1)
     )
-    await state.set_state("resource_id")
     
-@router.callback_query(EditResourceCallbackFactory.filter(F.action == "change_page"), UserRoleFilter([Role.admin, Role.manager]))
-async def edit_resource_page(callback: CallbackQuery, state: FSMContext, callback_data: EditResourceCallbackFactory):
+@router.callback_query(EditResourceChooseCategoryCallbackFactory.filter(F.action == "change_page"), UserRoleFilter([Role.admin, Role.manager]))
+async def edit_resource_category_page(callback: CallbackQuery, state: FSMContext, callback_data: EditResourceChooseResourceCallbackFactory):
+    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
+    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
+    current_page = callback_data.page
+    
+    await state.update_data(current_page=current_page)
+    
+    state_data = await state.get_data()
+    categories = state_data["categories"][(current_page-1)*EDIT_RESOURCE_CATEGORIES_ON_PAGE:current_page*(EDIT_RESOURCE_CATEGORIES_ON_PAGE)]
+    total_pages = state_data["total_pages"]
+    
+    await callback.message.answer(
+        text=t("manage_resources.edit.choose_category", callback.from_user.language_code), 
+        reply_markup=manage_resources_edit_category_list_keyboard(
+            categories=categories, 
+            user_lang=callback.from_user.language_code, 
+            total_pages=total_pages, 
+            page=int(current_page))
+    )
+    
+@router.callback_query(EditResourceChooseCategoryCallbackFactory.filter(F.action=="select"), UserRoleFilter([Role.admin, Role.manager]))
+async def edit_resource_category_choose(callback: CallbackQuery, callback_data: EditResourceChooseCategoryCallbackFactory, state: FSMContext):
+    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
+    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
+    category_id = callback_data.category_id
+    resources = await get_resources(category_id=category_id)
+    await state.update_data(resources=resources)
+    total_pages = ceil(len(resources)/EDIT_RESOURCE_RESOURCES_ON_PAGE)
+    
+    await state.update_data(category_id=category_id)
+    await callback.message.answer(
+        text=t("manage_resources.edit.choose_to_change", callback.from_user.language_code),
+        reply_markup=manage_resources_edit_resource_list_keyboard(
+            resources=resources, 
+            user_lang=callback.from_user.language_code, 
+            total_pages=total_pages, 
+            page=1)
+    )
+    
+@router.callback_query(EditResourceChooseResourceCallbackFactory.filter(F.action == "change_page"), UserRoleFilter([Role.admin, Role.manager]))
+async def edit_resource_page(callback: CallbackQuery, state: FSMContext, callback_data: EditResourceChooseResourceCallbackFactory):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     current_page = callback_data.page
@@ -64,8 +107,8 @@ async def edit_resource_page(callback: CallbackQuery, state: FSMContext, callbac
             page=int(current_page))
     )
     
-@router.callback_query(EditResourceCallbackFactory.filter(F.action=="select"), UserRoleFilter([Role.admin, Role.manager]))
-async def edit_resource_choose(callback: CallbackQuery, callback_data: EditResourceCallbackFactory, state: FSMContext):
+@router.callback_query(EditResourceChooseResourceCallbackFactory.filter(F.action=="select"), UserRoleFilter([Role.admin, Role.manager]))
+async def edit_resource_choose(callback: CallbackQuery, callback_data: EditResourceChooseResourceCallbackFactory, state: FSMContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     resource_id = callback_data.resource_id
