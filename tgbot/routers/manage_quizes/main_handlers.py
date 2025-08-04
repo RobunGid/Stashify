@@ -4,7 +4,7 @@ from aiogram.types import CallbackQuery
 from database.models.user import Role
 from .router import router
 from config.bot_config import bot
-from keyboards.manage_quizes_keyboard import manage_quizes_keyboard
+from keyboards.manage_quizes.manage_quizes_keyboard import manage_quizes_keyboard
 from filters.user_role_filter import UserRoleFilter
 from i18n import t
 

@@ -1,15 +1,24 @@
 
-from typing import List
+from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, UUID4, ConfigDict
 
-class QuizQuestionSchema(BaseModel):
-    id: str
+class QuizQuestionBaseSchema(BaseModel):
+    id: UUID4
+    text: str
     
-    quiz_id: str
-    quiz: "QuizSchema"
+    quiz_id: UUID4
     
     options: List[str]
-    answer: str
+    right_options: List[int]
     
-from .quiz_schema import QuizSchema
+    image: Optional[str]
+    model_config = ConfigDict(from_attributes=True)
+    
+class QuizQuestionSchema(QuizQuestionBaseSchema):
+    quiz: "QuizSchema"
+
+class QuizQuestionWithoutResourceSchema(QuizQuestionBaseSchema):
+    quiz: "QuizSchemaWithoutResource"
+
+from .quiz_schema import QuizSchema, QuizSchemaWithoutResource

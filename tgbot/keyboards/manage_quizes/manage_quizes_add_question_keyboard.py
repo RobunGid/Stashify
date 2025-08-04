@@ -1,0 +1,14 @@
+from typing import Optional
+
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types import InlineKeyboardButton
+
+from i18n.translate import t
+
+def manage_quizes_add_question_keyboard(user_lang: Optional[str]):
+    user_lang = user_lang or "en"
+    builder = InlineKeyboardBuilder()
+    builder.row(InlineKeyboardButton(text=t("manage_quizes.create.stop_questions", user_lang), callback_data="manage_quizes.stop"))
+    builder.row(InlineKeyboardButton(text=t("common.back", user_lang), callback_data="manage_quizes"))
+
+    return builder.as_markup()

@@ -6,6 +6,7 @@ from pydantic import UUID4
 from database.orm import AsyncSessionLocal
 from database.models.resource import ResourceModel
 from database.models.resource import ResourceModel
+from database.models.quiz import QuizModel
 from schemas.resource_schema import ResourceSchema
 
 async def get_resources(category_id: Optional[UUID4] = None) -> List[ResourceSchema]:
@@ -15,7 +16,7 @@ async def get_resources(category_id: Optional[UUID4] = None) -> List[ResourceSch
             selectinload(ResourceModel.category)
         )\
         .options(
-            selectinload(ResourceModel.quizes)
+            selectinload(ResourceModel.quizes).selectinload(QuizModel.questions)
         )
         if category_id: 
             statement = statement.where(ResourceModel.category_id==category_id)
