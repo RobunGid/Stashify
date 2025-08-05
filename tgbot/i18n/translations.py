@@ -82,6 +82,12 @@ translations = {
 		"manage_quizes.create.success": "✅ Quiz created successfully\n\nResource name: {resource_name}\nQuestion count: {question_count}",
 		"manage_quizes.create.choose": "📤 Select resource",
   		"manage_quizes.create.stop_questions": "✅ Finish creating quiz",
+		"manage_quizes.delete.choose_category": "📤 Select category to delete quiz",
+		"manage_quizes.delete.choose_resource": "📤 Select resource to delete quiz",
+		"manage_quizes.delete.success": "✅ Quiz deleted successfully\n\nQuiz name: {resource_name}",
+		"manage_quizes.delete.fail": "❌ Resource with this name already deleted or something went wrong\n\nResource name: {resource_name}",
+  		"manage_quizes.delete.choose_to_delete": "📤 Are you sure?\n\nQuiz will be deleted:\nResource name: {name}",
+		"manage_quizes.delete.confirm": "❌ Delete quiz",
   
   		"manage_users.text": "🛠️ Manage Users\nChoose action:",
 		"manage_users_keyboard.edit": "✏️ Edit User",

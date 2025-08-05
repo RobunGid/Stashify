@@ -118,7 +118,6 @@ async def delete_resource_name_confirm(callback: CallbackQuery, state: FSMContex
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     resource_data = await state.get_data()
     resource = next((resource for resource in resource_data["resources"] if resource.id==resource_data["resource_id"]), {})
-    print(23498234982)
     try:
         await delete_resource(id=resource_data["resource_id"])
     except (IntegrityError, ValueError):

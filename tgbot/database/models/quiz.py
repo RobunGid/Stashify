@@ -15,5 +15,5 @@ class QuizModel(Base):
     resource_id = Column(UUID(as_uuid=True), ForeignKey('resource.id'), unique=True, nullable=False)
     resource = relationship("ResourceModel", back_populates="quiz")
     
-    questions = relationship("QuizQuestionModel", back_populates="quiz")
+    questions = relationship("QuizQuestionModel", back_populates="quiz", cascade="all, delete-orphan")
     ratings = relationship("QuizRatingModel", back_populates="quiz")
