@@ -76,7 +76,7 @@ async def create_quiz_category_choose(callback: CallbackQuery, callback_data: Cr
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     category_id = callback_data.category_id
-    resources = await get_resources(category_id=category_id)
+    resources = await get_resources(category_id=category_id, has_quiz=False)
     await state.update_data(resources=resources)
     total_pages = ceil(len(resources)/CREATE_QUIZ_RESOURCES_ON_PAGE)
     
@@ -116,26 +116,15 @@ async def create_quiz_choose(callback: CallbackQuery, callback_data: CreateQuizC
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     resource_id = callback_data.resource_id
-    await state.update_data(resource_id=resource_id)
-    await callback.message.answer(
-        text=t("manage_quizes.create.wait_quiz", callback.from_user.language_code),
-    )
-    await state.set_state(CreateQuizState.quiz)
-    
-@router.message(CreateQuizState.quiz, UserRoleFilter([Role.admin, Role.manager]))
-async def create_quiz_answer(message: Message, state: FSMContext):
-    if not message.from_user or not message.from_user.language_code: return
-    message.delete()
     state_data = await state.get_data()
-    quiz_resource = next((resource for resource in state_data["resources"] if resource.id == state_data["resource_id"]))
-    quiz = QuizSchema(id=uuid4(), resource_id=state_data["resource_id"], questions=[], resource=quiz_resource)
-    await state.update_data(quiz=quiz, questions=[])
     
-    await message.answer(
-        text=t("manage_quizes.create.send_question", message.from_user.language_code), 
-        reply_markup=manage_quizes_back_keyboard(user_lang=message.from_user.language_code)
+    quiz_resource = next((resource for resource in state_data["resources"] if resource.id == resource_id))
+    quiz = QuizSchema(id=uuid4(), resource_id=resource_id, questions=[], resource=quiz_resource)
+    await state.update_data(quiz=quiz, questions=[], resource_id=resource_id)
+    await callback.message.answer(
+        text=t("manage_quizes.create.send_question", callback.from_user.language_code), 
+        reply_markup=manage_quizes_back_keyboard(user_lang=callback.from_user.language_code)
     )
-    
     await state.set_state(CreateQuizState.questions)
     
 @router.message(CreateQuizState.questions, UserRoleFilter([Role.admin, Role.manager]))
@@ -178,7 +167,7 @@ async def create_quiz_finish(callback: CallbackQuery, state: FSMContext):
     try:
         await create_quiz(quiz)
     except IntegrityError as e:
-        await callback.answer(
+        await callback.message.answer(
             text=t(
                 "manage_quizes.create.fail", callback.from_user.language_code)
                             .format(

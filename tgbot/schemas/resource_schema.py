@@ -17,7 +17,7 @@ class ResourceSchemaWithoutCategory(BaseModel):
     image: str
     
     category_id: UUID4
-    quizes: "List[QuizSchemaWithoutResource]" = Field(default_factory=lambda: [])
+    quiz: "List[QuizSchemaWithoutResource]" = Field(default_factory=lambda: [])
     
     created_at: datetime = Field(default_factory=datetime.now)
     model_config = ConfigDict(from_attributes=True)

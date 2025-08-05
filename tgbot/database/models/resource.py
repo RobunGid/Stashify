@@ -21,7 +21,7 @@ class ResourceModel(Base):
     category_id = Column(UUID(as_uuid=True), ForeignKey('category.id'), nullable=False)
     category = relationship("CategoryModel", back_populates="resources")
     
-    quizes = relationship("QuizModel", back_populates="resource")
+    quiz = relationship("QuizModel", back_populates="resource")
     
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     

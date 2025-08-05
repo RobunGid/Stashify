@@ -12,7 +12,7 @@ async def get_categories() -> List[CategorySchema]:
     async with AsyncSessionLocal() as session:
         statement = select(CategoryModel)\
         .options(
-            selectinload(CategoryModel.resources).selectinload(ResourceModel.quizes).selectinload(QuizModel.questions)
+            selectinload(CategoryModel.resources).selectinload(ResourceModel.quiz).selectinload(QuizModel.questions)
 		)
         categories = (await session.execute(statement)).scalars().all()
         

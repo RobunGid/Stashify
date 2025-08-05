@@ -79,7 +79,7 @@ translations = {
 		"manage_quizes.create.send_question": "📤 Send question in format:\nquestion text on first line\neach option on separate line\nprefix correct options with !",
 		"manage_quizes.create.add_question": "➕ Add another question or finish",
 		"manage_quizes.create.fail": "❌ Failed to create quiz\n\nResource name: {resource_name}\nQuestion count: {question_count}",
-		"manage_quizes.create.success": "✅ Quiz created successfully\n\Resource name: {resource_name}\nQuestion count: {question_count}",
+		"manage_quizes.create.success": "✅ Quiz created successfully\n\nResource name: {resource_name}\nQuestion count: {question_count}",
 		"manage_quizes.create.choose": "📤 Select resource",
   		"manage_quizes.create.stop_questions": "✅ Finish creating quiz",
   

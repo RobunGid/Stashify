@@ -6,6 +6,6 @@ async def create_resource(resource_data: ResourceSchema):
     async with AsyncSessionLocal() as session:
         print(resource_data)
         print(resource_data.model_dump())
-        resource = ResourceModel(**resource_data.model_dump(exclude=("category", "quizes",)))
+        resource = ResourceModel(**resource_data.model_dump(exclude=("category", "quiz",)))
         session.add(resource)
         await session.commit()

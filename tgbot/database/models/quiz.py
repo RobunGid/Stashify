@@ -13,7 +13,7 @@ class QuizModel(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     
     resource_id = Column(UUID(as_uuid=True), ForeignKey('resource.id'), unique=True, nullable=False)
-    resource = relationship("ResourceModel", back_populates="quizes")
+    resource = relationship("ResourceModel", back_populates="quiz")
     
     questions = relationship("QuizQuestionModel", back_populates="quiz")
     ratings = relationship("QuizRatingModel", back_populates="quiz")
