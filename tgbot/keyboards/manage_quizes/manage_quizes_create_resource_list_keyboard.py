@@ -13,7 +13,6 @@ class CreateQuizChooseResourceCallbackFactory(CallbackData, prefix="create_quiz_
     resource_id: UUID4 | None
     page: int
 
-
 def manage_quizes_create_resource_list_keyboard(user_lang: str | None, resources: List[ResourceSchema], page: int, total_pages: int):
     user_lang = user_lang or "en"
     builder = InlineKeyboardBuilder()
@@ -21,24 +20,28 @@ def manage_quizes_create_resource_list_keyboard(user_lang: str | None, resources
     for resource in resources:
         builder.button(text=resource.name, callback_data=CreateQuizChooseResourceCallbackFactory(action="select", resource_id=resource.id, page=0))
     if page != total_pages and page != 1:
-            builder.button(text=t("items.start", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=1))
-            builder.button(text=t("items.back", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=page-1))
-            builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
-            builder.button(text=t("items.forward", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=page+1))
-            builder.button(text=t("items.end", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=total_pages))
-            builder.adjust(*[*([1]*len(resources)), 5, 1])
-    elif page == 1 and total_pages != 1:
-            builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
-            builder.button(text=t("items.forward", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=page+1))
-            builder.button(text=t("items.end", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=total_pages))
-            builder.adjust(*[*([1]*len(resources)), 3, 1])
+        builder.button(text=t("items.start", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=1))
+        builder.button(text=t("items.back", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=page-1))
+        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.button(text=t("items.forward", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=page+1))
+        builder.button(text=t("items.end", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=total_pages))
+        builder.adjust(*[*([1]*len(resources)), 5, 1])
+    elif page == 1 and total_pages > 1:
+        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.button(text=t("items.forward", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=page+1))
+        builder.button(text=t("items.end", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=total_pages))
+        builder.adjust(*[*([1]*len(resources)), 3, 1])
     elif page == total_pages and total_pages != 1:
-            builder.button(text=t("items.start", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=1))
-            builder.button(text=t("items.back", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=page-1))
-            builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
-            builder.adjust(*[*([1]*len(resources)), 3, 1])
+        builder.button(text=t("items.start", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=1))
+        builder.button(text=t("items.back", user_lang), callback_data=CreateQuizChooseResourceCallbackFactory(action="change_page", resource_id=None, page=page-1))
+        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.adjust(*[*([1]*len(resources)), 3, 1])
     elif page == 1 and total_pages == 1:
-            builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
-            builder.adjust(*[*([1]*len(resources)), 1, 1])
+        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.adjust(*[*([1]*len(resources)), 1, 1])
+    elif page == 1 and total_pages == 0:
+        builder.button(text=t("manage_quizes.create.no_resources", user_lang), callback_data=f" ")
+        builder.adjust(*[*([1]*len(resources)), 1, 1])
+  
     builder.row(InlineKeyboardButton(text=t("common.back", user_lang), callback_data="manage_quizes"))
     return builder.as_markup()
