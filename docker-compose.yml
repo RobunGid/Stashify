@@ -1,6 +1,6 @@
 services:
   database:
-    image: postgres:latest
+    image: postgres:17.5
     container_name: stashify-database
     environment:
       - POSTGRES_USER=postgres
@@ -11,9 +11,4 @@ services:
       - "5432:5432"
     volumes:
       - ./pgdata:/var/lib/postgresql/data/pgdata
-    networks:
-      - stashify-net
-
-networks:
-  stashify-net:
-    driver: bridge
+    network_mode: host
