@@ -11,7 +11,7 @@
 	- [x] Quiz results
 	- [x] Ratings
 	- [x] Categories
-	- [ ] Favorites
+	- [x] Favorites
 - [x] Initialize Pydantic schemas
 
 - [x] User registration, role and language assignment 
@@ -19,7 +19,7 @@
 
 - [x] Main menu
 - [x] Adding new resource
-- [ ] Deleting resource
+- [x] Deleting resource
 - [x] Editing resource
 - [x] Adding new category
 - [x] Deleting category
