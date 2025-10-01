@@ -102,6 +102,10 @@ translations = {
 		"manage_quizes.delete.confirm": "❌ Delete quiz",
 		"manage_quizes.delete.no_resources": "❌ No resources in this category",
 		"manage_quizes.delete.no_categories": "❌ No categories",
+  		"manage_quizes.edit.choose_category": "📤 Select category to edit quiz",
+  		"manage_quizes.edit.choose_resource": "📤 Select resource to edit quiz",
+		"manage_quizes.edit.no_categories": "❌ No categories",
+		"manage_quizes.edit.choose_to_change": "📤 Choose what to edit",
   
   		"manage_users.text": "🛠️ Manage Users\nChoose action:",
 		"manage_users_keyboard.edit": "✏️ Edit User",

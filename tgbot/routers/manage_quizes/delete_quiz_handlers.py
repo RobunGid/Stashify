@@ -2,7 +2,7 @@ from math import ceil
 from uuid import uuid4
 
 from aiogram import F
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.exc import IntegrityError
@@ -18,9 +18,7 @@ from config.var_config import DELETE_QUIZ_CATEGORIES_ON_PAGE, DELETE_QUIZ_RESOUR
 from database.operations.get_resources import get_resources
 from database.operations.get_categories import get_categories
 from keyboards.manage_quizes.manage_quizes_back_keyboard import manage_quizes_back_keyboard
-from schemas.quiz_question_schema import QuizQuestionSchema
 from schemas.quiz_schema import QuizSchema
-from keyboards.manage_quizes.manage_quizes_add_question_keyboard import manage_quizes_add_question_keyboard
 from database.operations.delete_quiz import delete_quiz
 from .router import router
 

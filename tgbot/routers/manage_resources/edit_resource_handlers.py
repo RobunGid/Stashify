@@ -1,6 +1,4 @@
 from math import ceil
-from unicodedata import category
-from uuid import uuid4
 
 from aiogram import F
 from aiogram.types import CallbackQuery, Message, PhotoSize
