@@ -27,7 +27,6 @@ class EditQuizState(StatesGroup):
     resources = State()
     categories = State()
     resource_id = State()
-    question_number = State()
 
 @router.callback_query(F.data=="edit_quiz", UserRoleFilter([Role.admin, Role.manager]))
 async def edit_quiz_callback_handler(callback: CallbackQuery, state: FSMContext):
@@ -104,7 +103,7 @@ async def edit_quiz_page(callback: CallbackQuery, state: FSMContext, callback_da
             page=int(current_page))
     )
     
-@router.callback_query(EditQuizChooseResourceCallbackFactory.filter(F.action=="select"), UserRoleFilter([Role.admin, Role.manager]))
+@router.callback_query(EditQuizChooseResourceCallbackFactory.filter(F.action == "select"), UserRoleFilter([Role.admin, Role.manager]))
 async def edit_resource_choose(callback: CallbackQuery, callback_data: EditQuizChooseResourceCallbackFactory, state: FSMContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
@@ -112,8 +111,6 @@ async def edit_resource_choose(callback: CallbackQuery, callback_data: EditQuizC
     await state.update_data(resource_id=resource_id)
     await callback.message.answer(
         text=t("manage_quizes.edit.choose_to_change", callback.from_user.language_code),
-        reply_markup=manage_quizes_edit_keyboard(callback.from_user.language_code)
+        reply_markup=manage_quizes_edit_keyboard(callback.from_user.language_code, resource_id=resource_id)
     )
-    
-
     
