@@ -34,7 +34,7 @@ async def edit_quiz_callback_handler(callback: CallbackQuery, state: FSMContext)
     if not callback.from_user or not callback.from_user.language_code or not callback.message: return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     
-    categories = await get_categories()
+    categories = await get_categories(has_quizes=True)
     total_pages = ceil(len(categories)/EDIT_QUIZ_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
     
@@ -69,7 +69,7 @@ async def edit_quizes_category_choose(callback: CallbackQuery, callback_data: Ed
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     category_id = callback_data.category_id
-    resources = await get_resources(category_id=category_id)
+    resources = await get_resources(category_id=category_id, has_quiz=True)
     await state.update_data(resources=resources)
     total_pages = ceil(len(resources)/EDIT_QUIZ_RESOURCES_ON_PAGE)
     
