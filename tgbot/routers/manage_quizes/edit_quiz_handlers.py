@@ -1,25 +1,22 @@
 from math import ceil
-from unicodedata import category
-from uuid import uuid4
 
 from aiogram import F
-from aiogram.types import CallbackQuery, Message, PhotoSize
+from aiogram.types import CallbackQuery
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
-from sqlalchemy.exc import IntegrityError
 
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
 from i18n.translate import t
 from keyboards.manage_quizes.manage_quizes_edit_resource_list_keyboard import manage_quizes_edit_resource_list_keyboard, EditQuizChooseResourceCallbackFactory
 from keyboards.manage_quizes.manage_quizes_edit_category_list_keyboard import manage_quizes_edit_category_list_keyboard, EditQuizChooseCategoryCallbackFactory
-from keyboards.manage_quizes.manage_quizes_edit_keyboard import manage_quizes_edit_keyboard
-from keyboards.manage_quizes.manage_quizes_back_keyboard import manage_quizes_back_keyboard
+from keyboards.manage_quizes.manage_quizes_edit_keyboard import EditQuizActionCallbackFactory, manage_quizes_edit_keyboard
 from config.bot_config import bot
 from config.var_config import EDIT_QUIZ_RESOURCES_ON_PAGE, EDIT_QUIZ_CATEGORIES_ON_PAGE
 from database.operations.get_resources import get_resources
-from database.operations.edit_resource import edit_resource
 from database.operations.get_categories import get_categories
+from keyboards.manage_quizes.manage_quizes_delete_question_back_keyboard import manage_quizes_delete_question_back_keyboard
+from database.operations.get_quiz_questions import get_quiz_questions
 from .router import router
 
 class EditQuizState(StatesGroup):
@@ -27,6 +24,7 @@ class EditQuizState(StatesGroup):
     resources = State()
     categories = State()
     resource_id = State()
+    question_number = State()
 
 @router.callback_query(F.data=="edit_quiz", UserRoleFilter([Role.admin, Role.manager]))
 async def edit_quiz_callback_handler(callback: CallbackQuery, state: FSMContext):
@@ -114,3 +112,34 @@ async def edit_resource_choose(callback: CallbackQuery, callback_data: EditQuizC
         reply_markup=manage_quizes_edit_keyboard(callback.from_user.language_code, resource_id=resource_id)
     )
     
+@router.callback_query(EditQuizActionCallbackFactory.filter(F.action == "delete"), UserRoleFilter([Role.admin, Role.manager]))
+async def edit_resource_delete_question(callback: CallbackQuery, callback_data: EditQuizChooseResourceCallbackFactory, state: FSMContext):
+    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
+    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
+    state_data = await state.get_data()
+    resource_id = state_data["resource_id"]
+    quiz_questions = await get_quiz_questions(resource_id=resource_id)
+    
+    formatted_questions = ""
+    
+    for index, question in enumerate(quiz_questions):
+        formatted_question = f"{index+1}. {question.text}\n"
+        
+        for option in question.options:
+            if index in question.right_options:
+                formatted_question += f"!{option}\n"
+            else:
+                formatted_question += f"{option}\n"
+        
+        formatted_questions += formatted_question + "\n"
+    
+    await callback.message.answer(
+        text=t("manage_quizes.edit.delete_question_number", callback.from_user.language_code).format(questions=formatted_questions),
+        reply_markup=manage_quizes_delete_question_back_keyboard(callback.from_user.language_code)
+    )
+    await state.set_state(EditQuizState.question_number)
+    
+@router.message(EditQuizState.question_number, F.text, UserRoleFilter([Role.admin, Role.manager]))
+async def delete_question_confirm(state: FSMContext):
+    state_data = await state.get_data()
+    resource_id = state_data["resource_id"]

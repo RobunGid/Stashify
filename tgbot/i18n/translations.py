@@ -109,6 +109,7 @@ translations = {
 		"manage_quizes_keyboard.delete_question": "❌ Delete question",
 		"manage_quizes_keyboard.edit_question": "✏️ Edit question",
 		"manage_quizes_keyboard.add_question": "➕ Add question",
+		"manage_quizes.edit.delete_question_number": "Enter question number to delete:\n\n{questions}",
   
   		"manage_users.text": "🛠️ Manage Users\nChoose action:",
 		"manage_users_keyboard.edit": "✏️ Edit User",

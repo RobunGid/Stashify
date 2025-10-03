@@ -25,7 +25,6 @@ async def get_categories(has_quizes: Optional[bool] = None) -> List[CategorySche
 					CategoryModel, CategoryModel.id == ResourceModel.category_id
 				)
             statement = statement.where(CategoryModel.id.in_(subquery))
-            print(statement, 349)
         categories = (await session.execute(statement)).scalars().all()
         
         return [CategorySchema.model_validate(category, from_attributes=True) for category in categories]
