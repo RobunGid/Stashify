@@ -106,6 +106,9 @@ translations = {
   		"manage_quizes.edit.choose_resource": "📤 Select resource to edit quiz",
 		"manage_quizes.edit.no_categories": "❌ No categories",
 		"manage_quizes.edit.choose_to_change": "📤 Choose what to edit",
+		"manage_quizes_keyboard.delete_question": "❌ Delete question",
+		"manage_quizes_keyboard.edit_question": "✏️ Edit question",
+		"manage_quizes_keyboard.add_question": "➕ Add question",
   
   		"manage_users.text": "🛠️ Manage Users\nChoose action:",
 		"manage_users_keyboard.edit": "✏️ Edit User",
