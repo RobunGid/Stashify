@@ -110,6 +110,11 @@ translations = {
 		"manage_quizes_keyboard.edit_question": "✏️ Edit question",
 		"manage_quizes_keyboard.add_question": "➕ Add question",
 		"manage_quizes.edit.delete_question_number": "Enter question number to delete:\n\n{questions}",
+		"manage_quizes.edit.delete_question.fail": "❌ Quiz question with this number already deleted or something went wrong",
+		"manage_quizes.edit.delete_question.success": "✅ Quiz question deleted successfully",
+  		"manage_quizes.edit.add_question.fail": "❌ Something went wrong with creating this quiz question",
+		"manage_quizes.edit.add_question.success": "✅ Quiz question added successfully",
+		"manage_quizes.edit.add_question.text": "Enter new question to add:\n\n{questions}",
   
   		"manage_users.text": "🛠️ Manage Users\nChoose action:",
 		"manage_users_keyboard.edit": "✏️ Edit User",
