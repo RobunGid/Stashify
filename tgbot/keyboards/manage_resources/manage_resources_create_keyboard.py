@@ -13,7 +13,6 @@ class CreateResourceCallbackFactory(CallbackData, prefix="create_resource"):
     category_id: UUID4 | None
     page: int
 
-
 def manage_resources_create_keyboard(user_lang: str | None, categories: List[CategorySchema], page: int, total_pages: int):
     user_lang = user_lang or "en"
     builder = InlineKeyboardBuilder()

@@ -26,7 +26,7 @@
 - [x] Editing category
 - [x] Adding new quiz
 - [x] Deleting quiz
-- [ ] Editing quiz
+- [x] Editing quiz
 - [ ] View resource list pagination by categories
 - [ ] View resource details
 - [ ] Search resources by tags, verification by author

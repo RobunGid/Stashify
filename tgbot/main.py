@@ -5,6 +5,7 @@ from routers import common, menu, manage_users
 from routers.manage_resources.router import router as manage_resources_router
 from routers.manage_categories.router import router as manage_categories_router
 from routers.manage_quizes.router import router as manage_quizes_router
+from routers.list_resources.router import router as list_resources_router
 from database.orm import init_models
 from database.models import *
 
@@ -16,6 +17,7 @@ async def main():
         manage_resources_router,
         manage_categories_router,
         manage_quizes_router,
+        list_resources_router,
         manage_users.router,
     )
     

@@ -8,7 +8,7 @@ translations = {
   
 		"main_menu.text": "🏠 Main Menu\nChoose action:",
 		"main_menu.welcome": "🏠 Main Menu\nWelcome to the bot with \nlots of resources on \nprogramming, web, cybersecurity, etc.\nChoose action:",
-		"main_menu_keyboard.categories": "🗂️ Categories",
+		"main_menu_keyboard.resources": "🗂️ Resources",
 		"main_menu_keyboard.search": "🔍 Search",
 		"main_menu_keyboard.favorite": "⭐ Favorite",
 		"main_menu_keyboard.quizes": "📚 Quizes",
@@ -119,6 +119,9 @@ translations = {
 		"manage_quizes.edit.edit_question.text": "Enter new question text",
 		"manage_quizes.edit.edit_question.success": "❌ Something went wrong with editing this quiz question",
 		"manage_quizes.edit.edit_question.fail": "✅ Quiz question updated successfully",
+  
+		"list_resources.choose_category": "📤 Select category",
+		"list_resources.choose_resource": "📤 Select resource",
   
   		"manage_users.text": "🛠️ Manage Users\nChoose action:",
 		"manage_users_keyboard.edit": "✏️ Edit User",
