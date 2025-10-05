@@ -115,6 +115,10 @@ translations = {
   		"manage_quizes.edit.add_question.fail": "❌ Something went wrong with creating this quiz question",
 		"manage_quizes.edit.add_question.success": "✅ Quiz question added successfully",
 		"manage_quizes.edit.add_question.text": "Enter new question to add:\n\n{questions}",
+		"manage_quizes.edit.edit_question.number": "Enter question number to edit:\n\n{questions}",
+		"manage_quizes.edit.edit_question.text": "Enter new question text",
+		"manage_quizes.edit.edit_question.success": "❌ Something went wrong with editing this quiz question",
+		"manage_quizes.edit.edit_question.fail": "✅ Quiz question updated successfully",
   
   		"manage_users.text": "🛠️ Manage Users\nChoose action:",
 		"manage_users_keyboard.edit": "✏️ Edit User",
