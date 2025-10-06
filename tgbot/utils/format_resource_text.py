@@ -10,6 +10,8 @@ def format_resource_text(resource: ResourceSchema) -> str:
 
 <i>{resource.description}</i>
 
+{resource.links}
+
 Категория: {resource.category.name}
 Проверен: {formatted_is_checked}
 

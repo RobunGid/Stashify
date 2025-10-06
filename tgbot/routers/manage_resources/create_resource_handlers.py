@@ -25,6 +25,7 @@ class CreateResourceState(StatesGroup):
     category_id = State()
     name = State()
     description = State()
+    links = State()
     image = State()
     tags = State()
 
@@ -95,6 +96,16 @@ async def new_resource_description_choose(message: Message, state: FSMContext):
         text=t("manage_resources.create.wait_image", message.from_user.language_code),
         reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
     )
+    await state.set_state(CreateResourceState.links)
+    
+@router.message(CreateResourceState.links, F.text, UserRoleFilter([Role.admin, Role.manager]))
+async def new_resource_links_choose(message: Message, state: FSMContext):
+    if not message.from_user or not message.from_user.language_code: return
+    await state.update_data(description=message.html_text)
+    await message.answer(
+        text=t("manage_resources.create.wait_links", message.from_user.language_code),
+        reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
+    )
     await state.set_state(CreateResourceState.image)
     
 @router.message(CreateResourceState.image, F.photo[-1].as_("resource_image"))
@@ -116,6 +127,7 @@ async def new_resource_tags_choose(message: Message, state: FSMContext):
         id=uuid4(), 
         name=state_data["name"], 
         description=state_data["description"], 
+        links=state_data["links"], 
         image=state_data["image"],
         tags=message.html_text, 
     )

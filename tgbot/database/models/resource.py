@@ -14,6 +14,7 @@ class ResourceModel(Base):
     
     name = Column(String, unique=True, nullable=False)
     description = Column(String, nullable=False)
+    links = Column(String, nullable=False)
     tags = Column(String, nullable=False)
     verified = Column(Boolean(), default=False, nullable=False)
     image = Column(String, nullable=False)

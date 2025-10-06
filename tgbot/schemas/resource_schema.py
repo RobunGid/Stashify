@@ -12,6 +12,7 @@ class ResourceSchemaWithoutCategory(BaseModel):
     
     name: str
     description: str
+    links: str
     tags: str
     verified: bool = Field(default_factory=lambda: False)
     image: str
