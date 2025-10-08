@@ -27,9 +27,9 @@
 - [x] Adding new quiz
 - [x] Deleting quiz
 - [x] Editing quiz
-- [ ] View resource list pagination by categories
-- [ ] View resource details
-- [ ] Search resources by tags, verification by author
+- [x] View resource list pagination by categories
+- [x] View resource details
+- [x] Search resources by tags, verification by author
 - [ ] Rate resource
 - [ ] Add resource to favorite
 

@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlalchemy import select, column
+from sqlalchemy import func, or_, select, column
 from sqlalchemy.orm import selectinload
 from pydantic import UUID4
 
@@ -9,7 +9,9 @@ from database.models.resource import ResourceModel
 from database.models.quiz import QuizModel
 from schemas.resource_schema import ResourceSchema
 
-async def get_resources(category_id: Optional[UUID4] = None, has_quiz: bool = False) -> List[ResourceSchema]:
+FIND_COLUMNS = [ResourceModel.links, ResourceModel.description, ResourceModel.tags, ResourceModel.name]
+
+async def get_resources(category_id: Optional[UUID4] = None, has_quiz: bool = False, text: Optional[str] = None) -> List[ResourceSchema]:
     async with AsyncSessionLocal() as session:
         statement = select(ResourceModel)\
         .options(
@@ -26,6 +28,13 @@ async def get_resources(category_id: Optional[UUID4] = None, has_quiz: bool = Fa
             
         if category_id: 
             statement = statement.where(ResourceModel.category_id==category_id)
+        
+        if text:
+            statement = statement.filter(
+				or_(
+					*[func.lower(col).contains(text.lower()) for col in FIND_COLUMNS]
+				)
+			)
         
         resources = (await session.execute(statement)).scalars().all()
         

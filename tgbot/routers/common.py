@@ -2,7 +2,7 @@ from uuid import uuid4
 from pprint import pprint
 
 from aiogram import Router
-from aiogram.filters.command import CommandStart, Command
+from aiogram.filters.command import CommandStart
 from aiogram.types import Message
 
 from database.models.user import Role

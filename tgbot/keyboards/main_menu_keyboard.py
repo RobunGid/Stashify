@@ -8,7 +8,7 @@ def main_menu_keyboard(user_role: Role, user_lang: str | None):
     user_lang = user_lang or "en"
     builder = InlineKeyboardBuilder()
     builder.row(InlineKeyboardButton(text=t("main_menu_keyboard.resources", user_lang), callback_data="resources"))
-    builder.row(InlineKeyboardButton(text=t("main_menu_keyboard.search", user_lang), callback_data="search"))
+    builder.row(InlineKeyboardButton(text=t("main_menu_keyboard.search_resource", user_lang), callback_data="search_resource"))
     builder.row(InlineKeyboardButton(text=t("main_menu_keyboard.favorite", user_lang), callback_data="favorite"))
     builder.row(InlineKeyboardButton(text=t("main_menu_keyboard.quizes", user_lang), callback_data="quizes"))
 

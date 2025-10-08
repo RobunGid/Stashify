@@ -9,7 +9,7 @@ translations = {
 		"main_menu.text": "🏠 Main Menu\nChoose action:",
 		"main_menu.welcome": "🏠 Main Menu\nWelcome to the bot with \nlots of resources on \nprogramming, web, cybersecurity, etc.\nChoose action:",
 		"main_menu_keyboard.resources": "🗂️ Resources",
-		"main_menu_keyboard.search": "🔍 Search",
+		"main_menu_keyboard.search_resource": "🔍 Search",
 		"main_menu_keyboard.favorite": "⭐ Favorite",
 		"main_menu_keyboard.quizes": "📚 Quizes",
 		"main_menu_keyboard.manage_resources": "🛠️ Manage resources",
@@ -122,6 +122,9 @@ translations = {
   
 		"list_resources.choose_category": "📤 Select category",
 		"list_resources.choose_resource": "📤 Select resource",
+  
+		"search_resource.enter_text": "✏️ Enter resource text, tags or description",
+		"search_resource.select": "✏️ Select the appropriate resource",
   
   		"manage_users.text": "🛠️ Manage Users\nChoose action:",
 		"manage_users_keyboard.edit": "✏️ Edit User",
