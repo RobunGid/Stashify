@@ -111,6 +111,9 @@ async def list_resource_resource_select(callback: CallbackQuery, state: FSMConte
     category_id = state_data["category_id"]
     resources = await get_resources(category_id=category_id)
     formatted_text = format_resource_text(resource)
+    tg_user_id = str(callback.from_user.id)
+    favorites = await get_user_favorites(tg_user_id=tg_user_id, user_id=None)
+    is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
         photo=resource.image,
@@ -119,6 +122,7 @@ async def list_resource_resource_select(callback: CallbackQuery, state: FSMConte
             resources=resources,
             user_lang=callback.from_user.language_code, 
             resource=resource,
+            is_favorite=is_favorite
     ))
     
 @router.callback_query(ListResourcesItemCallbackFactory.filter(F.action=="change_page"))
@@ -153,6 +157,7 @@ async def list_resource_resource_add_favorite(callback: CallbackQuery, state: FS
     formatted_text = format_resource_text(resource)
     tg_user_id = str(callback.from_user.id)
     user = await get_user(tg_user_id=tg_user_id)
+    print(user, 919239123)
     favorite = FavoriteSchema(user_id=user.id, resource_id=resource.id)
     await create_favorite(favorite)
     await state.update_data(resources=resources)

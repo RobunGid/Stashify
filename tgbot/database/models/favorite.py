@@ -16,4 +16,4 @@ class FavoriteModel(Base):
     
     added_at = Column(DateTime, default=datetime.now)
     user = relationship("UserModel", back_populates="favorites")
-    resource = relationship("UserModel")
+    resource = relationship("ResourceModel")

@@ -5,6 +5,8 @@ from sqlalchemy.orm import selectinload
 
 from database.orm import AsyncSessionLocal
 from database.models.favorite import FavoriteModel
+from database.models.user import UserModel
+from database.models.resource import ResourceModel
 from schemas.favorite_schema import FavoriteSchema
 
 @overload
@@ -17,11 +19,25 @@ async def get_user_favorites(user_id, tg_user_id) -> List[FavoriteSchema]:
     async with AsyncSessionLocal() as session:
         statement = select(FavoriteModel)\
         .options(
-            selectinload(FavoriteModel.user)
+            selectinload(FavoriteModel.user).\
+                selectinload(UserModel.quiz_results)
         )\
         .options(
-            selectinload(FavoriteModel.resource)
+            selectinload(FavoriteModel.user).\
+                selectinload(UserModel.quiz_ratings)
+        )\
+        .options(
+            selectinload(FavoriteModel.resource).\
+                selectinload(ResourceModel.category)
+        )\
+        .options(
+            selectinload(FavoriteModel.resource).\
+                selectinload(ResourceModel.quiz)
         )
+        if user_id:
+            statement = statement.where(FavoriteModel.user_id==user_id)
+        if tg_user_id:
+            statement = statement.join(FavoriteModel.user).where(UserModel.tg_id==tg_user_id)
         
         favorites = (await session.execute(statement)).scalars().all()
         

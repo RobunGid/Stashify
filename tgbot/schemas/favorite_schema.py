@@ -11,7 +11,7 @@ class FavoriteSchema(BaseModel):
     user: Optional["UserSchema"] = None
     
     resource_id: UUID4
-    resource: Optional["ResourceSchema"] = None
+    resource: Optional["ResourceSchema"] = Field(default_factory=lambda: None)
     
     added_at: datetime = Field(default_factory=datetime.now)
     
