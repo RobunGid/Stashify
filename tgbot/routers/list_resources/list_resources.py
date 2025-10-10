@@ -7,6 +7,8 @@ from aiogram.fsm.context import FSMContext
 
 from keyboards.list_resources.list_resources_back_keyboard import list_resources_back_keyboard
 from keyboards.list_resources.list_resources_resource_list_keyboard import ListResourcesChooseResourceCallbackFactory, list_resources_resource_list_keyboard
+from database.operations.get_user_favorites import get_user_favorites
+from database.operations.create_favorite import create_favorite
 from .router import router
 from config.bot_config import bot
 from config.var_config import LIST_RESOURCES_RESOURCES_ON_PAGE, LIST_RESOURCES_CATEGORIES_ON_PAGE
@@ -17,6 +19,8 @@ from keyboards.list_resources.list_resources_category_list_keyboard import ListR
 from keyboards.list_resources.list_resources_resource_item_keyboard import ListResourcesItemCallbackFactory, list_resources_resource_item_keyboard
 from i18n.translate import t
 from utils.format_resource_text import format_resource_text
+from schemas.favorite_schema import FavoriteSchema
+from database.operations.get_user import get_user
 
 class ResourcesState(StatesGroup):
     total_categories_pages = State()
@@ -114,7 +118,7 @@ async def list_resource_resource_select(callback: CallbackQuery, state: FSMConte
         reply_markup=list_resources_resource_item_keyboard(
             resources=resources,
             user_lang=callback.from_user.language_code, 
-            resource=resource
+            resource=resource,
     ))
     
 @router.callback_query(ListResourcesItemCallbackFactory.filter(F.action=="change_page"))
@@ -125,6 +129,9 @@ async def list_resource_resource_change_page(callback: CallbackQuery, state: FSM
     state_data = await state.get_data()
     resources = state_data["resources"]
     formatted_text = format_resource_text(resource)
+    tg_user_id = str(callback.from_user.id)
+    favorites = await get_user_favorites(tg_user_id=tg_user_id, user_id=None)
+    is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
         photo=resource.image,
@@ -132,5 +139,29 @@ async def list_resource_resource_change_page(callback: CallbackQuery, state: FSM
         reply_markup=list_resources_resource_item_keyboard(
             resources=resources,
             user_lang=callback.from_user.language_code, 
-            resource=resource
+            resource=resource,
+            is_favorite=is_favorite,
+    ))
+    
+@router.callback_query(ListResourcesItemCallbackFactory.filter(F.action=="add_favorite"))
+async def list_resource_resource_add_favorite(callback: CallbackQuery, state: FSMContext, callback_data: ListResourcesChooseResourceCallbackFactory):
+    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data or not callback_data.resource_id: return
+    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
+    resource = await get_resource(resource_id=callback_data.resource_id)
+    state_data = await state.get_data()
+    resources = state_data["resources"]
+    formatted_text = format_resource_text(resource)
+    tg_user_id = str(callback.from_user.id)
+    user = await get_user(tg_user_id=tg_user_id)
+    favorite = FavoriteSchema(user_id=user.id, resource_id=resource.id)
+    await create_favorite(favorite)
+    await state.update_data(resources=resources)
+    await callback.message.answer_photo(
+        photo=resource.image,
+        caption=formatted_text,
+        reply_markup=list_resources_resource_item_keyboard(
+            resources=resources,
+            user_lang=callback.from_user.language_code, 
+            resource=resource,
+            is_favorite=True,
     ))

@@ -128,6 +128,8 @@ translations = {
   
   		"manage_users.text": "🛠️ Manage Users\nChoose action:",
 		"manage_users_keyboard.edit": "✏️ Edit User",
-		"manage_users_keyboard.block": "🗑️ Block User"
+		"manage_users_keyboard.block": "🗑️ Block User",
+		"favorite.add": "✅ Add to favorite",
+		"favorite.remove": "❌ Remove from favorite"
 	}
 }
