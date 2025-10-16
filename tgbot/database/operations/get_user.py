@@ -4,12 +4,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from database.orm import AsyncSessionLocal
-from database.models.user import Role, UserModel
+from database.models.user import UserModel
 from schemas.user_schema import UserSchema
 
-async def get_user(tg_user_id: str) -> UserSchema:
+async def get_user(user_id: str) -> UserSchema:
     async with AsyncSessionLocal() as session:
-        statement = select(UserModel).where(UserModel.tg_id==tg_user_id).options(
+        statement = select(UserModel).where(UserModel.id==user_id).options(
             selectinload(UserModel.quiz_results)
         )\
         .options(

@@ -17,7 +17,7 @@ router = Router()
 @router.message(CommandStart())
 async def start(message: Message):
     if not message.from_user or not message.from_user.id: return
-    user_data = {"id": str(uuid4()), "tg_id": str(message.from_user.id), "role": Role.user, "language": message.from_user.language_code}
+    user_data = {"id": str(message.from_user.id), "username": str(message.from_user.username), "role": Role.user, "language": message.from_user.language_code}
     
     user = UserSchema(**user_data)
     await create_user(user)

@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Integer, UniqueConstraint
+from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Integer, UniqueConstraint, String
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -15,7 +15,7 @@ class QuizResultModel(Base):
     quiz_id = Column(UUID(as_uuid=True), ForeignKey('quiz.id'), nullable=False)
     quiz = relationship("QuizModel", backref="quiz_results")
     
-    user_id = Column(UUID(as_uuid=True), ForeignKey('user.id'), nullable=False)
+    user_id = Column(String, ForeignKey('user.id'), nullable=False)
     user = relationship("UserModel", back_populates="quiz_results")
     
     completed_at = Column(DateTime, default=datetime.now)

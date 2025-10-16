@@ -18,6 +18,7 @@ from aiogram.types import Message
 from database.operations.get_resources import get_resources
 from database.operations.get_resource import get_resource
 from utils.format_resource_text import format_resource_text
+from database.operations.get_user_favorites import get_user_favorites
 
 class SearchResourceState(StatesGroup):
     text = State() 
@@ -81,7 +82,9 @@ async def search_resource_select(callback: CallbackQuery, state: FSMContext, cal
     
     resource_id = callback_data.resource_id
     resource = await get_resource(resource_id=resource_id)
-    
+    user_id = str(callback.from_user.id)
+    favorites = await get_user_favorites(user_id=user_id)
+    is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
     formatted_text = format_resource_text(resource)
     await callback.message.answer_photo(
         photo=resource.image,
@@ -89,7 +92,8 @@ async def search_resource_select(callback: CallbackQuery, state: FSMContext, cal
         reply_markup=search_resource_resource_item_keyboard(
             resources=resources,
             user_lang=callback.from_user.language_code, 
-            resource=resource
+            resource=resource,
+            is_favorite=is_favorite
     ))
     
 @router.callback_query(SearchResourceItemCallbackFactory.filter(F.action == "change_page"))
@@ -100,6 +104,9 @@ async def search_resource_resource_change_page(callback: CallbackQuery, state: F
     state_data = await state.get_data()
     resources = state_data["resources"]
     formatted_text = format_resource_text(resource)
+    user_id = str(callback.from_user.id)
+    favorites = await get_user_favorites(user_id=user_id)
+    is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
         photo=resource.image,
@@ -107,5 +114,6 @@ async def search_resource_resource_change_page(callback: CallbackQuery, state: F
         reply_markup=search_resource_resource_item_keyboard(
             resources=resources,
             user_lang=callback.from_user.language_code, 
-            resource=resource
+            resource=resource,
+            is_favorite=is_favorite
     ))

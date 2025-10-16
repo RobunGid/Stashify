@@ -15,7 +15,7 @@ class QuizRatingModel(Base):
     quiz_id = Column(UUID(as_uuid=True), ForeignKey('quiz.id'), nullable=False)
     quiz = relationship("QuizModel", back_populates="ratings")
     
-    user_id = Column(UUID(as_uuid=True), ForeignKey('user.id'), nullable=False)
+    user_id = Column(String, ForeignKey('user.id'), nullable=False)
     user = relationship("UserModel", back_populates="quiz_ratings")
     
     created_at = Column(DateTime, default=datetime.now)

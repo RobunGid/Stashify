@@ -16,8 +16,7 @@ class Role(PyEnum):
 class UserModel(Base):
     __tablename__ = "user"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    tg_id = Column(String, unique=True)
+    id = Column(String, primary_key=True, default=str)
     username = Column(String)
     
     role = Column(Enum(Role))

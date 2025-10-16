@@ -7,7 +7,7 @@ from pydantic import UUID4, BaseModel, Field
 class FavoriteSchema(BaseModel):
     id: UUID4 = Field(default_factory=uuid4)
     
-    user_id: UUID4
+    user_id: str
     user: Optional["UserSchema"] = None
     
     resource_id: UUID4

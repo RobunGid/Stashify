@@ -9,6 +9,7 @@ from keyboards.list_resources.list_resources_back_keyboard import list_resources
 from keyboards.list_resources.list_resources_resource_list_keyboard import ListResourcesChooseResourceCallbackFactory, list_resources_resource_list_keyboard
 from database.operations.get_user_favorites import get_user_favorites
 from database.operations.create_favorite import create_favorite
+from database.operations.remove_favorite import remove_favorite
 from .router import router
 from config.bot_config import bot
 from config.var_config import LIST_RESOURCES_RESOURCES_ON_PAGE, LIST_RESOURCES_CATEGORIES_ON_PAGE
@@ -111,8 +112,8 @@ async def list_resource_resource_select(callback: CallbackQuery, state: FSMConte
     category_id = state_data["category_id"]
     resources = await get_resources(category_id=category_id)
     formatted_text = format_resource_text(resource)
-    tg_user_id = str(callback.from_user.id)
-    favorites = await get_user_favorites(tg_user_id=tg_user_id, user_id=None)
+    user_id = str(callback.from_user.id)
+    favorites = await get_user_favorites(user_id=user_id)
     is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
@@ -133,8 +134,8 @@ async def list_resource_resource_change_page(callback: CallbackQuery, state: FSM
     state_data = await state.get_data()
     resources = state_data["resources"]
     formatted_text = format_resource_text(resource)
-    tg_user_id = str(callback.from_user.id)
-    favorites = await get_user_favorites(tg_user_id=tg_user_id, user_id=None)
+    user_id = str(callback.from_user.id)
+    favorites = await get_user_favorites(user_id=user_id)
     is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
@@ -155,10 +156,8 @@ async def list_resource_resource_add_favorite(callback: CallbackQuery, state: FS
     state_data = await state.get_data()
     resources = state_data["resources"]
     formatted_text = format_resource_text(resource)
-    tg_user_id = str(callback.from_user.id)
-    user = await get_user(tg_user_id=tg_user_id)
-    print(user, 919239123)
-    favorite = FavoriteSchema(user_id=user.id, resource_id=resource.id)
+    user_id = str(callback.from_user.id)
+    favorite = FavoriteSchema(user_id=user_id, resource_id=resource.id)
     await create_favorite(favorite)
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
@@ -169,4 +168,27 @@ async def list_resource_resource_add_favorite(callback: CallbackQuery, state: FS
             user_lang=callback.from_user.language_code, 
             resource=resource,
             is_favorite=True,
+    ))
+    
+
+@router.callback_query(ListResourcesItemCallbackFactory.filter(F.action=="remove_favorite"))
+async def list_resource_resource_remove_favorite(callback: CallbackQuery, state: FSMContext, callback_data: ListResourcesChooseResourceCallbackFactory):
+    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data or not callback_data.resource_id: return
+    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
+    resource = await get_resource(resource_id=callback_data.resource_id)
+    state_data = await state.get_data()
+    resources = state_data["resources"]
+    formatted_text = format_resource_text(resource)
+    user_id = str(callback.from_user.id)
+    
+    await remove_favorite(user_id=user_id, resource_id=resource.id)
+    await state.update_data(resources=resources)
+    await callback.message.answer_photo(
+        photo=resource.image,
+        caption=formatted_text,
+        reply_markup=list_resources_resource_item_keyboard(
+            resources=resources,
+            user_lang=callback.from_user.language_code, 
+            resource=resource,
+            is_favorite=False,
     ))

@@ -6,8 +6,7 @@ from pydantic import UUID4, BaseModel, Field
 from database.models.user import Role
 
 class UserSchema(BaseModel):
-    id: UUID4
-    tg_id: str = Field()
+    id: str = Field()
     username: Optional[str]
     
     role: Role

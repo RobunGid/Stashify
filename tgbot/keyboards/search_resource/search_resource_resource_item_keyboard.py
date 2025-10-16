@@ -9,10 +9,10 @@ from i18n.translate import t
 from schemas.resource_schema import ResourceSchema
 
 class SearchResourceItemCallbackFactory(CallbackData, prefix="search_resource_itm"):
-    action: Literal["change_page"]
+    action: Union[Literal["change_page"], Literal["add_favorite"], Literal["remove_favorite"]]
     resource_id: UUID4 | None
 
-def search_resource_resource_item_keyboard(resources: List[ResourceSchema],  resource: ResourceSchema, user_lang: str = "en"):
+def search_resource_resource_item_keyboard(resources: List[ResourceSchema],  resource: ResourceSchema, user_lang: str = "en", is_favorite: bool = False):
     builder = InlineKeyboardBuilder()
     resource_index = resources.index(resource)
     resource_quantity = len(resources)
@@ -37,5 +37,9 @@ def search_resource_resource_item_keyboard(resources: List[ResourceSchema],  res
     elif resource_index == 0 and resource_quantity == 0:
             builder.button(text=f"{resource_index+1}/{resource_quantity}", callback_data=f" ")
             builder.adjust(1)
+    if not is_favorite:    
+        builder.button(text=t("favorite.add", user_lang), callback_data=SearchResourceItemCallbackFactory(action="add_favorite", resource_id=resource.id))
+    if is_favorite:
+        builder.button(text=t("favorite.remove", user_lang), callback_data=SearchResourceItemCallbackFactory(action="remove_favorite", resource_id=resource.id))
     builder.row(InlineKeyboardButton(text=t("common.back", user_lang), callback_data="menu"))
     return builder.as_markup()
