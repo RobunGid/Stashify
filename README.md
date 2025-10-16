@@ -31,7 +31,7 @@
 - [x] View resource details
 - [x] Search resources by tags, verification by author
 - [ ] Rate resource
-- [ ] Add resource to favorite
+- [x] Add resource to favorite
 
 - [x] Add quiz to resource: multiple-choice questions
 - [ ] Complete quiz for a resource
