@@ -17,7 +17,7 @@ def list_resources_resource_item_keyboard(resources: List[ResourceSchema], resou
     builder = InlineKeyboardBuilder()
     resource_index = resources.index(resource)
     resource_quantity = len(resources)
-    first_line_buttons_quantity = 0
+    first_line_buttons_quantity = 1
     if resource_index+1 != resource_quantity and resource_index != 0:
             builder.button(text=t("items.start", user_lang), callback_data=ListResourcesItemCallbackFactory(action="change_page", resource_id=resources[0].id, rating=0))
             builder.button(text=t("items.back", user_lang), callback_data=ListResourcesItemCallbackFactory(action="change_page", resource_id=resources[resource_index-1].id, rating=0))
@@ -44,7 +44,6 @@ def list_resources_resource_item_keyboard(resources: List[ResourceSchema], resou
         builder.button(text=t("favorite.add", user_lang), callback_data=ListResourcesItemCallbackFactory(action="add_favorite", resource_id=resource.id, rating=0))
     if is_favorite:
         builder.button(text=t("favorite.remove", user_lang), callback_data=ListResourcesItemCallbackFactory(action="remove_favorite", resource_id=resource.id, rating=0))
-    builder.adjust(2)
     for i in range(1, 6):
         symbol = "⭐" if i <= rating else "☆"
         builder.button(text=symbol, callback_data=ListResourcesItemCallbackFactory(action="rate", resource_id=resource.id, rating=i))

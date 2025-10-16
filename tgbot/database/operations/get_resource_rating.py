@@ -27,6 +27,7 @@ async def get_resource_rating(resource_id: UUID4, user_id: str) -> ResourceRatin
             selectinload(ResourceRatingModel.user).selectinload(UserModel.quiz_ratings)
         )
         resource_rating = (await session.execute(statement)).scalars().first()
-            
-        resource_rating = ResourceRatingSchema.model_validate(resource_rating, from_attributes=True) 
-        return resource_rating
+        
+        if resource_rating is None:
+            return None    
+        return ResourceRatingSchema.model_validate(resource_rating, from_attributes=True) 
