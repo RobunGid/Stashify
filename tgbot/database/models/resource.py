@@ -23,6 +23,7 @@ class ResourceModel(Base):
     category = relationship("CategoryModel", back_populates="resources")
     
     quiz = relationship("QuizModel", back_populates="resource")
+    ratings = relationship("ResourceRatingModel", back_populates="resource", cascade="all, delete-orphan")
     
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     

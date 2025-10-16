@@ -26,5 +26,6 @@ class UserModel(Base):
     
     quiz_results = relationship("QuizResultModel", back_populates="user")
     quiz_ratings = relationship("QuizRatingModel", back_populates="user")
+    resource_ratings = relationship("ResourceRatingModel", back_populates="user")
     favorites = relationship("FavoriteModel", back_populates="user")
     

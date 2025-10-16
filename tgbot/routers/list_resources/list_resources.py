@@ -1,27 +1,30 @@
 from math import ceil
+from uuid import uuid4
 
 from aiogram import F
 from aiogram.types import CallbackQuery
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
-from keyboards.list_resources.list_resources_back_keyboard import list_resources_back_keyboard
 from keyboards.list_resources.list_resources_resource_list_keyboard import ListResourcesChooseResourceCallbackFactory, list_resources_resource_list_keyboard
 from database.operations.get_user_favorites import get_user_favorites
 from database.operations.create_favorite import create_favorite
 from database.operations.remove_favorite import remove_favorite
+from schemas.resource_rating_schema import ResourceRatingWithoutUserAndResourceSchema
 from .router import router
 from config.bot_config import bot
 from config.var_config import LIST_RESOURCES_RESOURCES_ON_PAGE, LIST_RESOURCES_CATEGORIES_ON_PAGE
 from database.operations.get_resources import get_resources
 from database.operations.get_categories import get_categories
 from database.operations.get_resource import get_resource
+from database.operations.get_resource_rating import get_resource_rating
+from database.operations.create_resource_rating import create_resource_rating
+from database.operations.delete_resource_rating import delete_resource_rating
 from keyboards.list_resources.list_resources_category_list_keyboard import ListResourcesChooseCategoryCallbackFactory, list_resources_category_list_keyboard
 from keyboards.list_resources.list_resources_resource_item_keyboard import ListResourcesItemCallbackFactory, list_resources_resource_item_keyboard
 from i18n.translate import t
 from utils.format_resource_text import format_resource_text
 from schemas.favorite_schema import FavoriteSchema
-from database.operations.get_user import get_user
 
 class ResourcesState(StatesGroup):
     total_categories_pages = State()
@@ -115,6 +118,7 @@ async def list_resource_resource_select(callback: CallbackQuery, state: FSMConte
     user_id = str(callback.from_user.id)
     favorites = await get_user_favorites(user_id=user_id)
     is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
+    resource_rating = await get_resource_rating(user_id=user_id, resource_id=resource.id)
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
         photo=resource.image,
@@ -123,7 +127,8 @@ async def list_resource_resource_select(callback: CallbackQuery, state: FSMConte
             resources=resources,
             user_lang=callback.from_user.language_code, 
             resource=resource,
-            is_favorite=is_favorite
+            is_favorite=is_favorite,
+            rating=resource_rating.rating if resource_rating else 0
     ))
     
 @router.callback_query(ListResourcesItemCallbackFactory.filter(F.action=="change_page"))
@@ -137,6 +142,7 @@ async def list_resource_resource_change_page(callback: CallbackQuery, state: FSM
     user_id = str(callback.from_user.id)
     favorites = await get_user_favorites(user_id=user_id)
     is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
+    resource_rating = await get_resource_rating(user_id=user_id, resource_id=resource.id)
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
         photo=resource.image,
@@ -146,6 +152,7 @@ async def list_resource_resource_change_page(callback: CallbackQuery, state: FSM
             user_lang=callback.from_user.language_code, 
             resource=resource,
             is_favorite=is_favorite,
+            rating=resource_rating.rating if resource_rating else 0
     ))
     
 @router.callback_query(ListResourcesItemCallbackFactory.filter(F.action=="add_favorite"))
@@ -158,6 +165,7 @@ async def list_resource_resource_add_favorite(callback: CallbackQuery, state: FS
     formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
     favorite = FavoriteSchema(user_id=user_id, resource_id=resource.id)
+    resource_rating = await get_resource_rating(user_id=user_id, resource_id=resource.id)
     await create_favorite(favorite)
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
@@ -168,8 +176,8 @@ async def list_resource_resource_add_favorite(callback: CallbackQuery, state: FS
             user_lang=callback.from_user.language_code, 
             resource=resource,
             is_favorite=True,
+            rating=resource_rating.rating if resource_rating else 0
     ))
-    
 
 @router.callback_query(ListResourcesItemCallbackFactory.filter(F.action=="remove_favorite"))
 async def list_resource_resource_remove_favorite(callback: CallbackQuery, state: FSMContext, callback_data: ListResourcesChooseResourceCallbackFactory):
@@ -180,6 +188,7 @@ async def list_resource_resource_remove_favorite(callback: CallbackQuery, state:
     resources = state_data["resources"]
     formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
+    resource_rating = await get_resource_rating(user_id=user_id, resource_id=resource.id)
     
     await remove_favorite(user_id=user_id, resource_id=resource.id)
     await state.update_data(resources=resources)
@@ -191,4 +200,41 @@ async def list_resource_resource_remove_favorite(callback: CallbackQuery, state:
             user_lang=callback.from_user.language_code, 
             resource=resource,
             is_favorite=False,
+            rating=resource_rating.rating if resource_rating else 0
+    ))
+    
+@router.callback_query(ListResourcesItemCallbackFactory.filter(F.action=="rate"))
+async def list_resource_resource_rate(callback: CallbackQuery, state: FSMContext, callback_data: ListResourcesItemCallbackFactory):
+    if (not callback.from_user or 
+        not callback.from_user.language_code or 
+        not callback.message or 
+        not callback.data or 
+        not callback_data.resource_id or 
+        not callback_data.rating): return
+    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
+    resource_id = callback_data.resource_id
+    resource = await get_resource(resource_id=resource_id)
+    state_data = await state.get_data()
+    resources = state_data["resources"]
+    formatted_text = format_resource_text(resource)
+    user_id = str(callback.from_user.id)
+    favorites = await get_user_favorites(user_id=user_id)
+    is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
+    rating = callback_data.rating
+    existing_resource_rating = await get_resource_rating(user_id=user_id, resource_id=resource.id)
+    print(999991, existing_resource_rating)
+    if existing_resource_rating:
+        await delete_resource_rating(user_id=user_id, resource_id=resource.id)
+    resource_rating = ResourceRatingWithoutUserAndResourceSchema(id=uuid4(), resource_id=resource_id, rating=rating, user_id=user_id)
+    await create_resource_rating(resource_rating)
+    await state.update_data(resources=resources)
+    await callback.message.answer_photo(
+        photo=resource.image,
+        caption=formatted_text,
+        reply_markup=list_resources_resource_item_keyboard(
+            resources=resources,
+            user_lang=callback.from_user.language_code, 
+            resource=resource,
+            is_favorite=is_favorite,
+            rating=rating
     ))
