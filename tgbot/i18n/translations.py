@@ -122,6 +122,11 @@ translations = {
   
 		"list_resources.choose_category": "📤 Select category",
 		"list_resources.choose_resource": "📤 Select resource",
+		"list_resources.change_page": "📤 Select resource",
+  
+  		"list_favorites.choose_category": "📤 Select category",
+		"list_favorites.choose_resource": "📤 Select resource",
+		"list_favorites.change_page": "📤 Select resource",
   
 		"search_resource.enter_text": "✏️ Enter resource text, tags or description",
 		"search_resource.select": "✏️ Select the appropriate resource",

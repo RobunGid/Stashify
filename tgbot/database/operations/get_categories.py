@@ -7,9 +7,10 @@ from database.orm import AsyncSessionLocal
 from database.models.category import CategoryModel
 from database.models.resource import ResourceModel
 from database.models.quiz import QuizModel
+from database.models.favorite import FavoriteModel
 from schemas.category_schema import CategorySchema
 
-async def get_categories(has_quizes: bool = False, has_resources: bool = False) -> List[CategorySchema]:
+async def get_categories(has_quizes: bool = False, has_resources: bool = False, favorites_user_id: Optional[str] = None) -> List[CategorySchema]:
     async with AsyncSessionLocal() as session:
         statement = select(CategoryModel)\
         .options(
@@ -32,7 +33,23 @@ async def get_categories(has_quizes: bool = False, has_resources: bool = False) 
                 .outerjoin(
                     ResourceModel, ResourceModel.category_id == CategoryModel.id
                 )
-            statement = statement.where(CategoryModel.id.in_(subquery))    
+            statement = statement\
+                .where(CategoryModel.id.in_(subquery))    
+
+        if favorites_user_id:
+            subquery = select(ResourceModel.category_id)\
+                .select_from(CategoryModel)\
+                .outerjoin(
+                    ResourceModel, ResourceModel.category_id == CategoryModel.id
+                )\
+                .outerjoin(
+                    FavoriteModel, FavoriteModel.resource_id == ResourceModel.id
+                )\
+                .where(
+                    FavoriteModel.user_id == favorites_user_id
+                )
+            statement = statement\
+                .where(CategoryModel.id.in_(subquery))  
 
         categories = (await session.execute(statement)).scalars().all()
         
