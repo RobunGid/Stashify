@@ -18,4 +18,4 @@ class ResourceRatingSchema(ResourceRatingWithoutUserAndResourceSchema):
     resource: "ResourceSchema"
     
 from .user_schema import UserSchema
-from .quiz_schema import ResourceSchema
+from .resource_schema import ResourceSchema

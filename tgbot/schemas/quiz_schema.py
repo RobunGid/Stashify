@@ -12,9 +12,8 @@ class QuizSchemaWithoutResourceAndQuestions(BaseModel):
 class QuizSchemaWithoutResource(QuizSchemaWithoutResourceAndQuestions):
     questions: "List[QuizQuestionBaseSchema]" = Field(default_factory=list)
     
-class QuizSchema(QuizSchemaWithoutResourceAndQuestions):
+class QuizSchema(QuizSchemaWithoutResource):
     resource: "ResourceSchema"
-    questions: "List[QuizQuestionBaseSchema]" = Field(default_factory=list)
     
 from .resource_schema import ResourceSchema
 from .quiz_question_schema import QuizQuestionBaseSchema

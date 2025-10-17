@@ -22,7 +22,7 @@ class ResourceModel(Base):
     category_id = Column(UUID(as_uuid=True), ForeignKey('category.id'), nullable=False)
     category = relationship("CategoryModel", back_populates="resources")
     
-    quiz = relationship("QuizModel", back_populates="resource")
+    quiz = relationship("QuizModel", back_populates="resource", uselist=False)
     ratings = relationship("ResourceRatingModel", back_populates="resource", cascade="all, delete-orphan")
     
     created_at = Column(DateTime, default=datetime.now, nullable=False)

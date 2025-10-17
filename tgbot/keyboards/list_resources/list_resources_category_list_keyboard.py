@@ -13,8 +13,7 @@ class ListResourcesChooseCategoryCallbackFactory(CallbackData, prefix="list_reso
     category_id: UUID4 | None
     page: int
 
-def list_resources_category_list_keyboard(user_lang: str | None, categories: List[CategorySchema], page: int, total_pages: int):
-    user_lang = user_lang or "en"
+def list_resources_category_list_keyboard(categories: List[CategorySchema], page: int, total_pages: int, user_lang: str = "en"):
     builder = InlineKeyboardBuilder()
     first_line_buttons_quantity = 1
     

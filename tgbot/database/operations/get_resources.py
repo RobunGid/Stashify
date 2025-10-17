@@ -12,7 +12,7 @@ from schemas.resource_schema import ResourceSchema
 
 FIND_COLUMNS = [ResourceModel.links, ResourceModel.description, ResourceModel.tags, ResourceModel.name]
 
-async def get_resources(category_id: Optional[UUID4] = None, has_quiz: bool = False, text: Optional[str] = None, favorites_user_id: Optional[str] = None) -> List[ResourceSchema]:
+async def get_resources(category_id: Optional[UUID4] = None, has_quiz: Optional[bool] = None, text: Optional[str] = None, favorites_user_id: Optional[str] = None) -> List[ResourceSchema]:
     async with AsyncSessionLocal() as session:
         statement = select(ResourceModel)\
         .options(
@@ -20,12 +20,16 @@ async def get_resources(category_id: Optional[UUID4] = None, has_quiz: bool = Fa
         )\
         .options(
             selectinload(ResourceModel.quiz).selectinload(QuizModel.questions)
+        )\
+        .options(
+            selectinload(ResourceModel.ratings)
         )
         
-        if has_quiz:
-            statement = statement.filter(ResourceModel.quiz != None)
-        else:
-            statement = statement.filter(ResourceModel.quiz == None)
+        if has_quiz is not None:
+            if has_quiz:
+                statement = statement.filter(ResourceModel.quiz.is_not(None))
+            else:
+                statement = statement.filter(ResourceModel.quiz.is_(None))
             
         if category_id: 
             statement = statement.where(ResourceModel.category_id==category_id)

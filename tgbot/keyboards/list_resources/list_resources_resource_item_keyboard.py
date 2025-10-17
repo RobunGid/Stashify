@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, Union
+from typing import List, Literal, Union
 
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardButton
@@ -9,11 +9,19 @@ from i18n.translate import t
 from schemas.resource_schema import ResourceSchema
 
 class ListResourcesItemCallbackFactory(CallbackData, prefix="lst_rsc_itm"):
-    action: Union[Literal["change_page"], Literal["add_favorite"], Literal["remove_favorite"], Literal["rate"]]
+    action: Union[Literal["change_page"], Literal["add_favorite"], Literal["remove_favorite"], Literal["rate"], Literal["start_quiz"]]
     resource_id: UUID4 | None
     rating: int | None
 
-def list_resources_resource_item_keyboard(resources: List[ResourceSchema], resource: ResourceSchema, user_lang: str = "en", is_favorite: bool = False, rating: int = 0):
+def list_resources_resource_item_keyboard(
+        resources: List[ResourceSchema], 
+        resource: ResourceSchema, 
+        user_lang: str = "en", 
+        is_favorite: bool = False, 
+        rating: int = 0,
+        has_quiz: bool = False,
+        quiz_percent: int = 0
+    ):
     builder = InlineKeyboardBuilder()
     resource_index = resources.index(resource)
     resource_quantity = len(resources)
@@ -47,6 +55,13 @@ def list_resources_resource_item_keyboard(resources: List[ResourceSchema], resou
     for i in range(1, 6):
         symbol = "⭐" if i <= rating else "☆"
         builder.button(text=symbol, callback_data=ListResourcesItemCallbackFactory(action="rate", resource_id=resource.id, rating=i))
+    
+    if quiz_percent != 0 and has_quiz:
+        builder.button(text=t("start_quiz.completed", user_lang).format(percent=quiz_percent), callback_data=ListResourcesItemCallbackFactory(action="start_quiz", resource_id=resource.id, rating=0))
+    if quiz_percent == 0 and has_quiz:
+        builder.button(text=t("start_quiz.firstly", user_lang), callback_data=ListResourcesItemCallbackFactory(action="start_quiz", resource_id=resource.id, rating=0))
+
+    
     builder.adjust(first_line_buttons_quantity, 2, 5)
     return builder.as_markup()
 

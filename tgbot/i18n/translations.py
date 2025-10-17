@@ -90,7 +90,6 @@ translations = {
 		"manage_quizes.create.add_question": "➕ Add another question or finish",
 		"manage_quizes.create.fail": "❌ Failed to create quiz\n\nResource name: {resource_name}\nQuestion count: {question_count}",
 		"manage_quizes.create.success": "✅ Quiz created successfully\n\nResource name: {resource_name}\nQuestion count: {question_count}",
-		"manage_quizes.create.choose": "📤 Select resource",
 		"manage_quizes.create.no_resources": "❌ No resources in this category",
 		"manage_quizes.create.no_categories": "❌ No categories","manage_quizes.create.stop_questions": "✅ Finish creating quiz",
 		"manage_quizes.delete.choose_category": "📤 Select category to delete quiz",
@@ -122,6 +121,8 @@ translations = {
 		"list_resources.choose_category": "📤 Select category",
 		"list_resources.choose_resource": "📤 Select resource",
 		"list_resources.change_page": "📤 Select resource",
+		"list_resources.start_quiz.question": "✏️ Start quiz?\n\nResource name: {resource_name}\nQuestion count: {question_count}",
+		"list_resources.start_quiz.confirm": "✅ Start quiz",
   
   		"list_favorites.choose_category": "📤 Select category",
 		"list_favorites.choose_resource": "📤 Select resource",
@@ -135,6 +136,8 @@ translations = {
 		"manage_users_keyboard.edit": "✏️ Edit User",
 		"manage_users_keyboard.block": "🗑️ Block User",
 		"favorite.add": "✅ Add to favorite",
-		"favorite.remove": "❌ Remove from favorite"
+		"favorite.remove": "❌ Remove from favorite",
+		"start_quiz.completed": "🔄 Retry Quiz ({current_percent}%)",
+		"start_quiz.firstly": "📝 Start Quiz",
 	}
 }

@@ -26,14 +26,6 @@ from i18n.translate import t
 from utils.format_resource_text import format_resource_text
 from schemas.favorite_schema import FavoriteSchema
 
-class ResourcesState(StatesGroup):
-    total_categories_pages = State()
-    total_resources_pages = State()
-    resources = State()
-    categories = State()
-    resource_id = State()
-    category_id = State()
-
 @router.callback_query(F.data=="list_favorites")
 async def list_favorites_callback_handler(callback: CallbackQuery, state: FSMContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message: return

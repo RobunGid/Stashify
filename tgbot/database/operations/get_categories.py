@@ -52,5 +52,4 @@ async def get_categories(has_quizes: bool = False, has_resources: bool = False, 
                 .where(CategoryModel.id.in_(subquery))  
 
         categories = (await session.execute(statement)).scalars().all()
-        
         return [CategorySchema.model_validate(category, from_attributes=True) for category in categories]

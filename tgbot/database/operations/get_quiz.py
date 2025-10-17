@@ -4,15 +4,18 @@ from pydantic import UUID4
 
 from database.orm import AsyncSessionLocal
 from database.models.quiz import QuizModel
-from schemas.quiz_schema import QuizSchemaWithoutResource
+from schemas.quiz_schema import QuizSchema
 
-async def get_quiz(resource_id: UUID4) -> QuizSchemaWithoutResource:
+async def get_quiz(resource_id: UUID4) -> QuizSchema:
     async with AsyncSessionLocal() as session:
         statement = select(QuizModel)\
         .options(
             selectinload(QuizModel.questions)
+        )\
+        .options(
+            selectinload(QuizModel.resource)
         )
         statement = statement.filter(QuizModel.resource_id == resource_id)
         quiz = (await session.execute(statement)).scalars().first()
         
-        return QuizSchemaWithoutResource.model_validate(quiz, from_attributes=True)
+        return QuizSchema.model_validate(quiz, from_attributes=True)
