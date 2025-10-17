@@ -30,7 +30,7 @@
 - [x] View resource list pagination by categories
 - [x] View resource details
 - [x] Search resources by tags, verification by author
-- [ ] Rate resource
+- [x] Rate resource
 - [x] Add resource to favorite
 
 - [x] Add quiz to resource: multiple-choice questions
