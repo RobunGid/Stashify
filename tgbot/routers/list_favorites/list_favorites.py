@@ -44,10 +44,16 @@ async def list_favorites_callback_handler(callback: CallbackQuery, state: FSMCon
     total_categories_pages = ceil(len(categories) / LIST_RESOURCES_CATEGORIES_ON_PAGE)
     await state.update_data(total_categories_pages=total_categories_pages, categories=categories)
     
-    await callback.message.answer(
-        text=t("list_favorites.choose_category", callback.from_user.language_code), 
-        reply_markup=list_favorites_category_list_keyboard(categories=categories[0:5], user_lang=callback.from_user.language_code, total_pages=total_categories_pages, page=1)
-    )
+    if total_categories_pages != 0:
+        await callback.message.answer(
+            text=t("list_favorites.choose_category", callback.from_user.language_code), 
+            reply_markup=list_favorites_category_list_keyboard(categories=categories[0:5], user_lang=callback.from_user.language_code, total_pages=total_categories_pages, page=1)
+        )
+    if total_categories_pages == 0:
+          await callback.message.answer(
+            text=t("list_favorites.no_results", callback.from_user.language_code), 
+            reply_markup=list_favorites_category_list_keyboard(categories=categories[0:5], user_lang=callback.from_user.language_code, total_pages=total_categories_pages, page=1)
+        )
     
 @router.callback_query(ListFavoritesChooseCategoryCallbackFactory.filter(F.action == "change_page"))
 async def list_favorites_category_page(callback: CallbackQuery, state: FSMContext, callback_data: ListFavoritesChooseCategoryCallbackFactory):

@@ -35,11 +35,11 @@ def list_favorites_resource_item_keyboard(resources: List[ResourceSchema], resou
             builder.button(text=t("items.back", user_lang), callback_data=ListFavoritesItemCallbackFactory(action="change_page", resource_id=resources[resource_index-1].id, rating=0))
             builder.button(text=f"{resource_index+1}/{resource_quantity}", callback_data=f" ")
             first_line_buttons_quantity = 3
-    elif resource_index == 0 and resource_quantity == 0:
+    elif resource_index == 0 and resource_quantity == 1:
             builder.button(text=f"{resource_index+1}/{resource_quantity}", callback_data=f" ")
             first_line_buttons_quantity = 1
+    
     builder.row(InlineKeyboardButton(text=t("common.back", user_lang), callback_data="list_favorites"))
-  
     if not is_favorite:    
         builder.button(text=t("favorite.add", user_lang), callback_data=ListFavoritesItemCallbackFactory(action="add_favorite", resource_id=resource.id, rating=0))
     if is_favorite:

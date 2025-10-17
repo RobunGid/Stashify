@@ -127,6 +127,7 @@ translations = {
   		"list_favorites.choose_category": "📤 Select category",
 		"list_favorites.choose_resource": "📤 Select resource",
 		"list_favorites.change_page": "📤 Select resource",
+		"list_favorites.no_results": "❌ You doesnt have resources in favorites yet",
   
 		"search_resource.enter_text": "✏️ Enter resource text, tags or description",
 		"search_resource.select": "✏️ Select the appropriate resource",
