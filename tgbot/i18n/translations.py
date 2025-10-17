@@ -11,7 +11,6 @@ translations = {
 		"main_menu_keyboard.resources": "🗂️ Resources",
 		"main_menu_keyboard.search_resource": "🔍 Search",
 		"main_menu_keyboard.favorite": "⭐ Favorite",
-		"main_menu_keyboard.quizes": "📚 Quizes",
 		"main_menu_keyboard.manage_resources": "🛠️ Manage resources",
 		"main_menu_keyboard.manage_categories": "⚙️ Manage categories",
 		"main_menu_keyboard.manage_users": "👤 Manage users",
