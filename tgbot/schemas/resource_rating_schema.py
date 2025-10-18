@@ -14,8 +14,8 @@ class ResourceRatingWithoutUserAndResourceSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
 class ResourceRatingSchema(ResourceRatingWithoutUserAndResourceSchema):
-    user: "UserSchema"
+    user: "PlainUserSchema"
     resource: "ResourceSchema"
     
-from .user_schema import UserSchema
+from .user_schema import PlainUserSchema
 from .resource_schema import ResourceSchema

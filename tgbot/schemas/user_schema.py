@@ -5,7 +5,7 @@ from pydantic import UUID4, BaseModel, Field
 
 from database.models.user import Role
 
-class UserSchema(BaseModel):
+class PlainUserSchema(BaseModel):
     id: str = Field()
     username: Optional[str]
     
@@ -14,6 +14,7 @@ class UserSchema(BaseModel):
     
     connection_date: datetime = Field(default_factory=datetime.now)
     
+class UserSchema(PlainUserSchema):
     quiz_results: "List[QuizResultSchema]" = Field(default_factory=list)
     quiz_ratings: "List[QuizRatingSchema]" = Field(default_factory=list)
     

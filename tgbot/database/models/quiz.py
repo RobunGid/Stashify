@@ -1,7 +1,6 @@
-from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -15,5 +14,5 @@ class QuizModel(Base):
     resource_id = Column(UUID(as_uuid=True), ForeignKey('resource.id'), unique=True, nullable=False)
     resource = relationship("ResourceModel", back_populates="quiz")
     
-    questions = relationship("QuizQuestionModel", back_populates="quiz", cascade="all, delete-orphan")
+    questions = relationship("QuizQuestionModel", back_populates="quiz", cascade="all, delete-orphan", lazy="joined")
     ratings = relationship("QuizRatingModel", back_populates="quiz")

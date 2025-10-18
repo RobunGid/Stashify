@@ -8,7 +8,7 @@ from pydantic import UUID4
 from i18n.translate import t
 from schemas.resource_schema import ResourceSchema
 
-class ListResourcesChooseResourceCallbackFactory(CallbackData, prefix="list_resources_rsc"):
+class ListResourcesChooseResourceCallbackFactory(CallbackData, prefix="lst_rsc_rsc"):
     action: Union[Literal["select"], Literal["change_page"]]
     resource_id: UUID4 | None
     page: int

@@ -9,7 +9,7 @@ from i18n.translate import t
 from schemas.resource_schema import ResourceSchema
 
 class ListResourcesItemCallbackFactory(CallbackData, prefix="lst_rsc_itm"):
-    action: Union[Literal["change_page"], Literal["add_favorite"], Literal["remove_favorite"], Literal["rate"], Literal["start_quiz"]]
+    action: Union[Literal["change_page"], Literal["add_favorite"], Literal["remove_favorite"], Literal["rate"], Literal["start_quiz"], Literal["start_quiz_cnfrm"]]
     resource_id: UUID4 | None
     rating: int | None
 
@@ -61,7 +61,6 @@ def list_resources_resource_item_keyboard(
     if quiz_percent == 0 and has_quiz:
         builder.button(text=t("start_quiz.firstly", user_lang), callback_data=ListResourcesItemCallbackFactory(action="start_quiz", resource_id=resource.id, rating=0))
 
-    
     builder.adjust(first_line_buttons_quantity, 2, 5)
     return builder.as_markup()
 

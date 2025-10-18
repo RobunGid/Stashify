@@ -20,10 +20,10 @@ class ResourceModel(Base):
     image = Column(String, nullable=False)
     
     category_id = Column(UUID(as_uuid=True), ForeignKey('category.id'), nullable=False)
-    category = relationship("CategoryModel", back_populates="resources")
+    category = relationship("CategoryModel", back_populates="resources", lazy="joined")
     
-    quiz = relationship("QuizModel", back_populates="resource", uselist=False)
-    ratings = relationship("ResourceRatingModel", back_populates="resource", cascade="all, delete-orphan")
+    quiz = relationship("QuizModel", back_populates="resource", uselist=False, lazy="joined")
+    ratings = relationship("ResourceRatingModel", back_populates="resource", cascade="all, delete-orphan", lazy="joined")
     
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     

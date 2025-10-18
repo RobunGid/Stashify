@@ -138,6 +138,8 @@ translations = {
 		"favorite.add": "✅ Add to favorite",
 		"favorite.remove": "❌ Remove from favorite",
 		"start_quiz.completed": "🔄 Retry Quiz ({current_percent}%)",
+		"start_quiz.retry": "🔄 Retry Quiz",
 		"start_quiz.firstly": "📝 Start Quiz",
+		"start_quiz.final": "✅ You pass quiz. Your result is {percent}%. Retry?"
 	}
 }

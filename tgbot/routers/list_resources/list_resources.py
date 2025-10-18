@@ -32,7 +32,7 @@ async def list_resources_callback_handler(callback: CallbackQuery, state: FSMCon
     
     categories = await get_categories(has_resources=True)
     total_categories_pages = ceil(len(categories) / LIST_RESOURCES_CATEGORIES_ON_PAGE)
-    await state.update_data(total_categories_pages=total_categories_pages, categories=categories)
+    await state.update_data(total_categories_pages=total_categories_pages, categories=categories, current_page=1)
     
     await callback.message.answer(
         text=t("list_resources.choose_category", callback.from_user.language_code), 
@@ -84,6 +84,7 @@ async def list_resource_resource_page(callback: CallbackQuery, state: FSMContext
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     current_page = callback_data.page
+    await state.update_data(current_page=current_page)
     
     resources_data = await state.get_data()
     resources = resources_data["resources"][(current_page-1)*LIST_RESOURCES_RESOURCES_ON_PAGE:current_page*(LIST_RESOURCES_RESOURCES_ON_PAGE)]
@@ -110,7 +111,7 @@ async def list_resource_resource_select(callback: CallbackQuery, state: FSMConte
     favorites = await get_user_favorites(user_id=user_id)
     is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
     resource_rating = await get_resource_rating(user_id=user_id, resource_id=resource.id)
-    await state.update_data(resources=resources)
+    await state.update_data(resources=resources, resource=resource)
     await callback.message.answer_photo(
         photo=resource.image,
         caption=formatted_text,
@@ -136,7 +137,7 @@ async def list_resource_resource_change_page(callback: CallbackQuery, state: FSM
     favorites = await get_user_favorites(user_id=user_id)
     is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
     resource_rating = await get_resource_rating(user_id=user_id, resource_id=resource.id)
-    await state.update_data(resources=resources)
+    await state.update_data(resources=resources, resource=resource)
     await callback.message.answer_photo(
         photo=resource.image,
         caption=formatted_text,

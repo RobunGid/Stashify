@@ -1,10 +1,9 @@
 from typing import List, Optional
-from sqlalchemy import func, or_, select, column
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import selectinload
 from pydantic import UUID4
 
 from database.orm import AsyncSessionLocal
-from database.models.resource import ResourceModel
 from database.models.resource import ResourceModel
 from database.models.quiz import QuizModel
 from database.models.favorite import FavoriteModel
