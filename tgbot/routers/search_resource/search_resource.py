@@ -55,7 +55,6 @@ async def search_resource_start(callback: CallbackQuery, state: FSMContext):
 @router.message(SearchResourceState.text)
 async def search_resource_search(message: Message, state: FSMContext):
     if not message.from_user or not message.from_user.language_code or not message: return
-    await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     
     resources = await get_resources(text=message.text)
     total_pages = ceil(len(resources)/FIND_RESOURCE_RESOURCES_ON_PAGE)
