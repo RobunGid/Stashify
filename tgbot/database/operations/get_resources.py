@@ -28,7 +28,7 @@ async def get_resources(category_id: Optional[UUID4] = None, has_quiz: Optional[
             if has_quiz:
                 statement = statement.filter(ResourceModel.quiz.is_not(None))
             else:
-                statement = statement.filter(ResourceModel.quiz.is_(None))
+                statement = statement.filter(ResourceModel.quiz == None)
             
         if category_id: 
             statement = statement.where(ResourceModel.category_id==category_id)
