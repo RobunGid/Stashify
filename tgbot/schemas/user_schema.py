@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import UUID4, BaseModel, Field
+from pydantic import BaseModel, Field
 
 from database.models.user import Role
 
