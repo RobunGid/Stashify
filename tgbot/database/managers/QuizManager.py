@@ -16,6 +16,7 @@ class QuizManager:
             session.add(quiz)
             session.add_all(quiz_questions)
             await session.commit()
+            
     @classmethod
     async def delete(cls, resource_id: UUID4) -> None:
         async with AsyncSessionLocal() as session:
@@ -25,6 +26,7 @@ class QuizManager:
                 raise ValueError("No such quiz")
             await session.delete(quiz)
             await session.commit()
+            
     @classmethod
     async def get_one(cls, resource_id: UUID4) -> QuizSchema:
         async with AsyncSessionLocal() as session:

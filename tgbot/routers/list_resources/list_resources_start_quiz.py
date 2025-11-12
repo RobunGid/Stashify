@@ -45,7 +45,7 @@ async def list_resource_start_quiz_confirm(callback: CallbackQuery, state: FSMCo
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     resource_id = callback_data.resource_id
     state_data = await state.get_data()
-    quiz = await QuizManager.get_quiz(resource_id=resource_id)
+    quiz = await QuizManager.get_one(resource_id=resource_id)
     page = state_data["current_page"]
     await state.update_data(quiz=quiz)
     await state.update_data(quiz_answers=[])
@@ -120,9 +120,11 @@ async def list_resource_quiz_question_answer(callback: CallbackQuery, state: FSM
         
         state_data = await state.get_data()
         resource = state_data["resource"]
-        
+        existing_quiz_result = QuizResultManager.get_one(resource.id)
+        if existing_quiz_result:
+            await QuizResultManager.delete(resource.id, str(callback.from_user.id))
         quiz_result = QuizResultSchema(id=uuid4(), quiz=quiz, quiz_id=quiz.id, user_id=str(callback.from_user.id), percent=right_answer_percent)
-        await QuizResultManager.create_quiz_result(quiz_result)
+        await QuizResultManager.create(quiz_result)
         
         await callback.message.answer(
             text=t("start_quiz.final", lang=callback.from_user.language_code).format(percent=right_answer_percent),
