@@ -17,7 +17,7 @@ class QuizManager:
             session.add_all(quiz_questions)
             await session.commit()
     @classmethod
-    async def delete_quiz(cls, resource_id: UUID4) -> None:
+    async def delete(cls, resource_id: UUID4) -> None:
         async with AsyncSessionLocal() as session:
             statement = select(QuizModel).where(QuizModel.resource_id==resource_id)
             quiz = (await session.execute(statement)).scalars().first()
@@ -26,7 +26,7 @@ class QuizManager:
             await session.delete(quiz)
             await session.commit()
     @classmethod
-    async def get_quiz(cls, resource_id: UUID4) -> QuizSchema:
+    async def get_one(cls, resource_id: UUID4) -> QuizSchema:
         async with AsyncSessionLocal() as session:
             statement = select(QuizModel)\
             .options(

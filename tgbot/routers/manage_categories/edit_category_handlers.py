@@ -10,11 +10,10 @@ from filters.user_role_filter import UserRoleFilter
 from i18n.translate import t
 from config.bot_config import bot
 from keyboards.manage_categories.manage_categories_back_keyboard import manage_categories_back_keyboard
-from database.operations.get_categories import get_categories
 from keyboards.manage_categories.manage_categories_edit_keyboard import EditCategoryIdCallbackFactory, manage_categories_edit_keyboard
 from config.var_config import EDIT_CATEGORIES_ON_PAGE
-from database.operations.edit_category import edit_category
 from .router import router
+from database.managers import CategoryManager
 
 class EditCategoryState(StatesGroup):
     total_pages = State()
@@ -24,10 +23,11 @@ class EditCategoryState(StatesGroup):
 
 @router.callback_query(F.data=="edit_category", UserRoleFilter([Role.admin]))
 async def edit_category_callback_handler(callback: CallbackQuery, state: FSMContext):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message: return
+    if not callback.from_user or not callback.from_user.language_code or not callback.message: 
+        return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     
-    categories = await get_categories()
+    categories = await CategoryManager.get_categories()
     total_pages=ceil(len(categories)/EDIT_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
     
@@ -39,7 +39,8 @@ async def edit_category_callback_handler(callback: CallbackQuery, state: FSMCont
     
 @router.callback_query(EditCategoryIdCallbackFactory.filter(F.action == "change_page"), UserRoleFilter([Role.admin]))
 async def edit_category_page(callback: CallbackQuery, state: FSMContext, callback_data: EditCategoryIdCallbackFactory):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
+    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: 
+        return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     current_page=callback_data.page
     
@@ -60,7 +61,8 @@ async def edit_category_page(callback: CallbackQuery, state: FSMContext, callbac
     
 @router.callback_query(EditCategoryIdCallbackFactory.filter(F.action=="select"), UserRoleFilter([Role.admin]))
 async def edit_category_choose(callback: CallbackQuery, callback_data: EditCategoryIdCallbackFactory, state: FSMContext):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
+    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: 
+        return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     
     await callback.message.answer(
@@ -73,12 +75,13 @@ async def edit_category_choose(callback: CallbackQuery, callback_data: EditCateg
     
 @router.message(EditCategoryState.new_category_name)
 async def new_category_name_choose(message: Message, state: FSMContext):
-    if not message.from_user or not message.from_user.language_code: return
+    if not message.from_user or not message.from_user.language_code: 
+        return
     state_date = await state.get_data()
     new_category_name = message.html_text
     category_id = state_date["category_id"]
     try:
-        await edit_category(category_id, new_category_name)
+        await CategoryManager.edit_category(category_id, new_category_name)
     except ValueError:
         await message.answer(
             text=t("manage_categories.edit.fail", message.from_user.language_code).format(category_name=new_category_name),

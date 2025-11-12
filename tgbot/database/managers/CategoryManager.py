@@ -19,7 +19,7 @@ class CategoryManager:
             session.add(category)
             await session.commit()
     @classmethod
-    async def edit_category(cls, id: UUID4, new_name: str) -> None:
+    async def edit(cls, id: UUID4, new_name: str) -> None:
         async with AsyncSessionLocal() as session:
             statement = select(CategoryModel).where(CategoryModel.id==id)
             category = (await session.execute(statement)).scalars().first()
@@ -28,7 +28,7 @@ class CategoryManager:
             category.name = new_name # type: ignore
             await session.commit()
     @classmethod
-    async def get_categories(cls, has_quizes: bool = False, has_resources: bool = False, favorites_user_id: Optional[str] = None) -> List[CategorySchema]:
+    async def get_many(cls, has_quizes: bool = False, has_resources: bool = False, favorites_user_id: Optional[str] = None) -> List[CategorySchema]:
         async with AsyncSessionLocal() as session:
             statement = select(CategoryModel)\
             .options(
@@ -72,7 +72,7 @@ class CategoryManager:
             categories = (await session.execute(statement)).scalars().all()
             return [CategorySchema.model_validate(category, from_attributes=True) for category in categories]
     @classmethod
-    async def delete_category(cls, id: UUID4) -> None:
+    async def delete(cls, id: UUID4) -> None:
         async with AsyncSessionLocal() as session:
             statement = select(CategoryModel).where(CategoryModel.id==id)
             category = (await session.execute(statement)).scalars().first()

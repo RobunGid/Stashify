@@ -15,8 +15,8 @@ class PlainUserSchema(BaseModel):
     connection_date: datetime = Field(default_factory=datetime.now)
     
 class UserSchema(PlainUserSchema):
-    quiz_results: "List[QuizResultSchema]" = Field(default_factory=list)
+    quiz_results: "List[QuizResultWithoutUserAndQuizSchema]" = Field(default_factory=list)
     quiz_ratings: "List[QuizRatingSchema]" = Field(default_factory=list)
     
-from .quiz_result_schema import QuizResultSchema
+from .quiz_result_schema import QuizResultWithoutUserAndQuizSchema
 from .quiz_rating_schema import QuizRatingSchema

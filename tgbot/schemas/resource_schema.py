@@ -4,6 +4,8 @@ from uuid import uuid4
 
 from pydantic import UUID4, BaseModel, Field, ConfigDict
 
+from utils.OptionalSchema import AllOptional
+
 def default_category():
     return CategorySchemaWithoutResources(id=uuid4(), name='')
 
@@ -26,6 +28,9 @@ class ResourceSchemaWithoutCategory(BaseModel):
 class ResourceSchema(ResourceSchemaWithoutCategory):
     category: "CategorySchemaWithoutResources" = Field(default_factory=default_category)
     ratings: List["ResourceRatingWithoutUserAndResourceSchema"] = Field(default_factory=list)
+    
+class UpdateResourceSchemaWithoutCategory(ResourceSchemaWithoutCategory, metaclass=AllOptional):
+    ...
     
 from .category_schema import CategorySchemaWithoutResources
 from .quiz_schema import QuizSchemaWithoutResource

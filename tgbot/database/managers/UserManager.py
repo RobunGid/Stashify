@@ -4,13 +4,17 @@ from sqlalchemy.orm import selectinload
 from database.orm import AsyncSessionLocal
 from database.models.user import UserModel
 from schemas.user_schema import UserSchema
+from database.models.quiz_result import QuizResultModel
 
 class UserManager:
     @classmethod
-    async def get_user(cls, user_id: str) -> UserSchema:
+    async def get_one(cls, user_id: str) -> UserSchema:
         async with AsyncSessionLocal() as session:
             statement = select(UserModel).where(UserModel.id==user_id).options(
                 selectinload(UserModel.quiz_results)
+            )\
+			.options(
+                selectinload(UserModel.quiz_results).selectinload(QuizResultModel.quiz)
             )\
             .options(
                 selectinload(UserModel.quiz_ratings)
@@ -21,7 +25,7 @@ class UserManager:
             return UserSchema.model_validate(user, from_attributes=True)
     
     @classmethod
-    async def create_user(cls, user_data: UserSchema):
+    async def create(cls, user_data: UserSchema):
         async with AsyncSessionLocal() as session:
             statement = select(UserModel).where(UserModel.id==user_data.id)
             existing_user = (await session.execute(statement)).scalars().first()

@@ -6,12 +6,12 @@ from sqlalchemy.orm import selectinload
 
 from schemas.quiz_question_schema import QuizQuestionBaseSchema, QuizQuestionWithoutResourceSchema
 from database.orm import AsyncSessionLocal
-from models.quiz_question import QuizQuestionModel
+from database.models.quiz_question import QuizQuestionModel
 from database.models.quiz import QuizModel
 
 class QuizQuestionManager:
     @classmethod
-    async def create_quiz_question(cls, quiz_question_data: QuizQuestionBaseSchema):
+    async def create(cls, quiz_question_data: QuizQuestionBaseSchema):
         async with AsyncSessionLocal() as session:
             quiz_question = QuizQuestionModel(**quiz_question_data.model_dump())
             session.add(quiz_question)
@@ -19,14 +19,22 @@ class QuizQuestionManager:
             
     @overload
     @classmethod
-    async def delete_quiz_question(cls, resource_id: UUID4, quiz_question_number: int, quiz_question_id: None) -> None: ...
+    async def delete(cls, resource_id: str, quiz_question_number: int, quiz_question_id: None) -> None: ...
+    
+    @overload
+    @classmethod
+    async def delete(cls, resource_id: UUID4, quiz_question_number: int, quiz_question_id: None) -> None: ...
 
     @overload
     @classmethod
-    async def delete_quiz_question(cls, resource_id: UUID4, quiz_question_number: None, quiz_question_id: int) -> None: ...
+    async def delete(cls, resource_id: str, quiz_question_number: None, quiz_question_id: int) -> None: ...
+    
+    @overload
+    @classmethod
+    async def delete(cls, resource_id: UUID4, quiz_question_number: None, quiz_question_id: int) -> None: ...
 
     @classmethod
-    async def delete_quiz_question(cls, resource_id, quiz_question_number = None, quiz_question_id = None) -> None:
+    async def delete(cls, resource_id, quiz_question_number = None, quiz_question_id = None) -> None:
         async with AsyncSessionLocal() as session:
             statement = select(QuizQuestionModel)\
                 .join(QuizModel, QuizModel.id == QuizQuestionModel.quiz_id)\
@@ -41,7 +49,7 @@ class QuizQuestionManager:
             await session.commit()
 
     @classmethod
-    async def get_quiz_questions(cls, resource_id: UUID4) -> List[QuizQuestionWithoutResourceSchema]:
+    async def get_many(cls, resource_id: UUID4) -> List[QuizQuestionWithoutResourceSchema]:
         async with AsyncSessionLocal() as session:
             statement = select(QuizQuestionModel)\
             .options(
@@ -53,7 +61,7 @@ class QuizQuestionManager:
             return [QuizQuestionWithoutResourceSchema.model_validate(quiz_question, from_attributes=True) for quiz_question in quiz_questions]
         
     @classmethod
-    async def update_quiz_question(cls, quiz_question_data: QuizQuestionBaseSchema):
+    async def update(cls, quiz_question_data: QuizQuestionBaseSchema):
         async with AsyncSessionLocal() as session:
             statement = update(QuizQuestionModel).where(QuizQuestionModel.id == quiz_question_data.id).values(**quiz_question_data.model_dump())
             await session.execute(statement)

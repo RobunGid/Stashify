@@ -14,14 +14,14 @@ from keyboards.manage_quizes.manage_quizes_create_resource_list_keyboard import 
 from keyboards.manage_quizes.manage_quizes_create_category_list_keyboard import manage_quizes_create_category_list_keyboard, CreateQuizChooseCategoryCallbackFactory
 from config.bot_config import bot
 from config.var_config import CREATE_QUIZ_RESOURCES_ON_PAGE, CREATE_QUIZ_CATEGORIES_ON_PAGE
-from database.operations.get_resources import get_resources
-from database.operations.get_categories import get_categories
 from keyboards.manage_quizes.manage_quizes_back_keyboard import manage_quizes_back_keyboard
 from schemas.quiz_question_schema import QuizQuestionSchema
 from schemas.quiz_schema import QuizSchema
 from keyboards.manage_quizes.manage_quizes_add_question_keyboard import manage_quizes_add_question_keyboard
-from database.operations.create_quiz import create_quiz
 from .router import router
+from database.managers import ResourceManager
+from database.managers import CategoryManager
+from database.managers import QuizManager
 
 class CreateQuizState(StatesGroup):
     total_pages = State()
@@ -38,10 +38,11 @@ class CreateQuizState(StatesGroup):
 
 @router.callback_query(F.data=="create_quiz", UserRoleFilter([Role.admin, Role.manager]))
 async def create_quiz_callback_handler(callback: CallbackQuery, state: FSMContext):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message: return
+    if not callback.from_user or not callback.from_user.language_code or not callback.message: 
+        return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     
-    categories = await get_categories()
+    categories = await CategoryManager.get_all()
     total_pages = ceil(len(categories) / CREATE_QUIZ_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
     
@@ -52,7 +53,8 @@ async def create_quiz_callback_handler(callback: CallbackQuery, state: FSMContex
     
 @router.callback_query(CreateQuizChooseCategoryCallbackFactory.filter(F.action == "change_page"), UserRoleFilter([Role.admin, Role.manager]))
 async def create_quiz_category_page(callback: CallbackQuery, state: FSMContext, callback_data: CreateQuizChooseCategoryCallbackFactory):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
+    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: 
+        return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     current_page = callback_data.page
     
@@ -73,10 +75,11 @@ async def create_quiz_category_page(callback: CallbackQuery, state: FSMContext, 
     
 @router.callback_query(CreateQuizChooseCategoryCallbackFactory.filter(F.action=="select"), UserRoleFilter([Role.admin, Role.manager]))
 async def create_quiz_category_choose(callback: CallbackQuery, callback_data: CreateQuizChooseCategoryCallbackFactory, state: FSMContext):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
+    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: 
+        return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     category_id = callback_data.category_id
-    resources = await get_resources(category_id=category_id, has_quiz=False)
+    resources = await ResourceManager.get_resources(category_id=category_id, has_quiz=False)
     await state.update_data(resources=resources)
     total_pages = ceil(len(resources)/CREATE_QUIZ_RESOURCES_ON_PAGE)
     
@@ -92,7 +95,8 @@ async def create_quiz_category_choose(callback: CallbackQuery, callback_data: Cr
     
 @router.callback_query(CreateQuizChooseResourceCallbackFactory.filter(F.action == "change_page"), UserRoleFilter([Role.admin, Role.manager]))
 async def create_quiz_page(callback: CallbackQuery, state: FSMContext, callback_data: CreateQuizChooseResourceCallbackFactory):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
+    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: 
+        return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     current_page = callback_data.page
     
@@ -113,10 +117,13 @@ async def create_quiz_page(callback: CallbackQuery, state: FSMContext, callback_
     
 @router.callback_query(CreateQuizChooseResourceCallbackFactory.filter(F.action=="select"), UserRoleFilter([Role.admin, Role.manager]))
 async def create_quiz_choose(callback: CallbackQuery, callback_data: CreateQuizChooseResourceCallbackFactory, state: FSMContext):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
+    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: 
+        return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     resource_id = callback_data.resource_id
     state_data = await state.get_data()
+    if not resource_id:
+        return
     
     quiz_resource = next((resource for resource in state_data["resources"] if resource.id == resource_id))
     quiz = QuizSchema(id=uuid4(), resource_id=resource_id, questions=[], resource=quiz_resource)
@@ -129,7 +136,8 @@ async def create_quiz_choose(callback: CallbackQuery, callback_data: CreateQuizC
     
 @router.message(CreateQuizState.questions, UserRoleFilter([Role.admin, Role.manager]))
 async def create_quiz_add_question(message: Message, state: FSMContext):
-    if not message.from_user or not message.from_user.language_code: return
+    if not message.from_user or not message.from_user.language_code: 
+        return
     
     state_data = await state.get_data()
     
@@ -157,7 +165,8 @@ async def create_quiz_add_question(message: Message, state: FSMContext):
     
 @router.callback_query(F.data=="manage_quizes.stop", UserRoleFilter([Role.admin, Role.manager]))
 async def create_quiz_finish(callback: CallbackQuery, state: FSMContext):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message: return
+    if not callback.from_user or not callback.from_user.language_code or not callback.message: 
+        return
     
     state_data = await state.get_data()
     quiz = state_data["quiz"]
@@ -165,8 +174,8 @@ async def create_quiz_finish(callback: CallbackQuery, state: FSMContext):
     quiz.questions = quiz_questions
     
     try:
-        await create_quiz(quiz)
-    except IntegrityError as e:
+        await QuizManager.create_quiz(quiz)
+    except IntegrityError:
         await callback.message.answer(
             text=t(
                 "manage_quizes.create.fail", callback.from_user.language_code)

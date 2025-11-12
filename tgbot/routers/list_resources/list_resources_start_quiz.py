@@ -4,15 +4,15 @@ from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from keyboards.list_resources.list_resources_start_quiz_confirm_keyboard import list_resources_start_quiz_confirm_keyboard
-from database.operations.get_quiz import get_quiz
 from keyboards.list_resources.list_resources_quiz_question_keyboard import ListResourcesQuizQuestionCallbackFactory, list_resources_quiz_question_keyboard
 from keyboards.list_resources.list_resources_quiz_final_keyboard import list_resources_quiz_final_keyboard
 from schemas.quiz_result_schema import QuizResultSchema
-from database.operations.create_quiz_result import create_quiz_result
 from .router import router
 from config.bot_config import bot
 from keyboards.list_resources.list_resources_resource_item_keyboard import ListResourcesItemCallbackFactory
 from i18n.translate import t
+from database.managers import QuizManager
+from database.managers import QuizResultManager
 
 @router.callback_query(ListResourcesItemCallbackFactory.filter(F.action=="start_quiz"))
 async def list_resource_start_quiz(callback: CallbackQuery, state: FSMContext, callback_data: ListResourcesItemCallbackFactory):
@@ -20,7 +20,8 @@ async def list_resource_start_quiz(callback: CallbackQuery, state: FSMContext, c
         not callback.from_user.language_code or 
         not callback.message or 
         not callback.data or 
-        not callback_data.resource_id): return
+        not callback_data.resource_id): 
+        return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     
     state_data = await state.get_data()
@@ -39,11 +40,12 @@ async def list_resource_start_quiz_confirm(callback: CallbackQuery, state: FSMCo
         not callback.from_user.language_code or 
         not callback.message or 
         not callback.data or 
-        not callback_data.resource_id): return
+        not callback_data.resource_id): 
+        return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     resource_id = callback_data.resource_id
     state_data = await state.get_data()
-    quiz = await get_quiz(resource_id=resource_id)
+    quiz = await QuizManager.get_quiz(resource_id=resource_id)
     page = state_data["current_page"]
     await state.update_data(quiz=quiz)
     await state.update_data(quiz_answers=[])
@@ -75,7 +77,8 @@ async def list_resource_quiz_question_answer(callback: CallbackQuery, state: FSM
     if (not callback.from_user or 
         not callback.from_user.language_code or 
         not callback.message or 
-        not callback.data): return
+        not callback.data): 
+        return
     state_data = await state.get_data()
     quiz = state_data["quiz"]
     current_quiz_answers = state_data["quiz_answers"]
@@ -119,8 +122,7 @@ async def list_resource_quiz_question_answer(callback: CallbackQuery, state: FSM
         resource = state_data["resource"]
         
         quiz_result = QuizResultSchema(id=uuid4(), quiz=quiz, quiz_id=quiz.id, user_id=str(callback.from_user.id), percent=right_answer_percent)
-        print(quiz_result, quiz_result.user_id, 9192393)
-        await create_quiz_result(quiz_result)
+        await QuizResultManager.create_quiz_result(quiz_result)
         
         await callback.message.answer(
             text=t("start_quiz.final", lang=callback.from_user.language_code).format(percent=right_answer_percent),

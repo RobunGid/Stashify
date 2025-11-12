@@ -14,10 +14,10 @@ from keyboards.manage_resources.manage_resources_create_keyboard import manage_r
 from keyboards.manage_resources.manage_resources_back_keyboard import manage_resources_back_keyboard
 from config.bot_config import bot
 from config.var_config import CREATE_RESOURCE_CATEGORIES_ON_PAGE
-from database.operations.get_categories import get_categories
-from database.operations.create_resource import create_resource
 from schemas.resource_schema import ResourceSchema
 from .router import router
+from database.managers import CategoryManager
+from database.managers import ResourceManager
 
 class CreateResourceState(StatesGroup):
     total_pages = State()
@@ -31,10 +31,11 @@ class CreateResourceState(StatesGroup):
 
 @router.callback_query(F.data=="create_resource", UserRoleFilter([Role.admin, Role.manager]))
 async def create_resource_callback_handler(callback: CallbackQuery, state: FSMContext):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message: return
+    if not callback.from_user or not callback.from_user.language_code or not callback.message: 
+        return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     
-    categories = await get_categories()
+    categories = await CategoryManager.get_many()
     total_pages=ceil(len(categories)/CREATE_RESOURCE_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
     
@@ -46,7 +47,8 @@ async def create_resource_callback_handler(callback: CallbackQuery, state: FSMCo
     
 @router.callback_query(CreateResourceCallbackFactory.filter(F.action == "change_page"), UserRoleFilter([Role.admin, Role.manager]))
 async def create_resource_page(callback: CallbackQuery, state: FSMContext, callback_data: CreateResourceCallbackFactory):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
+    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: 
+        return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     current_page = callback_data.page
     
@@ -67,7 +69,8 @@ async def create_resource_page(callback: CallbackQuery, state: FSMContext, callb
     
 @router.callback_query(CreateResourceCallbackFactory.filter(F.action=="select"), UserRoleFilter([Role.admin, Role.manager]))
 async def create_resource_choose(callback: CallbackQuery, callback_data: CreateResourceCallbackFactory, state: FSMContext):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: return
+    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: 
+        return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     
     await callback.message.answer(
@@ -80,7 +83,8 @@ async def create_resource_choose(callback: CallbackQuery, callback_data: CreateR
     
 @router.message(CreateResourceState.name, F.text, UserRoleFilter([Role.admin, Role.manager]))
 async def new_resource_name_choose(message: Message, state: FSMContext):
-    if not message.from_user or not message.from_user.language_code: return
+    if not message.from_user or not message.from_user.language_code: 
+        return
     await state.update_data(name=message.html_text)
     await message.answer(
         text=t("manage_resources.create.wait_description", message.from_user.language_code),
@@ -90,7 +94,8 @@ async def new_resource_name_choose(message: Message, state: FSMContext):
     
 @router.message(CreateResourceState.description, F.text, UserRoleFilter([Role.admin, Role.manager]))
 async def new_resource_description_choose(message: Message, state: FSMContext):
-    if not message.from_user or not message.from_user.language_code: return
+    if not message.from_user or not message.from_user.language_code: 
+        return
     await state.update_data(description=message.html_text)
     await message.answer(
         text=t("manage_resources.create.wait_image", message.from_user.language_code),
@@ -100,7 +105,8 @@ async def new_resource_description_choose(message: Message, state: FSMContext):
     
 @router.message(CreateResourceState.links, F.text, UserRoleFilter([Role.admin, Role.manager]))
 async def new_resource_links_choose(message: Message, state: FSMContext):
-    if not message.from_user or not message.from_user.language_code: return
+    if not message.from_user or not message.from_user.language_code: 
+        return
     await state.update_data(description=message.html_text)
     await message.answer(
         text=t("manage_resources.create.wait_links", message.from_user.language_code),
@@ -110,7 +116,8 @@ async def new_resource_links_choose(message: Message, state: FSMContext):
     
 @router.message(CreateResourceState.image, F.photo[-1].as_("resource_image"))
 async def new_resource_image_choose(message: Message, state: FSMContext, resource_image: PhotoSize):
-    if not message.from_user or not message.from_user.language_code: return
+    if not message.from_user or not message.from_user.language_code: 
+        return
     await state.update_data(image=resource_image.file_id)
     await message.answer(
         text=t("manage_resources.create.wait_tags", message.from_user.language_code),
@@ -120,7 +127,8 @@ async def new_resource_image_choose(message: Message, state: FSMContext, resourc
     
 @router.message(CreateResourceState.tags, F.text)
 async def new_resource_tags_choose(message: Message, state: FSMContext):
-    if not message.from_user or not message.from_user.language_code: return
+    if not message.from_user or not message.from_user.language_code: 
+        return
     state_data = await state.get_data()
     resource_data = ResourceSchema(
         category_id=state_data["category_id"],
@@ -133,8 +141,8 @@ async def new_resource_tags_choose(message: Message, state: FSMContext):
     )
     category_name = next((category.name for category in state_data["categories"]), "Unknown")
     try:
-        await create_resource(resource_data)
-    except IntegrityError as e:
+        await ResourceManager.create(resource_data)
+    except IntegrityError:
         await message.answer(
             text=t(
                 "manage_resources.create.fail", message.from_user.language_code)

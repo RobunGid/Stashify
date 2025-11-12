@@ -12,7 +12,7 @@ from database.models.user import UserModel
 
 class ResourceRatingManager:
     @classmethod
-    async def create_resource_rating(cls, resource_rating_data: ResourceRatingWithoutUserAndResourceSchema):
+    async def create(cls, resource_rating_data: ResourceRatingWithoutUserAndResourceSchema):
         async with AsyncSessionLocal() as session:
             resource_rating = ResourceRatingModel(**resource_rating_data.model_dump())
             session.add(resource_rating)
@@ -20,14 +20,14 @@ class ResourceRatingManager:
             
     @overload
     @classmethod
-    async def delete_resource_rating(cls, user_id: None, resource_id: None, resource_rating_id: UUID4): ...
+    async def delete(cls, user_id: None, resource_id: None, resource_rating_id: UUID4): ...
 
     @overload
     @classmethod
-    async def delete_resource_rating(cls, user_id: str, resource_id: UUID4, resource_rating_id: None = None): ...
+    async def delete(cls, user_id: str, resource_id: UUID4, resource_rating_id: None = None): ...
 
     @classmethod
-    async def delete_resource_rating(cls, user_id = None, resource_id = None, resource_rating_id = None):
+    async def delete(cls, user_id = None, resource_id = None, resource_rating_id = None):
         async with AsyncSessionLocal() as session:
             if resource_rating_id:
                 statement = select(ResourceRatingModel).where(ResourceRatingModel.id == resource_rating_id)
@@ -41,7 +41,7 @@ class ResourceRatingManager:
                 await session.commit()
                 
     @classmethod
-    async def get_resource_rating(cls, resource_id: UUID4, user_id: str) -> ResourceRatingSchema | None:
+    async def get_one(cls, resource_id: UUID4, user_id: str) -> ResourceRatingSchema | None:
         async with AsyncSessionLocal() as session:
             statement = select(ResourceRatingModel)
             statement = statement\

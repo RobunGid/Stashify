@@ -17,9 +17,9 @@ async def start(message: Message):
     user_data = {"id": str(message.from_user.id), "username": str(message.from_user.username), "role": Role.user, "language": message.from_user.language_code}
     
     user = UserSchema(**user_data)
-    await UserManager.create_user(user)
+    await UserManager.create(user)
         
-    existing_user = await UserManager.get_user(str(message.from_user.id))
+    existing_user = await UserManager.get_one(str(message.from_user.id))
     role = existing_user.role
     
     reply_keyboard = main_menu_keyboard(role, message.from_user.language_code)
