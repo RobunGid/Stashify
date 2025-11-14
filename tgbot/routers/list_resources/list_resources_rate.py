@@ -24,21 +24,21 @@ async def list_resource_resource_rate(callback: CallbackQuery, state: FSMContext
         return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     resource_id = callback_data.resource_id
-    resource = await ResourceManager.get_resource(resource_id=resource_id)
+    resource = await ResourceManager.get_one(resource_id=resource_id)
     if not resource:
         return
     state_data = await state.get_data()
     resources = state_data["resources"]
     formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
-    favorites = await FavoriteManager.get_user_favorites(user_id=user_id)
+    favorites = await FavoriteManager.get_many(user_id=user_id)
     is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
     rating = callback_data.rating
-    existing_resource_rating = await ResourceRatingManager.get_resource_rating(user_id=user_id, resource_id=resource.id)
+    existing_resource_rating = await ResourceRatingManager.get_one(user_id=user_id, resource_id=resource.id)
     if existing_resource_rating:
-        await ResourceRatingManager.delete_resource_rating(user_id=user_id, resource_id=resource.id)
+        await ResourceRatingManager.delete(user_id=user_id, resource_id=resource.id)
     resource_rating = ResourceRatingWithoutUserAndResourceSchema(id=uuid4(), resource_id=resource_id, rating=rating, user_id=user_id)
-    await ResourceRatingManager.create_resource_rating(resource_rating)
+    await ResourceRatingManager.create(resource_rating)
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
         photo=resource.image,

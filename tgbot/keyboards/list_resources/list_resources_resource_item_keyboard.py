@@ -23,7 +23,8 @@ def list_resources_resource_item_keyboard(
         quiz_percent: int = 0
     ):
     builder = InlineKeyboardBuilder()
-    resource_index = resources.index(resource)
+    resource_id_list = [resource.id for resource in resources]
+    resource_index = resource_id_list.index(resource.id)
     resource_quantity = len(resources)
     first_line_buttons_quantity = 1
     if resource_index+1 != resource_quantity and resource_index != 0:
