@@ -28,7 +28,7 @@ async def delete_category_callback_handler(callback: CallbackQuery, state: FSMCo
         return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     
-    categories = await CategoryManager.get_categories()
+    categories = await CategoryManager.get_many()
     total_pages = ceil(len(categories)/DELETE_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
     
@@ -70,7 +70,7 @@ async def delete_category_choose(callback: CallbackQuery, callback_data: DeleteC
     try:
         if not callback_data.category_id:
             raise ValueError
-        await CategoryManager.delete_category(callback_data.category_id)
+        await CategoryManager.delete(callback_data.category_id)
     except (IntegrityError, ValueError):
         await callback.message.answer(
             text=t("manage_categories.delete.fail", callback.from_user.language_code).format(category_name=category.name if category else "unknown"),

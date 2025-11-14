@@ -1,6 +1,5 @@
 from typing import Optional, List
 
-from pydantic import UUID4
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -10,23 +9,11 @@ from database.models.category import CategoryModel
 from database.models.resource import ResourceModel
 from database.models.quiz import QuizModel
 from database.models.favorite import FavoriteModel
+from .BaseManager import BaseManager
 
-class CategoryManager:
-    @classmethod
-    async def create(cls, category_data: CategorySchema):
-        async with AsyncSessionLocal() as session:
-            category = CategoryModel(**category_data.model_dump())
-            session.add(category)
-            await session.commit()
-    @classmethod
-    async def edit(cls, id: UUID4, new_name: str) -> None:
-        async with AsyncSessionLocal() as session:
-            statement = select(CategoryModel).where(CategoryModel.id==id)
-            category = (await session.execute(statement)).scalars().first()
-            if not category:
-                raise ValueError("No such category")
-            category.name = new_name # type: ignore
-            await session.commit()
+class CategoryManager(BaseManager):
+    model = CategoryModel
+    schema = CategorySchema
     @classmethod
     async def get_many(cls, has_quizes: bool = False, has_resources: bool = False, favorites_user_id: Optional[str] = None) -> List[CategorySchema]:
         async with AsyncSessionLocal() as session:
@@ -71,12 +58,3 @@ class CategoryManager:
 
             categories = (await session.execute(statement)).scalars().all()
             return [CategorySchema.model_validate(category, from_attributes=True) for category in categories]
-    @classmethod
-    async def delete(cls, id: UUID4) -> None:
-        async with AsyncSessionLocal() as session:
-            statement = select(CategoryModel).where(CategoryModel.id==id)
-            category = (await session.execute(statement)).scalars().first()
-            if not category:
-                raise ValueError("No such category")
-            await session.delete(category)
-            await session.commit()

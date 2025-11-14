@@ -6,6 +6,7 @@ from .QuizResultManager import QuizResultManager
 from .ResourceManager import ResourceManager
 from .ResourceRatingManager import ResourceRatingManager
 from .UserManager import UserManager
+from .BaseManager import BaseManager
 __all__ = [
 	"CategoryManager",
 	"FavoriteManager",
@@ -14,5 +15,6 @@ __all__ = [
 	"QuizResultManager",
 	"ResourceManager",
 	"ResourceRatingManager",
-	"UserManager"
+	"UserManager",
+	"BaseManager"
 ]

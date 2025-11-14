@@ -12,6 +12,7 @@ from config.bot_config import bot
 from keyboards.manage_categories.manage_categories_back_keyboard import manage_categories_back_keyboard
 from keyboards.manage_categories.manage_categories_edit_keyboard import EditCategoryIdCallbackFactory, manage_categories_edit_keyboard
 from config.var_config import EDIT_CATEGORIES_ON_PAGE
+from schemas.category_schema import UpdateCategorySchema
 from .router import router
 from database.managers import CategoryManager
 
@@ -27,7 +28,7 @@ async def edit_category_callback_handler(callback: CallbackQuery, state: FSMCont
         return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     
-    categories = await CategoryManager.get_categories()
+    categories = await CategoryManager.get_many()
     total_pages=ceil(len(categories)/EDIT_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
     
@@ -77,11 +78,12 @@ async def edit_category_choose(callback: CallbackQuery, callback_data: EditCateg
 async def new_category_name_choose(message: Message, state: FSMContext):
     if not message.from_user or not message.from_user.language_code: 
         return
-    state_date = await state.get_data()
+    state_data = await state.get_data()
+    category_id = state_data["category_id"]
     new_category_name = message.html_text
-    category_id = state_date["category_id"]
+    new_category = UpdateCategorySchema(id=category_id, name=new_category_name)
     try:
-        await CategoryManager.edit_category(category_id, new_category_name)
+        await CategoryManager.update(category_id, new_category)
     except ValueError:
         await message.answer(
             text=t("manage_categories.edit.fail", message.from_user.language_code).format(category_name=new_category_name),
