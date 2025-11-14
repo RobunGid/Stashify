@@ -27,7 +27,7 @@ async def list_favorites_callback_handler(callback: CallbackQuery, state: FSMCon
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     
     user_id = str(callback.from_user.id)
-    categories = await CategoryManager.get_many(has_resources=True, favorites_user_id=user_id)
+    categories = await CategoryManager.get_many(has_resources=True, favorites_user_id=user_id, has_quizes=True)
     total_categories_pages = ceil(len(categories) / LIST_RESOURCES_CATEGORIES_ON_PAGE)
     await state.update_data(total_categories_pages=total_categories_pages, categories=categories)
     
@@ -235,7 +235,6 @@ async def list_resource_resource_rate(callback: CallbackQuery, state: FSMContext
     is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
     rating = callback_data.rating
     existing_resource_rating = await ResourceRatingManager.get_one(user_id=user_id, resource_id=resource.id)
-    print(999991, existing_resource_rating)
     if existing_resource_rating:
         await ResourceRatingManager.delete(user_id=user_id, resource_id=resource.id)
     resource_rating = ResourceRatingWithoutUserAndResourceSchema(id=uuid4(), resource_id=resource_id, rating=rating, user_id=user_id)

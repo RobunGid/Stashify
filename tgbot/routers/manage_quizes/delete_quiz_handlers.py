@@ -36,7 +36,7 @@ async def delete_quiz_callback_handler(callback: CallbackQuery, state: FSMContex
         return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     
-    categories = await CategoryManager.get_many()
+    categories = await CategoryManager.get_many(has_resources=True, has_quizes=True)
     total_pages = ceil(len(categories) / DELETE_QUIZ_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
     

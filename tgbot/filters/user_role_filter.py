@@ -13,6 +13,6 @@ class UserRoleFilter(BaseFilter):
     async def __call__(self, message: Message) -> bool:
         if not message.from_user or not message.from_user.id: 
             return False
-        user = await UserManager.get_user(str(message.from_user.id))
+        user = await UserManager.get_one(str(message.from_user.id))
         user_role = user.role
         return user_role in self.roles

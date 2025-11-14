@@ -16,8 +16,8 @@ class QuizResultWithoutUserAndQuizSchema(BaseModel):
     percent: int
     
 class QuizResultSchema(QuizResultWithoutUserAndQuizSchema):
-    user: Optional["UserSchema"] = Field(default_factory=lambda: None)
-    quiz: Optional["QuizSchema"] = Field(default_factory=lambda: None)
+    user: Optional["PlainUserSchema"] = Field(default_factory=lambda: None)
+    quiz: Optional["PlainQuizSchema"] = Field(default_factory=lambda: None)
     
-from .user_schema import UserSchema
-from .quiz_schema import QuizSchema
+from .user_schema import PlainUserSchema
+from .quiz_schema import PlainQuizSchema

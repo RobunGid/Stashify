@@ -22,6 +22,8 @@ def list_resources_quiz_question_keyboard(
     ):
     builder = InlineKeyboardBuilder()
     for index, option in enumerate(question.options):
+        if option.startswith("!"):
+            option = option[1:]
         builder.button(text=option, callback_data=ListResourcesQuizQuestionCallbackFactory(action="answer", option_number=index, question_number=question_number))
         builder.adjust(1)
         

@@ -19,6 +19,6 @@ class QuizQuestionSchema(QuizQuestionBaseSchema):
     quiz: "QuizSchema"
 
 class QuizQuestionWithoutResourceSchema(QuizQuestionBaseSchema):
-    quiz: "QuizSchemaWithoutResourceAndQuestions"
+    quiz: "PlainQuizSchema"
 
-from .quiz_schema import QuizSchema, QuizSchemaWithoutResourceAndQuestions
+from .quiz_schema import QuizSchema, PlainQuizSchema

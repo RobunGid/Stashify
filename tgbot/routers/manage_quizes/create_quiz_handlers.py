@@ -42,7 +42,7 @@ async def create_quiz_callback_handler(callback: CallbackQuery, state: FSMContex
         return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     
-    categories = await CategoryManager.get_all()
+    categories = await CategoryManager.get_many()
     total_pages = ceil(len(categories) / CREATE_QUIZ_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
     
@@ -79,7 +79,7 @@ async def create_quiz_category_choose(callback: CallbackQuery, callback_data: Cr
         return
     await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     category_id = callback_data.category_id
-    resources = await ResourceManager.get_resources(category_id=category_id, has_quiz=False)
+    resources = await ResourceManager.get_many(category_id=category_id, has_quiz=False)
     await state.update_data(resources=resources)
     total_pages = ceil(len(resources)/CREATE_QUIZ_RESOURCES_ON_PAGE)
     
@@ -174,7 +174,7 @@ async def create_quiz_finish(callback: CallbackQuery, state: FSMContext):
     quiz.questions = quiz_questions
     
     try:
-        await QuizManager.create_quiz(quiz)
+        await QuizManager.create(quiz)
     except IntegrityError:
         await callback.message.answer(
             text=t(

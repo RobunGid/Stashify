@@ -24,17 +24,27 @@ class QuizResultManager:
             await session.commit()
             
     @classmethod
-    async def get_one(cls, resource_id: UUID4):
+    async def get_one(cls, resource_id: UUID4, user_id: str):
         async with AsyncSessionLocal() as session:
             statement = select(QuizResultModel)\
                 .options(
                     selectinload(QuizResultModel.quiz)
+                )\
+                .options(
+                    selectinload(QuizResultModel.user)
+                )\
+                .options(
+                    selectinload(QuizResultModel.quiz).\
+                    selectinload(QuizModel.resource)
                 )
 
-            statement = statement.filter(QuizResultModel.quiz.resource_id == resource_id)
-            quiz = (await session.execute(statement)).scalars().first()
-                
-            return QuizResultSchema.model_validate(quiz, from_attributes=True)
+            statement = statement.filter(QuizResultModel.user_id == user_id).\
+                filter(QuizModel.resource_id == resource_id)
+            quiz_result = (await session.execute(statement)).scalars().first()
+            if quiz_result:
+                return QuizResultSchema.model_validate(quiz_result, from_attributes=True)
+            else:
+                return None
         
     @classmethod
     async def delete(cls, resource_id: UUID4, user_id: str) -> None:
@@ -42,8 +52,8 @@ class QuizResultManager:
             statement = select(QuizResultModel)\
                 .filter(QuizResultModel.user_id==user_id)\
                 .filter(QuizModel.resource_id==resource_id)
-            quiz = (await session.execute(statement)).scalars().first()
-            if not quiz:
+            quiz_result = (await session.execute(statement)).scalars().first()
+            if not quiz_result:
                 raise ValueError("No such quiz result")
-            await session.delete(quiz)
+            await session.delete(quiz_result)
             await session.commit()

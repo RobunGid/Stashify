@@ -16,3 +16,4 @@ class QuizModel(Base):
     
     questions = relationship("QuizQuestionModel", back_populates="quiz", cascade="all, delete-orphan", lazy="joined")
     ratings = relationship("QuizRatingModel", back_populates="quiz")
+    results = relationship("QuizResultModel", back_populates="quiz", lazy="dynamic")

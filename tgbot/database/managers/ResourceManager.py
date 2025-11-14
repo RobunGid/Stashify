@@ -67,9 +67,9 @@ class ResourceManager:
             
             if has_quiz is not None:
                 if has_quiz:
-                    statement = statement.filter(ResourceModel.quiz.is_not(None))
+                    statement = statement.filter(ResourceModel.quiz != None)
                 else:
-                    statement = statement.filter(ResourceModel.quiz.is_(None))
+                    statement = statement.filter(ResourceModel.quiz == None)
                 
             if category_id: 
                 statement = statement.where(ResourceModel.category_id==category_id)

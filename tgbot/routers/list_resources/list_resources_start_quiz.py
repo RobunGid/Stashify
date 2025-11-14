@@ -120,7 +120,7 @@ async def list_resource_quiz_question_answer(callback: CallbackQuery, state: FSM
         
         state_data = await state.get_data()
         resource = state_data["resource"]
-        existing_quiz_result = QuizResultManager.get_one(resource.id)
+        existing_quiz_result = await QuizResultManager.get_one(resource.id, str(callback.from_user.id))
         if existing_quiz_result:
             await QuizResultManager.delete(resource.id, str(callback.from_user.id))
         quiz_result = QuizResultSchema(id=uuid4(), quiz=quiz, quiz_id=quiz.id, user_id=str(callback.from_user.id), percent=right_answer_percent)
