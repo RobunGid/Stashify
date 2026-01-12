@@ -3,10 +3,12 @@ from uuid import uuid4
 from typing import List
 
 from aiogram import F
-from aiogram.types import CallbackQuery, Message, PhotoSize
+from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.exc import IntegrityError
+from aiogram.utils.media_group import MediaGroupBuilder
+from aiogram_media_group import media_group_handler
 
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
@@ -16,9 +18,11 @@ from keyboards.manage_resources.manage_resources_back_keyboard import manage_res
 from config.bot_config import bot
 from config.var_config import CREATE_RESOURCE_CATEGORIES_ON_PAGE
 from schemas.resource_schema import ResourceSchema
-from .router import router
+from schemas.resource_image_schema import ResourceImageWithoutResourceSchema
+from routers.manage_resources.router import router
 from database.managers import CategoryManager
 from database.managers import ResourceManager
+from database.managers import ResourceImageManager
 
 class CreateResourceState(StatesGroup):
     total_pages = State()
@@ -99,7 +103,7 @@ async def new_resource_description_choose(message: Message, state: FSMContext):
         return
     await state.update_data(description=message.html_text)
     await message.answer(
-        text=t("manage_resources.create.wait_image", message.from_user.language_code),
+        text=t("manage_resources.create.wait_links", message.from_user.language_code),
         reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
     )
     await state.set_state(CreateResourceState.links)
@@ -108,22 +112,22 @@ async def new_resource_description_choose(message: Message, state: FSMContext):
 async def new_resource_links_choose(message: Message, state: FSMContext):
     if not message.from_user or not message.from_user.language_code: 
         return
-    await state.update_data(description=message.html_text)
+    await state.update_data(links=message.html_text)
     await message.answer(
-        text=t("manage_resources.create.wait_links", message.from_user.language_code),
+        text=t("manage_resources.create.wait_images", message.from_user.language_code),
         reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
     )
     await state.set_state(CreateResourceState.images)
     
-@router.message(CreateResourceState.images, F.photo.as_("resource_images"))
-async def new_resource_image_choose(message: Message, state: FSMContext, resource_images: List[PhotoSize]):
-    if not message.from_user or not message.from_user.language_code: 
+@router.message(F.media_group_id)
+@media_group_handler
+async def new_resource_image_choose(messages: List[Message], state: FSMContext):
+    if not messages[0].from_user or not messages[0].from_user.language_code: 
         return
-    print(message.photo)
-    await state.update_data(images=[resource_image.file_id for resource_image in resource_images])
-    await message.answer(
-        text=t("manage_resources.create.wait_tags", message.from_user.language_code),
-        reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
+    await state.update_data(images=[message.photo[-1].file_id for message in messages])
+    await messages[0].answer(
+        text=t("manage_resources.create.wait_tags", messages[0].from_user.language_code),
+        reply_markup=manage_resources_back_keyboard(messages[0].from_user.language_code)
     )
     await state.set_state(CreateResourceState.tags)
     
@@ -138,12 +142,14 @@ async def new_resource_tags_choose(message: Message, state: FSMContext):
         name=state_data["name"], 
         description=state_data["description"], 
         links=state_data["links"], 
-        images=state_data["images"],
         tags=message.html_text, 
     )
     category_name = next((category.name for category in state_data["categories"]), "Unknown")
     try:
         await ResourceManager.create(resource_data)
+        for resource_image in state_data["images"]:
+            image = ResourceImageWithoutResourceSchema(id=uuid4(), resource_id=resource_data.id, image=resource_image)
+            await ResourceImageManager.create(image)
     except IntegrityError:
         await message.answer(
             text=t(
@@ -157,14 +163,30 @@ async def new_resource_tags_choose(message: Message, state: FSMContext):
             reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
         )
     else:
-        await message.answer_photo(
-            photo=resource_data.image,
-            caption=t("manage_resources.create.success", message.from_user.language_code)
-                            .format(
-                                resource_name=resource_data.name,
-                                resource_description=resource_data.description,
-                                resource_tags=resource_data.tags,
-                                category_name=category_name,
-                                ),
-            reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
-        )
+        if len(state_data["images"]) > 1:
+            media_group = MediaGroupBuilder(caption=t("manage_resources.create.success", message.from_user.language_code)
+                                .format(
+                                    resource_name=resource_data.name,
+                                    resource_description=resource_data.description,
+                                    resource_tags=resource_data.tags,
+                                    category_name=category_name,
+                                    )
+                            )
+            for image in state_data["images"]:
+                media_group.add_photo(type="photo", media=image)
+            await message.answer_media_group(
+                media=media_group.build(),
+                reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
+            )
+        else:
+            await message.answer_photo(
+                photo=state_data["images"][0],
+                caption=t("manage_resources.create.success", message.from_user.language_code)
+                                .format(
+                                    resource_name=resource_data.name,
+                                    resource_description=resource_data.description,
+                                    resource_tags=resource_data.tags,
+                                    category_name=category_name,
+                                    ),
+                reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
+            )

@@ -6,6 +6,7 @@ class ResourceImageWithoutResourceSchema(BaseModel):
     id: UUID4
     
     resource_id: UUID4
+    image: str
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
