@@ -1,9 +1,9 @@
-from datetime import datetime
 from uuid import uuid4
 
 from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.sql import func
 
 from database.orm import Base
 
@@ -18,7 +18,8 @@ class ResourceRatingModel(Base):
     user_id = Column(String, ForeignKey('user.id'), nullable=False)
     user = relationship("UserModel", back_populates="resource_ratings")
     
-    created_at = Column(DateTime, default=datetime.now)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     rating = Column(Integer)
     
     __table_args__ = (
