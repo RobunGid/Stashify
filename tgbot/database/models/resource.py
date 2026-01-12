@@ -17,13 +17,13 @@ class ResourceModel(Base):
     links = Column(String, nullable=False)
     tags = Column(String, nullable=False)
     verified = Column(Boolean(), default=False, nullable=False)
-    image = Column(String, nullable=False)
     
     category_id = Column(UUID(as_uuid=True), ForeignKey('category.id'), nullable=False)
     category = relationship("CategoryModel", back_populates="resources", lazy="joined")
     
     quiz = relationship("QuizModel", back_populates="resource", uselist=False, lazy="joined")
     ratings = relationship("ResourceRatingModel", back_populates="resource", cascade="all, delete-orphan", lazy="joined")
+    images = relationship("ResourceImageModel", back_populates="resource", cascade="all, delete-orphan", lazy="joined")
     
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     
