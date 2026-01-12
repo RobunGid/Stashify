@@ -1,5 +1,6 @@
 from math import ceil
 from uuid import uuid4
+from typing import List
 
 from aiogram import F
 from aiogram.types import CallbackQuery, Message, PhotoSize
@@ -26,7 +27,7 @@ class CreateResourceState(StatesGroup):
     name = State()
     description = State()
     links = State()
-    image = State()
+    images = State()
     tags = State()
 
 @router.callback_query(F.data=="create_resource", UserRoleFilter([Role.admin, Role.manager]))
@@ -112,13 +113,14 @@ async def new_resource_links_choose(message: Message, state: FSMContext):
         text=t("manage_resources.create.wait_links", message.from_user.language_code),
         reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
     )
-    await state.set_state(CreateResourceState.image)
+    await state.set_state(CreateResourceState.images)
     
-@router.message(CreateResourceState.image, F.photo[-1].as_("resource_image"))
-async def new_resource_image_choose(message: Message, state: FSMContext, resource_image: PhotoSize):
+@router.message(CreateResourceState.images, F.photo.as_("resource_images"))
+async def new_resource_image_choose(message: Message, state: FSMContext, resource_images: List[PhotoSize]):
     if not message.from_user or not message.from_user.language_code: 
         return
-    await state.update_data(image=resource_image.file_id)
+    print(message.photo)
+    await state.update_data(images=[resource_image.file_id for resource_image in resource_images])
     await message.answer(
         text=t("manage_resources.create.wait_tags", message.from_user.language_code),
         reply_markup=manage_resources_back_keyboard(message.from_user.language_code)
@@ -136,7 +138,7 @@ async def new_resource_tags_choose(message: Message, state: FSMContext):
         name=state_data["name"], 
         description=state_data["description"], 
         links=state_data["links"], 
-        image=state_data["image"],
+        images=state_data["images"],
         tags=message.html_text, 
     )
     category_name = next((category.name for category in state_data["categories"]), "Unknown")

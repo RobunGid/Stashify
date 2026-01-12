@@ -17,7 +17,6 @@ class ResourceSchemaWithoutCategory(BaseModel):
     links: str
     tags: str
     verified: bool = Field(default_factory=lambda: False)
-    image: str
     
     category_id: UUID4
     quiz: Optional["QuizSchemaWithoutResource"] = Field(default_factory=lambda: None)
@@ -28,10 +27,12 @@ class ResourceSchemaWithoutCategory(BaseModel):
 class ResourceSchema(ResourceSchemaWithoutCategory):
     category: "CategorySchemaWithoutResources" = Field(default_factory=default_category)
     ratings: List["ResourceRatingWithoutUserAndResourceSchema"] = Field(default_factory=list)
+    images: List["ResourceImageWithoutResourceSchema"] = Field(default_factory=list)
     
 class UpdateResourceSchemaWithoutCategory(ResourceSchemaWithoutCategory, metaclass=AllOptional):
     ...
     
-from .category_schema import CategorySchemaWithoutResources
-from .quiz_schema import QuizSchemaWithoutResource
-from .resource_rating_schema import ResourceRatingWithoutUserAndResourceSchema
+from schemas.category_schema import CategorySchemaWithoutResources
+from schemas.quiz_schema import QuizSchemaWithoutResource
+from schemas.resource_rating_schema import ResourceRatingWithoutUserAndResourceSchema
+from schemas.resource_image_schema import ResourceImageWithoutResourceSchema

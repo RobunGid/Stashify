@@ -3,6 +3,7 @@ from math import ceil
 from aiogram import F
 from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
+from aiogram.utils.media_group import MediaGroupBuilder
 
 from keyboards.list_resources.list_resources_resource_list_keyboard import ListResourcesChooseResourceCallbackFactory, list_resources_resource_list_keyboard
 from .router import router
@@ -16,6 +17,7 @@ from database.managers import CategoryManager
 from database.managers import ResourceManager
 from database.managers import ResourceRatingManager
 from database.managers import FavoriteManager
+from database.managers import ResourceImageManager
 
 @router.callback_query(F.data=="resources")
 async def list_resources_callback_handler(callback: CallbackQuery, state: FSMContext):
@@ -108,21 +110,38 @@ async def list_resource_resource_select(callback: CallbackQuery, state: FSMConte
     formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
+    images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
     is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
     resource_rating = await ResourceRatingManager.get_one(user_id=user_id, resource_id=resource.id)
     await state.update_data(resources=resources, resource=resource)
-    await callback.message.answer_photo(
-        photo=resource.image,
-        caption=formatted_text,
-        reply_markup=list_resources_resource_item_keyboard(
-            resources=resources,
-            user_lang=callback.from_user.language_code, 
-            resource=resource,
-            is_favorite=is_favorite,
-            rating=resource_rating.rating if resource_rating else 0,
-            has_quiz=bool(resource.quiz),
-            quiz_percent=0
-    ))
+    if images:
+        media_group = MediaGroupBuilder(caption=formatted_text)
+        for photo in images:
+            media_group.add_photo(type="photo", media=photo)
+        await callback.message.answer_media_group(
+            media=media_group.build(),
+            reply_markup=list_resources_resource_item_keyboard(
+                resources=resources,
+                user_lang=callback.from_user.language_code, 
+                resource=resource,
+                is_favorite=is_favorite,
+                rating=resource_rating.rating if resource_rating else 0,
+                has_quiz=bool(resource.quiz),
+                quiz_percent=0
+        ))
+    else:
+        await callback.message.answer(
+            text=formatted_text,
+            reply_markup=list_resources_resource_item_keyboard(
+                resources=resources,
+                user_lang=callback.from_user.language_code, 
+                resource=resource,
+                is_favorite=is_favorite,
+                rating=resource_rating.rating if resource_rating else 0,
+                has_quiz=bool(resource.quiz),
+                quiz_percent=0
+            )
+        )
     
 @router.callback_query(ListResourcesItemCallbackFactory.filter(F.action=="change_page"))
 async def list_resource_resource_change_page(callback: CallbackQuery, state: FSMContext, callback_data: ListResourcesChooseResourceCallbackFactory):
@@ -137,19 +156,35 @@ async def list_resource_resource_change_page(callback: CallbackQuery, state: FSM
     formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
+    images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
     is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
     resource_rating = await ResourceRatingManager.get_one(user_id=user_id, resource_id=resource.id)
     await state.update_data(resources=resources, resource=resource)
-    await callback.message.answer_photo(
-        photo=resource.image,
-        caption=formatted_text,
-        reply_markup=list_resources_resource_item_keyboard(
-            resources=resources,
-            user_lang=callback.from_user.language_code, 
-            resource=resource,
-            is_favorite=is_favorite,
-            rating=resource_rating.rating if resource_rating else 0,
-			has_quiz=bool(resource.quiz),
-            quiz_percent=0
-    ))
-    
+    if images:
+        media_group = MediaGroupBuilder(caption=formatted_text)
+        for photo in images:
+            media_group.add_photo(type="photo", media=photo)
+        await callback.message.answer_media_group(
+            media=media_group.build(),
+            reply_markup=list_resources_resource_item_keyboard(
+                resources=resources,
+                user_lang=callback.from_user.language_code, 
+                resource=resource,
+                is_favorite=is_favorite,
+                rating=resource_rating.rating if resource_rating else 0,
+                has_quiz=bool(resource.quiz),
+                quiz_percent=0
+        ))
+    else:
+        await callback.message.answer(
+            text=formatted_text,
+            reply_markup=list_resources_resource_item_keyboard(
+                resources=resources,
+                user_lang=callback.from_user.language_code, 
+                resource=resource,
+                is_favorite=is_favorite,
+                rating=resource_rating.rating if resource_rating else 0,
+                has_quiz=bool(resource.quiz),
+                quiz_percent=0
+            )
+        )

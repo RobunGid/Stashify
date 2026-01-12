@@ -7,6 +7,7 @@ from .ResourceManager import ResourceManager
 from .ResourceRatingManager import ResourceRatingManager
 from .UserManager import UserManager
 from .BaseManager import BaseManager
+from .ResourceImageManager import ResourceImageManager
 __all__ = [
 	"CategoryManager",
 	"FavoriteManager",
@@ -15,6 +16,7 @@ __all__ = [
 	"QuizResultManager",
 	"ResourceManager",
 	"ResourceRatingManager",
+	"ResourceImageManager",
 	"UserManager",
 	"BaseManager"
 ]

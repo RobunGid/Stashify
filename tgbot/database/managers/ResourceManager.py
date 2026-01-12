@@ -19,6 +19,7 @@ class ResourceManager:
             resource = ResourceModel(**resource_data.model_dump(exclude={"category", "quiz",}))
             session.add(resource)
             await session.commit()
+            
     @classmethod
     async def delete(cls, id: UUID4):
         async with AsyncSessionLocal() as session:
@@ -86,6 +87,6 @@ class ResourceManager:
                     join(FavoriteModel, FavoriteModel.resource_id == ResourceModel.id).\
                     where(FavoriteModel.user_id == favorites_user_id)
             
-            resources = (await session.execute(statement)).scalars().all()
+            resources = (await session.execute(statement)).unique().scalars().all()
             
             return [ResourceSchema.model_validate(resource, from_attributes=True) for resource in resources]

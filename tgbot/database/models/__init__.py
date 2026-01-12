@@ -16,6 +16,7 @@ __all__ = [
     "quiz_rating",
     "resource",
     "resource_rating",
+    "resource_image",
     "user",
     "favorite"
 ]
