@@ -1,252 +1,279 @@
-from math import ceil
-from uuid import uuid4
-
 from aiogram import F
 from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
 
-from constants import LIST_RESOURCES_CATEGORIES_ON_PAGE
-from keyboards.list_favorites.list_favorites_resource_list_keyboard import ListFavoritesChooseResourceCallbackFactory, list_favorites_resource_list_keyboard
-from schemas.resource_rating_schema import ResourceRatingWithoutUserAndResourceSchema
-from .router import router
-from keyboards.list_favorites.list_favorites_category_list_keyboard import ListFavoritesChooseCategoryCallbackFactory, list_favorites_category_list_keyboard
-from keyboards.list_favorites.list_favorites_resource_item_keyboard import ListFavoritesItemCallbackFactory, list_favorites_resource_item_keyboard
-from i18n.translate import t
-from utils.format_resource_text import format_resource_text
-from schemas.favorite_schema import FavoriteSchema
-from database.managers import FavoriteManager
+from constants import LIST_RESOURCES_CATEGORIES_ON_PAGE, LIST_RESOURCES_RESOURCES_ON_PAGE
 from database.managers import ResourceManager
-from database.managers import ResourceRatingManager
-from database.managers import CategoryManager
-from settings.config import bot
+from handlers.base_resource_router import BaseResourceRouter
+from keyboards.list_favorites.category_list_keyboard import (
+    FavoritesCategoryListKeyboard,
+    ListFavoritesChooseCategoryCallbackFactory,
+)
+from keyboards.list_favorites.resource_list_keyboard import (
+    FavoritesResourceListKeyboard,
+    ListFavoritesChooseResourceCallbackFactory,
+)
+from keyboards.list_favorites.resource_item_keyboard import (
+    FavoritesResourceItemKeyboard,
+    ListFavoritesItemCallbackFactory,
+)
+from i18n.translate import t
+from routers.list_favorites.router import router
 
-@router.callback_query(F.data=="list_favorites")
-async def list_favorites_callback_handler(callback: CallbackQuery, state: FSMContext):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message: 
-        return
-    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
-    
-    user_id = str(callback.from_user.id)
-    categories = await CategoryManager.get_many(has_resources=True, favorites_user_id=user_id, has_quizes=True)
-    total_categories_pages = ceil(len(categories) / LIST_RESOURCES_CATEGORIES_ON_PAGE)
-    await state.update_data(total_categories_pages=total_categories_pages, categories=categories)
-    
-    if total_categories_pages != 0:
+
+class ListFavoritesRouter(BaseResourceRouter):
+    def __init__(self):
+        super().__init__()
+        self.router = router
+        self._register_handlers()
+
+    def _build_category_list_keyboard(self, categories, user_lang, total_pages, page):
+        return FavoritesCategoryListKeyboard(
+            categories=categories, page=page, total_pages=total_pages, user_lang=user_lang
+        ).build()
+
+    def _build_resource_list_keyboard(self, resources, user_lang, total_pages, page):
+        return FavoritesResourceListKeyboard(
+            resources=resources, page=page, total_pages=total_pages, user_lang=user_lang
+        ).build()
+
+    def _build_resource_item_keyboard(self, resources, resource, user_lang, is_favorite, rating):
+        return FavoritesResourceItemKeyboard(
+            resources=resources, resource=resource, user_lang=user_lang,
+            is_favorite=is_favorite, rating=rating
+        ).build()
+
+    def _register_handlers(self):
+        self.router.callback_query(F.data == "list_favorites")(self.on_list_favorites)
+        self.router.callback_query(
+            ListFavoritesChooseCategoryCallbackFactory.filter(F.action == "change_page")
+        )(self.on_category_page)
+        self.router.callback_query(
+            ListFavoritesChooseCategoryCallbackFactory.filter(F.action == "select")
+        )(self.on_category_select)
+        self.router.callback_query(
+            ListFavoritesChooseResourceCallbackFactory.filter(F.action == "change_page")
+        )(self.on_resource_page)
+        self.router.callback_query(
+            ListFavoritesChooseResourceCallbackFactory.filter(F.action == "select")
+        )(self.on_resource_select)
+        self.router.callback_query(
+            ListFavoritesItemCallbackFactory.filter(F.action == "change_page")
+        )(self.on_resource_item_page)
+        self.router.callback_query(
+            ListFavoritesItemCallbackFactory.filter(F.action == "add_favorite")
+        )(self.on_add_favorite)
+        self.router.callback_query(
+            ListFavoritesItemCallbackFactory.filter(F.action == "remove_favorite")
+        )(self.on_remove_favorite)
+        self.router.callback_query(
+            ListFavoritesItemCallbackFactory.filter(F.action == "rate")
+        )(self.on_rate)
+
+
+    async def on_list_favorites(self, callback: CallbackQuery, state: FSMContext):
+        if not callback.from_user or not callback.from_user.language_code or not callback.message:
+            return
+        await self._delete_message(callback.message)
+        await self._show_category_list(
+            message=callback.message,
+            state=state,
+            user_id=str(callback.from_user.id),
+            user_lang=callback.from_user.language_code,
+            empty_text_key="list_favorites.no_results",
+            choose_text_key="list_favorites.choose_category",
+            translate_fn=t,
+        )
+
+    async def on_category_page(
+        self,
+        callback: CallbackQuery,
+        state: FSMContext,
+        callback_data: ListFavoritesChooseCategoryCallbackFactory,
+    ):
+        if not callback.from_user or not callback.from_user.language_code or not callback.message:
+            return
+        await self._delete_message(callback.message)
+        page = callback_data.page
+        data = await state.get_data()
+        categories = data["categories"][
+            (page - 1) * LIST_RESOURCES_CATEGORIES_ON_PAGE : page * LIST_RESOURCES_CATEGORIES_ON_PAGE
+        ]
         await callback.message.answer(
-            text=t("list_favorites.choose_category", callback.from_user.language_code), 
-            reply_markup=list_favorites_category_list_keyboard(categories=categories[0:5], user_lang=callback.from_user.language_code, total_pages=total_categories_pages, page=1)
+            text=t("list_favorites.choose_category", callback.from_user.language_code),
+            reply_markup=self._build_category_list_keyboard(
+                categories=categories,
+                user_lang=callback.from_user.language_code,
+                total_pages=data["total_categories_pages"],
+                page=page,
+            ),
         )
-    if total_categories_pages == 0:
-          await callback.message.answer(
-            text=t("list_favorites.no_results", callback.from_user.language_code), 
-            reply_markup=list_favorites_category_list_keyboard(categories=categories[0:5], user_lang=callback.from_user.language_code, total_pages=total_categories_pages, page=1)
-        )
-    
-@router.callback_query(ListFavoritesChooseCategoryCallbackFactory.filter(F.action == "change_page"))
-async def list_favorites_category_page(callback: CallbackQuery, state: FSMContext, callback_data: ListFavoritesChooseCategoryCallbackFactory):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: 
-        return
-    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
-    current_page = callback_data.page
-    
-    await state.update_data(current_page=current_page)
-    
-    categories_data = await state.get_data()
-    categories = categories_data["categories"][(current_page-1)*LIST_RESOURCES_CATEGORIES_ON_PAGE:current_page*(LIST_RESOURCES_CATEGORIES_ON_PAGE)]
-    total_categories_pages = categories_data["total_categories_pages"]
-    
-    await callback.message.answer(
-        text=t("list_favorites.choose_category", callback.from_user.language_code), 
-        reply_markup=list_favorites_category_list_keyboard(
-            categories=categories, 
-            user_lang=callback.from_user.language_code, 
-            total_pages=total_categories_pages, 
-            page=int(current_page))
-    )
-    
-@router.callback_query(ListFavoritesChooseCategoryCallbackFactory.filter(F.action=="select"))
-async def list_favorites_category_select(callback: CallbackQuery, callback_data: ListFavoritesChooseCategoryCallbackFactory, state: FSMContext):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: 
-        return
-    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
-    
-    user_id = str(callback.from_user.id)
-    category_id = callback_data.category_id
-    await state.update_data(category_id=category_id)
-    resources = await ResourceManager.get_many(category_id=category_id, favorites_user_id = user_id)
-    total_resources_pages = ceil(len(resources) / LIST_RESOURCES_RESOURCES_ON_PAGE)
-    await state.update_data(category_id=category_id, resources=resources, total_resources_pages=total_resources_pages)
-    await callback.message.answer(
-        text=t("list_favorites.choose_resource", callback.from_user.language_code),
-        reply_markup=list_favorites_resource_list_keyboard(
-            resources=resources,
-            user_lang=callback.from_user.language_code, 
-            total_pages=total_resources_pages, 
-            page=1)
-        )
-    
-@router.callback_query(ListFavoritesChooseResourceCallbackFactory.filter(F.action=="change_page"))
-async def list_resource_resource_page(callback: CallbackQuery, state: FSMContext, callback_data: ListFavoritesChooseResourceCallbackFactory):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data: 
-        return
-    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
-    current_page = callback_data.page
-    
-    resources_data = await state.get_data()
-    resources = resources_data["resources"][(current_page-1)*LIST_RESOURCES_RESOURCES_ON_PAGE:current_page*(LIST_RESOURCES_RESOURCES_ON_PAGE)]
-    total_resources_pages = resources_data["total_resources_pages"]
-    
-    await callback.message.answer(
-        text=t("list_favorites.delete.choose_resource", callback.from_user.language_code), 
-        reply_markup=list_favorites_resource_list_keyboard(
-            resources=resources, 
-            user_lang=callback.from_user.language_code, 
-            total_pages=total_resources_pages, 
-            page=int(current_page))
-    )
-    
-@router.callback_query(ListFavoritesChooseResourceCallbackFactory.filter(F.action=="select"))
-async def list_resource_resource_select(callback: CallbackQuery, state: FSMContext, callback_data: ListFavoritesChooseResourceCallbackFactory):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data or not callback_data.resource_id: 
-        return
-    resource = await ResourceManager.get_one(resource_id=callback_data.resource_id)
-    if not resource:
-        return
-    state_data = await state.get_data()
-    category_id = state_data["category_id"]
-    formatted_text = format_resource_text(resource)
-    user_id = str(callback.from_user.id)
-    resources = await ResourceManager.get_many(category_id=category_id, favorites_user_id=user_id)
-    favorites = await FavoriteManager.get_many(user_id=user_id)
-    is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
-    resource_rating = await ResourceRatingManager.get_one(user_id=user_id, resource_id=resource.id)
-    await state.update_data(resources=resources)
-    await callback.message.answer_photo(
-        photo=resource.image,
-        caption=formatted_text,
-        reply_markup=list_favorites_resource_item_keyboard(
-            resources=resources,
-            user_lang=callback.from_user.language_code, 
-            resource=resource,
-            is_favorite=is_favorite,
-            rating=resource_rating.rating if resource_rating else 0
-    ))
-    
-@router.callback_query(ListFavoritesItemCallbackFactory.filter(F.action=="change_page"))
-async def list_resource_resource_change_page(callback: CallbackQuery, state: FSMContext, callback_data: ListFavoritesChooseResourceCallbackFactory):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data or not callback_data.resource_id: 
-        return
-    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
-    resource = await ResourceManager.get_one(resource_id=callback_data.resource_id)
-    if not resource:
-        return
-    state_data = await state.get_data()
-    resources = state_data["resources"]
-    formatted_text = format_resource_text(resource)
-    user_id = str(callback.from_user.id)
-    favorites = await FavoriteManager.get_many(user_id=user_id)
-    is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
-    resource_rating = await ResourceRatingManager.get_one(user_id=user_id, resource_id=resource.id)
-    await state.update_data(resources=resources)
-    await callback.message.answer_photo(
-        photo=resource.image,
-        caption=formatted_text,
-        reply_markup=list_favorites_resource_item_keyboard(
-            resources=resources,
-            user_lang=callback.from_user.language_code, 
-            resource=resource,
-            is_favorite=is_favorite,
-            rating=resource_rating.rating if resource_rating else 0
-    ))
-    
-@router.callback_query(ListFavoritesItemCallbackFactory.filter(F.action=="add_favorite"))
-async def list_resource_resource_add_favorite(callback: CallbackQuery, state: FSMContext, callback_data: ListFavoritesChooseResourceCallbackFactory):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data or not callback_data.resource_id: 
-        return
-    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
-    resource = await ResourceManager.get_one(resource_id=callback_data.resource_id)
-    if not resource:
-        return
-    state_data = await state.get_data()
-    resources = state_data["resources"]
-    formatted_text = format_resource_text(resource)
-    user_id = str(callback.from_user.id)
-    favorite = FavoriteSchema(user_id=user_id, resource_id=resource.id)
-    resource_rating = await ResourceRatingManager.get_one(user_id=user_id, resource_id=resource.id)
-    await FavoriteManager.create(favorite)
-    await state.update_data(resources=resources)
-    await callback.message.answer_photo(
-        photo=resource.image,
-        caption=formatted_text,
-        reply_markup=list_favorites_resource_item_keyboard(
-            resources=resources,
-            user_lang=callback.from_user.language_code, 
-            resource=resource,
-            is_favorite=True,
-            rating=resource_rating.rating if resource_rating else 0
-    ))
 
-@router.callback_query(ListFavoritesItemCallbackFactory.filter(F.action=="remove_favorite"))
-async def list_resource_resource_remove_favorite(callback: CallbackQuery, state: FSMContext, callback_data: ListFavoritesChooseResourceCallbackFactory):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data or not callback_data.resource_id: 
-        return
-    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
-    resource = await ResourceManager.get_one(resource_id=callback_data.resource_id)
-    if not resource:
-        return
-    state_data = await state.get_data()
-    resources = state_data["resources"]
-    formatted_text = format_resource_text(resource)
-    user_id = str(callback.from_user.id)
-    resource_rating = await ResourceRatingManager.get_one(user_id=user_id, resource_id=resource.id)
-    
-    await FavoriteManager.delete(user_id=user_id, resource_id=resource.id)
-    await state.update_data(resources=resources)
-    await callback.message.answer_photo(
-        photo=resource.image,
-        caption=formatted_text,
-        reply_markup=list_favorites_resource_item_keyboard(
-            resources=resources,
-            user_lang=callback.from_user.language_code, 
+    async def on_category_select(
+        self,
+        callback: CallbackQuery,
+        callback_data: ListFavoritesChooseCategoryCallbackFactory,
+        state: FSMContext,
+    ):
+        if not callback.from_user or not callback.from_user.language_code or not callback.message:
+            return
+        await self._delete_message(callback.message)
+        await self._show_resource_list(
+            message=callback.message,
+            state=state,
+            user_id=str(callback.from_user.id),
+            category_id=callback_data.category_id,
+            user_lang=callback.from_user.language_code,
+            text_key="list_favorites.choose_resource",
+            translate_fn=t,
+        )
+
+    async def on_resource_page(
+        self,
+        callback: CallbackQuery,
+        state: FSMContext,
+        callback_data: ListFavoritesChooseResourceCallbackFactory,
+    ):
+        if not callback.from_user or not callback.from_user.language_code or not callback.message:
+            return
+        await self._delete_message(callback.message)
+        page = callback_data.page
+        data = await state.get_data()
+        resources = data["resources"][
+            (page - 1) * LIST_RESOURCES_RESOURCES_ON_PAGE : page * LIST_RESOURCES_RESOURCES_ON_PAGE
+        ]
+        await callback.message.answer(
+            text=t("list_favorites.choose_resource", callback.from_user.language_code),
+            reply_markup=self._build_resource_list_keyboard(
+                resources=resources,
+                user_lang=callback.from_user.language_code,
+                total_pages=data["total_resources_pages"],
+                page=page,
+            ),
+        )
+
+    async def _get_resource_and_state(self, callback: CallbackQuery, state: FSMContext, resource_id):
+        resource = await ResourceManager.get_one(resource_id=resource_id)
+        if not resource:
+            return None, None
+        state_data = await state.get_data()
+        return resource, state_data
+
+    async def on_resource_select(
+        self,
+        callback: CallbackQuery,
+        state: FSMContext,
+        callback_data: ListFavoritesChooseResourceCallbackFactory,
+    ):
+        if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback_data.resource_id:
+            return
+        resource, state_data = await self._get_resource_and_state(callback, state, callback_data.resource_id)
+        if not resource:
+            return
+        user_id = str(callback.from_user.id)
+        resources = await ResourceManager.get_many(
+            category_id=state_data["category_id"], favorites_user_id=user_id
+        )
+        await state.update_data(resources=resources)
+        await self._send_resource_photo(
+            message=callback.message,
             resource=resource,
-            is_favorite=False,
-            rating=resource_rating.rating if resource_rating else 0
-    ))
-    
-@router.callback_query(ListFavoritesItemCallbackFactory.filter(F.action=="rate"))
-async def list_resource_resource_rate(callback: CallbackQuery, state: FSMContext, callback_data: ListFavoritesItemCallbackFactory):
-    if (not callback.from_user or 
-        not callback.from_user.language_code or 
-        not callback.message or 
-        not callback.data or 
-        not callback_data.resource_id or 
-        not callback_data.rating): 
-        return
-    await bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
-    resource_id = callback_data.resource_id
-    resource = await ResourceManager.get_one(resource_id=resource_id)
-    if not resource:
-        return
-    state_data = await state.get_data()
-    resources = state_data["resources"]
-    formatted_text = format_resource_text(resource)
-    user_id = str(callback.from_user.id)
-    favorites = await FavoriteManager.get_many(user_id=user_id)
-    is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
-    rating = callback_data.rating
-    existing_resource_rating = await ResourceRatingManager.get_one(user_id=user_id, resource_id=resource.id)
-    if existing_resource_rating:
-        await ResourceRatingManager.delete(user_id=user_id, resource_id=resource.id)
-    resource_rating = ResourceRatingWithoutUserAndResourceSchema(id=uuid4(), resource_id=resource_id, rating=rating, user_id=user_id)
-    await ResourceRatingManager.create(resource_rating)
-    await state.update_data(resources=resources)
-    await callback.message.answer_photo(
-        photo=resource.image,
-        caption=formatted_text,
-        reply_markup=list_favorites_resource_item_keyboard(
             resources=resources,
-            user_lang=callback.from_user.language_code, 
+            user_id=user_id,
+            user_lang=callback.from_user.language_code,
+        )
+
+    async def on_resource_item_page(
+        self,
+        callback: CallbackQuery,
+        state: FSMContext,
+        callback_data: ListFavoritesItemCallbackFactory,
+    ):
+        if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback_data.resource_id:
+            return
+        await self._delete_message(callback.message)
+        resource, state_data = await self._get_resource_and_state(callback, state, callback_data.resource_id)
+        if not resource:
+            return
+        await self._send_resource_photo(
+            message=callback.message,
             resource=resource,
-            is_favorite=is_favorite,
-            rating=rating
-    ))
+            resources=state_data["resources"],
+            user_id=str(callback.from_user.id),
+            user_lang=callback.from_user.language_code,
+        )
+
+    async def on_add_favorite(
+        self,
+        callback: CallbackQuery,
+        state: FSMContext,
+        callback_data: ListFavoritesItemCallbackFactory,
+    ):
+        if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback_data.resource_id:
+            return
+        await self._delete_message(callback.message)
+        resource, state_data = await self._get_resource_and_state(callback, state, callback_data.resource_id)
+        if not resource:
+            return
+        user_id = str(callback.from_user.id)
+        await self._handle_add_favorite(user_id=user_id, resource_id=resource.id)
+        await self._send_resource_photo(
+            message=callback.message,
+            resource=resource,
+            resources=state_data["resources"],
+            user_id=user_id,
+            user_lang=callback.from_user.language_code,
+        )
+
+    async def on_remove_favorite(
+        self,
+        callback: CallbackQuery,
+        state: FSMContext,
+        callback_data: ListFavoritesItemCallbackFactory,
+    ):
+        if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback_data.resource_id:
+            return
+        await self._delete_message(callback.message)
+        resource, state_data = await self._get_resource_and_state(callback, state, callback_data.resource_id)
+        if not resource:
+            return
+        user_id = str(callback.from_user.id)
+        await self._handle_remove_favorite(user_id=user_id, resource_id=resource.id)
+        await self._send_resource_photo(
+            message=callback.message,
+            resource=resource,
+            resources=state_data["resources"],
+            user_id=user_id,
+            user_lang=callback.from_user.language_code,
+        )
+
+    async def on_rate(
+        self,
+        callback: CallbackQuery,
+        state: FSMContext,
+        callback_data: ListFavoritesItemCallbackFactory,
+    ):
+        if (
+            not callback.from_user
+            or not callback.from_user.language_code
+            or not callback.message
+            or not callback_data.resource_id
+            or not callback_data.rating
+        ):
+            return
+        await self._delete_message(callback.message)
+        resource, state_data = await self._get_resource_and_state(callback, state, callback_data.resource_id)
+        if not resource:
+            return
+        user_id = str(callback.from_user.id)
+        await self._handle_rate(user_id=user_id, resource_id=resource.id, rating=callback_data.rating)
+        await self._send_resource_photo(
+            message=callback.message,
+            resource=resource,
+            resources=state_data["resources"],
+            user_id=user_id,
+            user_lang=callback.from_user.language_code,
+        )
+
+
+list_favorites_router = ListFavoritesRouter()

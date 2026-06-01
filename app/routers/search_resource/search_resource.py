@@ -5,6 +5,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram import F
 from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
+from aiogram.utils.media_group import MediaGroupBuilder
 
 from constants import FIND_RESOURCE_RESOURCES_ON_PAGE
 
@@ -94,9 +95,11 @@ async def search_resource_select(callback: CallbackQuery, state: FSMContext, cal
     is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
     formatted_text = format_resource_text(resource)
     resource_rating = await ResourceRatingManager.get_one(user_id=user_id, resource_id=resource.id)
-    await callback.message.answer_photo(
-        photo=resource.image,
-        caption=formatted_text,
+    media_group = MediaGroupBuilder(caption=formatted_text)
+    for photo in resource.images:
+        media_group.add_photo(type="photo", media=photo.image)
+    await callback.message.answer_media_group(
+        media=media_group.build(),
         reply_markup=search_resource_resource_item_keyboard(
             resources=resources,
             user_lang=callback.from_user.language_code, 
