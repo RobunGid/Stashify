@@ -1,0 +1,18 @@
+services:
+  main-app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: main-app
+    command: python main.py
+    env_file:
+      - ../.env
+    volumes:
+      - ../app/:/app/
+    networks:
+      - backend
+    restart: always
+
+networks:
+  backend:
+    driver: bridge
