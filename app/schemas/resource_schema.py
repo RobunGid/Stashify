@@ -4,6 +4,10 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, UUID4
 
+from schemas.category_schema import CategorySchemaWithoutResources
+from schemas.quiz_schema import QuizSchemaWithoutResource
+from schemas.resource_image_schema import ResourceImageWithoutResourceSchema
+from schemas.resource_rating_schema import ResourceRatingWithoutUserAndResourceSchema
 from utils.OptionalSchema import AllOptional
 
 
@@ -12,7 +16,7 @@ def default_category():
 
 
 class ResourceSchemaWithoutCategory(BaseModel):
-    id: UUID4
+    resource_id: UUID4
 
     name: str
     description: str
@@ -38,10 +42,5 @@ class ResourceSchema(ResourceSchemaWithoutCategory):
 class UpdateResourceSchemaWithoutCategory(
     ResourceSchemaWithoutCategory,
     metaclass=AllOptional,
-): ...
-
-
-from schemas.category_schema import CategorySchemaWithoutResources
-from schemas.quiz_schema import QuizSchemaWithoutResource
-from schemas.resource_image_schema import ResourceImageWithoutResourceSchema
-from schemas.resource_rating_schema import ResourceRatingWithoutUserAndResourceSchema
+):
+    pass

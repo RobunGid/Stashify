@@ -2,9 +2,11 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, UUID4
 
+from schemas.quiz_schema import PlainQuizSchema, QuizSchema
+
 
 class QuizQuestionBaseSchema(BaseModel):
-    id: UUID4
+    quiz_question_id: UUID4
     text: str
 
     quiz_id: UUID4
@@ -17,11 +19,8 @@ class QuizQuestionBaseSchema(BaseModel):
 
 
 class QuizQuestionSchema(QuizQuestionBaseSchema):
-    quiz: "QuizSchema"
+    quiz: QuizSchema
 
 
 class QuizQuestionWithoutResourceSchema(QuizQuestionBaseSchema):
-    quiz: "PlainQuizSchema"
-
-
-from .quiz_schema import PlainQuizSchema, QuizSchema
+    quiz: PlainQuizSchema

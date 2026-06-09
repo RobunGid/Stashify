@@ -2,9 +2,12 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, UUID4
 
+from schemas.resource_schema import ResourceSchema
+from schemas.user_schema import PlainUserSchema
+
 
 class ResourceRatingWithoutUserAndResourceSchema(BaseModel):
-    id: UUID4
+    resource_rating_id: UUID4
 
     resource_id: UUID4
 
@@ -16,9 +19,5 @@ class ResourceRatingWithoutUserAndResourceSchema(BaseModel):
 
 
 class ResourceRatingSchema(ResourceRatingWithoutUserAndResourceSchema):
-    user: "PlainUserSchema"
-    resource: "ResourceSchema"
-
-
-from .resource_schema import ResourceSchema
-from .user_schema import PlainUserSchema
+    user: PlainUserSchema
+    resource: ResourceSchema

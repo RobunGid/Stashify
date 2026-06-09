@@ -11,7 +11,7 @@ from database.orm import Base
 class ResourceModel(Base):
     __tablename__ = "resource"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    resource_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     name = Column(String, unique=True, nullable=False)
     description = Column(String, nullable=False)

@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
 
-from constants import DELETE_QUIZ_CATEGORIES_ON_PAGE
+from constants import DELETE_QUIZ_CATEGORIES_ON_PAGE, DELETE_QUIZ_RESOURCES_ON_PAGE
 from sqlalchemy.exc import IntegrityError
 
 from database.managers import CategoryManager, QuizManager, ResourceManager

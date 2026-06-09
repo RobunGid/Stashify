@@ -51,7 +51,7 @@ def manage_categories_delete_keyboard(
                 page=page - 1,
             ),
         )
-        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.button(text=f"{page}/{total_pages}", callback_data=" ")
         builder.button(
             text=t("items.forward", user_lang),
             callback_data=DeleteCategoryIdCallbackFactory(
@@ -70,7 +70,7 @@ def manage_categories_delete_keyboard(
         )
         builder.adjust(*[*([1] * len(categories)), 5, 1])
     elif page == 1 and total_pages != 1:
-        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.button(text=f"{page}/{total_pages}", callback_data=" ")
         builder.button(
             text=t("items.forward", user_lang),
             callback_data=DeleteCategoryIdCallbackFactory(
@@ -105,10 +105,10 @@ def manage_categories_delete_keyboard(
                 page=page - 1,
             ),
         )
-        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.button(text=f"{page}/{total_pages}", callback_data=" ")
         builder.adjust(*[*([1] * len(categories)), 3, 1])
     elif page == 1 and total_pages == 1:
-        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.button(text=f"{page}/{total_pages}", callback_data=" ")
         builder.adjust(*[*([1] * len(categories)), 1, 1])
     builder.row(
         InlineKeyboardButton(

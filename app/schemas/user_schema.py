@@ -4,10 +4,12 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from database.models.user import Role
+from schemas.quiz_rating_schema import QuizRatingSchema
+from schemas.quiz_result_schema import QuizResultWithoutUserAndQuizSchema
 
 
 class PlainUserSchema(BaseModel):
-    id: str = Field()
+    user_id: str = Field()
     username: Optional[str]
 
     role: Role
@@ -17,11 +19,7 @@ class PlainUserSchema(BaseModel):
 
 
 class UserSchema(PlainUserSchema):
-    quiz_results: "List[QuizResultWithoutUserAndQuizSchema]" = Field(
+    quiz_results: List[QuizResultWithoutUserAndQuizSchema] = Field(
         default_factory=list,
     )
-    quiz_ratings: "List[QuizRatingSchema]" = Field(default_factory=list)
-
-
-from .quiz_rating_schema import QuizRatingSchema
-from .quiz_result_schema import QuizResultWithoutUserAndQuizSchema
+    quiz_ratings: List[QuizRatingSchema] = Field(default_factory=list)

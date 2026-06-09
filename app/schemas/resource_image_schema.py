@@ -2,9 +2,11 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, UUID4
 
+from schemas.resource_schema import ResourceSchema
+
 
 class ResourceImageWithoutResourceSchema(BaseModel):
-    id: UUID4
+    resource_image_id: UUID4
 
     resource_id: UUID4
     image: str
@@ -15,7 +17,4 @@ class ResourceImageWithoutResourceSchema(BaseModel):
 
 
 class ResourceImageSchema(ResourceImageWithoutResourceSchema):
-    resource: "ResourceSchema"
-
-
-from .resource_schema import ResourceSchema
+    resource: ResourceSchema

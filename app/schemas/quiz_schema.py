@@ -2,9 +2,12 @@ from typing import List
 
 from pydantic import BaseModel, ConfigDict, Field, UUID4
 
+from schemas.quiz_question_schema import QuizQuestionBaseSchema
+from schemas.resource_schema import ResourceSchema
+
 
 class PlainQuizSchema(BaseModel):
-    id: UUID4 = Field()
+    quiz_id: UUID4 = Field()
 
     resource_id: UUID4
 
@@ -12,12 +15,8 @@ class PlainQuizSchema(BaseModel):
 
 
 class QuizSchemaWithoutResource(PlainQuizSchema):
-    questions: "List[QuizQuestionBaseSchema]" = Field(default_factory=list)
+    questions: List[QuizQuestionBaseSchema] = Field(default_factory=list)
 
 
 class QuizSchema(QuizSchemaWithoutResource):
-    resource: "ResourceSchema"
-
-
-from .quiz_question_schema import QuizQuestionBaseSchema
-from .resource_schema import ResourceSchema
+    resource: ResourceSchema

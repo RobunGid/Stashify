@@ -54,7 +54,7 @@ def list_resources_category_list_keyboard(
                 page=page - 1,
             ),
         )
-        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.button(text=f"{page}/{total_pages}", callback_data=" ")
         builder.button(
             text=t("items.forward", user_lang),
             callback_data=ListResourcesChooseCategoryCallbackFactory(
@@ -73,7 +73,7 @@ def list_resources_category_list_keyboard(
         )
         first_line_buttons_quantity = 5
     elif page == 1 and total_pages != 1:
-        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.button(text=f"{page}/{total_pages}", callback_data=" ")
         builder.button(
             text=t("items.forward", user_lang),
             callback_data=ListResourcesChooseCategoryCallbackFactory(
@@ -108,15 +108,15 @@ def list_resources_category_list_keyboard(
                 page=page - 1,
             ),
         )
-        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.button(text=f"{page}/{total_pages}", callback_data=" ")
         first_line_buttons_quantity = 3
     elif page == 1 and total_pages == 1:
-        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.button(text=f"{page}/{total_pages}", callback_data=" ")
         first_line_buttons_quantity = 1
     elif page == 1 and total_pages == 0:
         builder.button(
             text=t("list_favorites.no_results", lang=user_lang),
-            callback_data=f" ",
+            callback_data=" ",
         )
         first_line_buttons_quantity = 1
     builder.row(

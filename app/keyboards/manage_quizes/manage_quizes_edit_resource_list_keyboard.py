@@ -51,7 +51,7 @@ def manage_quizes_edit_resource_list_keyboard(
                 page=page - 1,
             ),
         )
-        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.button(text=f"{page}/{total_pages}", callback_data=" ")
         builder.button(
             text=t("items.forward", user_lang),
             callback_data=EditQuizChooseResourceCallbackFactory(
@@ -70,7 +70,7 @@ def manage_quizes_edit_resource_list_keyboard(
         )
         builder.adjust(*[*([1] * len(resources)), 5, 1])
     elif page == 1 and total_pages > 1:
-        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.button(text=f"{page}/{total_pages}", callback_data=" ")
         builder.button(
             text=t("items.forward", user_lang),
             callback_data=EditQuizChooseResourceCallbackFactory(
@@ -105,15 +105,15 @@ def manage_quizes_edit_resource_list_keyboard(
                 page=page - 1,
             ),
         )
-        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.button(text=f"{page}/{total_pages}", callback_data=" ")
         builder.adjust(*[*([1] * len(resources)), 3, 1])
     elif page == 1 and total_pages == 1:
-        builder.button(text=f"{page}/{total_pages}", callback_data=f" ")
+        builder.button(text=f"{page}/{total_pages}", callback_data=" ")
         builder.adjust(*[*([1] * len(resources)), 1, 1])
     elif page == 1 and total_pages == 0:
         builder.button(
             text=t("manage_quizes.create.no_resources", user_lang),
-            callback_data=f" ",
+            callback_data=" ",
         )
         builder.adjust(*[*([1] * len(resources)), 1, 1])
 

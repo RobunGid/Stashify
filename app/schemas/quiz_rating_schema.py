@@ -2,19 +2,18 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from schemas.quiz_schema import QuizSchema
+from schemas.user_schema import UserSchema
+
 
 class QuizRatingSchema(BaseModel):
-    id: str
+    quiz_rating_id: str
 
     quiz_id: str
-    quiz: "QuizSchema"
+    quiz: QuizSchema
 
     user_id: str
-    user: "UserSchema"
+    user: UserSchema
 
     created_at: datetime
     rating: int
-
-
-from .quiz_schema import QuizSchema
-from .user_schema import UserSchema

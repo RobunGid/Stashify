@@ -3,9 +3,12 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, UUID4
 
+from schemas.quiz_schema import PlainQuizSchema
+from schemas.user_schema import PlainUserSchema
+
 
 class QuizResultWithoutUserAndQuizSchema(BaseModel):
-    id: UUID4
+    quiz_result_id: UUID4
 
     quiz_id: UUID4
 
@@ -16,9 +19,5 @@ class QuizResultWithoutUserAndQuizSchema(BaseModel):
 
 
 class QuizResultSchema(QuizResultWithoutUserAndQuizSchema):
-    user: Optional["PlainUserSchema"] = Field(default_factory=lambda: None)
-    quiz: Optional["PlainQuizSchema"] = Field(default_factory=lambda: None)
-
-
-from .quiz_schema import PlainQuizSchema
-from .user_schema import PlainUserSchema
+    user: Optional[PlainUserSchema] = Field(default_factory=lambda: None)
+    quiz: Optional[PlainQuizSchema] = Field(default_factory=lambda: None)

@@ -52,7 +52,7 @@ def search_resource_resource_item_keyboard(
         )
         builder.button(
             text=f"{resource_index + 1}/{resource_quantity}",
-            callback_data=f" ",
+            callback_data=" ",
         )
         builder.button(
             text=t("items.forward", user_lang),
@@ -74,7 +74,7 @@ def search_resource_resource_item_keyboard(
     elif resource_index == 0 and resource_quantity != 1:
         builder.button(
             text=f"{resource_index + 1}/{resource_quantity}",
-            callback_data=f" ",
+            callback_data=" ",
         )
         builder.button(
             text=t("items.forward", user_lang),
@@ -112,13 +112,13 @@ def search_resource_resource_item_keyboard(
         )
         builder.button(
             text=f"{resource_index + 1}/{resource_quantity}",
-            callback_data=f" ",
+            callback_data=" ",
         )
         first_line_buttons_quantity = 3
     elif resource_index == 0 and resource_quantity == 0:
         builder.button(
             text=f"{resource_index + 1}/{resource_quantity}",
-            callback_data=f" ",
+            callback_data=" ",
         )
         first_line_buttons_quantity = 1
     if not is_favorite:
