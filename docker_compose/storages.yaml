@@ -14,11 +14,10 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
-      interval: 30s
-      timeout: 60s
-      retries: 5
-      start_period: 80s
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
   stashify-database-ui:
     image: dpage/pgadmin4
     container_name: stashify-database-ui
@@ -39,8 +38,8 @@ services:
         condition: service_healthy
     user: root
     volumes:
-      - ../pgadmin_entrypoint.sh:/entrypoint.sh
-    entrypoint: /entrypoint.sh
+      - ../pgadmin_entrypoint.sh:/entrypoint_custom.sh
+    entrypoint: /entrypoint_custom.sh
     networks:
       - backend
 
