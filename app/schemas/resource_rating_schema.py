@@ -20,5 +20,5 @@ class ResourceRatingSchema(ResourceRatingWithoutUserAndResourceSchema):
     resource: ResourceSchema
 
 
-from schemas.user_schema import PlainUserSchema
-from schemas.resource_schema import ResourceSchema
+from schemas.resource_schema import ResourceSchema  # noqa
+from schemas.user_schema import PlainUserSchema  # noqa

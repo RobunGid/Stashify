@@ -17,5 +17,5 @@ class FavoriteSchema(BaseModel):
     added_at: datetime = Field(default_factory=datetime.now)
 
 
-from schemas.resource_schema import ResourceSchema
-from schemas.user_schema import UserSchema
+from schemas.resource_schema import ResourceSchema  # noqa
+from schemas.user_schema import UserSchema  # noqa

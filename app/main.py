@@ -1,4 +1,5 @@
 import asyncio
+
 from aiogram_i18n import I18nMiddleware
 from aiogram_i18n.cores import FluentRuntimeCore
 

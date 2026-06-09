@@ -6,9 +6,9 @@ from aiogram.filters.callback_data import CallbackData
 
 from pydantic import UUID4
 
+from keyboards.base import BaseItemKeyboardBuilder, BaseListKeyboardBuilder, BaseQuizConfirmKeyboardBuilder
 from schemas.category_schema import CategorySchema
 from schemas.resource_schema import ResourceSchema
-from keyboards.base import BaseItemKeyboardBuilder, BaseListKeyboardBuilder
 
 
 class ListResourcesChooseResourceCallbackFactory(CallbackData, prefix="lst_rsc_rsc"):
@@ -26,7 +26,9 @@ class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceSchema]):
         return {
             "text": item.name,
             "callback_data": ListResourcesChooseResourceCallbackFactory(
-                action="select", resource_id=item.resource_id, page=0
+                action="select",
+                resource_id=item.resource_id,
+                page=0,
             ),
         }
 
@@ -52,7 +54,9 @@ class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
         return {
             "text": item.name,
             "callback_data": ListResourcesChooseCategoryCallbackFactory(
-                action="select", category_id=item.category_id, page=0
+                action="select",
+                category_id=item.category_id,
+                page=0,
             ),
         }
 
@@ -95,3 +99,12 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder):
 
     def _quiz_confirm_callback(self, item: ResourceSchema) -> CallbackData:
         return ListResourcesItemCallbackFactory(resource_id=item.resource_id, action="start_quiz_cnfrm", rating=None)
+
+
+@dataclass
+class ResourceQuizConfirmKeyboardBuilder(BaseQuizConfirmKeyboardBuilder[ResourceSchema]):
+    def _navigation_callback(self, item: ResourceSchema) -> CallbackData:
+        return ListResourcesItemCallbackFactory(resource_id=item.resource_id, action="change_page", rating=None)
+
+    def _quiz_confirm_callback(self, item: ResourceSchema) -> CallbackData:
+        return ListResourcesItemCallbackFactory(action="start_quiz_cnfrm", resource_id=item.resource_id, rating=None)

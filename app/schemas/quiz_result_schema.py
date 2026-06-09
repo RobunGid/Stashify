@@ -21,5 +21,5 @@ class QuizResultSchema(QuizResultWithoutUserAndQuizSchema):
     quiz: PlainQuizSchema
 
 
-from schemas.quiz_schema import PlainQuizSchema
-from schemas.user_schema import PlainUserSchema
+from schemas.quiz_schema import PlainQuizSchema  # noqa
+from schemas.user_schema import PlainUserSchema  # noqa

@@ -3,6 +3,7 @@ from uuid import uuid4
 from aiogram import F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
+
 from aiogram_i18n import I18nContext
 
 from database.managers import QuizManager, QuizResultManager
@@ -11,8 +12,8 @@ from keyboards.list_resources.list_resources_quiz_question_keyboard import (
     list_resources_quiz_question_keyboard,
     ListResourcesQuizQuestionCallbackFactory,
 )
-from keyboards.resources import ListResourcesItemCallbackFactory
-from schemas.quiz_result_schema import QuizResultSchema
+from keyboards.resources import ListResourcesItemCallbackFactory, ResourceQuizConfirmKeyboardBuilder
+from schemas.quiz_result_schema import QuizResultWithoutUserAndQuizSchema
 from settings.config import bot
 
 from .router import router
@@ -22,7 +23,10 @@ from .router import router
     ListResourcesItemCallbackFactory.filter(F.action == "start_quiz"),
 )
 async def list_resource_start_quiz(
-    callback: CallbackQuery, state: FSMContext, callback_data: ListResourcesItemCallbackFactory, i18n: I18nContext
+    callback: CallbackQuery,
+    state: FSMContext,
+    callback_data: ListResourcesItemCallbackFactory,
+    i18n: I18nContext,
 ):
     if (
         not callback.from_user
@@ -40,7 +44,9 @@ async def list_resource_start_quiz(
     state_data = await state.get_data()
     resource = state_data["resource"]
     state_data = await state.get_data()
-    page = state_data["current_page"]
+
+    keyboard_builder = ResourceQuizConfirmKeyboardBuilder(i18n=i18n, current_item=resource)
+    keyboard = keyboard_builder.build()
 
     await callback.message.answer(
         text=i18n.get(
@@ -49,11 +55,7 @@ async def list_resource_start_quiz(
             question_count=len(resource.quiz.questions),
             resource_name=resource.name,
         ),
-        reply_markup=list_resources_start_quiz_confirm_keyboard(
-            user_lang=callback.from_user.language_code,
-            resource_id=resource.resource_id,
-            page=page,
-        ),
+        reply_markup=keyboard,
     )
 
 
@@ -114,6 +116,7 @@ async def list_resource_quiz_question_answer(
     callback: CallbackQuery,
     state: FSMContext,
     callback_data: ListResourcesQuizQuestionCallbackFactory,
+    i18n: I18nContext,
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
@@ -167,9 +170,8 @@ async def list_resource_quiz_question_answer(
         )
         if existing_quiz_result:
             await QuizResultManager.delete(resource.resource_id, str(callback.from_user.id))
-        quiz_result = QuizResultSchema(
-            id=uuid4(),
-            quiz=quiz,
+        quiz_result = QuizResultWithoutUserAndQuizSchema(
+            quiz_result_id=uuid4(),
             quiz_id=quiz.quiz_id,
             user_id=str(callback.from_user.id),
             percent=right_answer_percent,
@@ -177,9 +179,7 @@ async def list_resource_quiz_question_answer(
         await QuizResultManager.create(quiz_result)
 
         await callback.message.answer(
-            text=t("start_quiz.final", lang=callback.from_user.language_code).format(
-                percent=right_answer_percent,
-            ),
+            text=i18n.get("start-quiz-final", percent=right_answer_percent),
             reply_markup=list_resources_quiz_final_keyboard(
                 user_lang=callback.from_user.language_code,
                 resource_id=resource.resource_id,

@@ -5,8 +5,8 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 from aiogram.utils.media_group import MediaGroupBuilder
-from aiogram_i18n import I18nContext
 
+from aiogram_i18n import I18nContext
 from constants import LIST_RESOURCES_CATEGORIES_ON_PAGE, LIST_RESOURCES_RESOURCES_ON_PAGE
 
 from database.managers import (
@@ -49,7 +49,10 @@ async def list_resources_callback_handler(callback: CallbackQuery, state: FSMCon
     )
 
     keyboard_builder = CategoryListKeyboardBuilder(
-        i18n, items=categories, current_page=1, total_pages=total_categories_pages
+        i18n,
+        items=categories,
+        current_page=1,
+        total_pages=total_categories_pages,
     )
     keyboard = keyboard_builder.build()
 
@@ -87,7 +90,10 @@ async def list_resources_category_page(
     total_categories_pages = categories_data["total_categories_pages"]
 
     keyboard_builder = CategoryListKeyboardBuilder(
-        i18n, items=categories, current_page=current_page, total_pages=total_categories_pages
+        i18n,
+        items=categories,
+        current_page=current_page,
+        total_pages=total_categories_pages,
     )
     keyboard = keyboard_builder.build()
 
@@ -427,7 +433,10 @@ async def list_resource_resource_remove_favorite(
 
 @router.callback_query(ListResourcesItemCallbackFactory.filter(F.action == "rate"))
 async def list_resource_resource_rate(
-    callback: CallbackQuery, state: FSMContext, callback_data: ListResourcesItemCallbackFactory, i18n: I18nContext
+    callback: CallbackQuery,
+    state: FSMContext,
+    callback_data: ListResourcesItemCallbackFactory,
+    i18n: I18nContext,
 ):
     if (
         not callback.from_user

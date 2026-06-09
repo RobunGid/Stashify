@@ -7,12 +7,12 @@ from sqlalchemy.orm import selectinload
 from database.models.quiz import QuizModel
 from database.models.quiz_result import QuizResultModel
 from database.orm import AsyncSessionLocal
-from schemas.quiz_result_schema import QuizResultSchema
+from schemas.quiz_result_schema import QuizResultSchema, QuizResultWithoutUserAndQuizSchema
 
 
 class QuizResultManager:
     @classmethod
-    async def create(cls, quiz_result_data: QuizResultSchema):
+    async def create(cls, quiz_result_data: QuizResultWithoutUserAndQuizSchema):
         async with AsyncSessionLocal() as session:
             quiz_result = QuizResultModel(
                 id=uuid4(),

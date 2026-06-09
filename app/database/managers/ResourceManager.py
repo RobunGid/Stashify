@@ -29,9 +29,9 @@ class ResourceManager:
             await session.commit()
 
     @classmethod
-    async def delete(cls, id: UUID4):
+    async def delete(cls, resource_id: UUID4):
         async with AsyncSessionLocal() as session:
-            statement = select(ResourceModel).where(ResourceModel.resource_id == id)
+            statement = select(ResourceModel).where(ResourceModel.resource_id == resource_id)
             resource = (await session.execute(statement)).scalars().first()
             if not resource:
                 raise ValueError("No such resource")

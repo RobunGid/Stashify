@@ -3,10 +3,11 @@ from dataclasses import dataclass
 from typing import Generic, TypeVar
 from uuid import UUID
 
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from aiogram_i18n import I18nContext
 from aiogram.filters.callback_data import CallbackData
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+from aiogram_i18n import I18nContext
 
 
 @dataclass
@@ -18,13 +19,12 @@ class BackKeyboardBuilderMixin:
             InlineKeyboardButton(
                 text=self.i18n.get("common-back"),
                 callback_data=self._back_callback(),
-            )
+            ),
         )
 
     @abstractmethod
     def _back_callback(self) -> str:
         """callback_data for 'Back' button"""
-        pass
 
 
 @dataclass
@@ -83,16 +83,21 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
     @abstractmethod
     def _pagination_callback(self, page: int) -> CallbackData:
         """Return callback_data for pagination button"""
-        pass
 
     @abstractmethod
     def _item_button(self, item: It) -> dict:
         """Convert item to kwargs for builder.button() - text and callback_data"""
-        pass
 
 
 @dataclass
-class BaseItemKeyboardBuilder(BaseKeyboardBuilder, Generic[It]):
+class NavigationKeyboardBuilderMixin(ABC, Generic[It]):
+    @abstractmethod
+    def _navigation_callback(self, item: It) -> CallbackData:
+        """Return callback_data for pagination button"""
+
+
+@dataclass
+class BaseItemKeyboardBuilder(NavigationKeyboardBuilderMixin, BaseKeyboardBuilder, Generic[It]):
     items: list[It]
     current_item: It
 
@@ -152,13 +157,13 @@ class BaseItemKeyboardBuilder(BaseKeyboardBuilder, Generic[It]):
                 {
                     "text": self.i18n.get("favorite-remove"),
                     "callback_data": self._remove_favorite_callback(self.current_item),
-                }
+                },
             ]
         return [
             {
                 "text": self.i18n.get("favorite-add"),
                 "callback_data": self._add_favorite_callback(self.current_item),
-            }
+            },
         ]
 
     def _build_rating_buttons(self) -> list[dict]:
@@ -181,28 +186,12 @@ class BaseItemKeyboardBuilder(BaseKeyboardBuilder, Generic[It]):
             {
                 "text": text,
                 "callback_data": self._quiz_callback(self.current_item),
-            }
-        ]
-
-    def _build_quiz_confirm_buttons(self) -> list[dict]:
-        return [
-            {
-                "text": self.i18n.get("ist-resources-start_quiz-confirm"),
-                "callback_data": self._quiz_confirm_callback(self.current_item),
-            },
-            {
-                "text": self.i18n.get("common-back"),
-                "callback_data": self._navigation_callback(self.current_item),
             },
         ]
 
     @abstractmethod
     def _get_item_id(self, item: It) -> str | UUID | int:
         """Get item id callback"""
-
-    @abstractmethod
-    def _navigation_callback(self, item: It) -> CallbackData:
-        """Return callback_data for pagination button"""
 
     @abstractmethod
     def _remove_favorite_callback(self, item: It) -> CallbackData:
@@ -219,6 +208,35 @@ class BaseItemKeyboardBuilder(BaseKeyboardBuilder, Generic[It]):
     @abstractmethod
     def _quiz_callback(self, item: It) -> CallbackData:
         """Return callback_data for start quiz"""
+
+
+@dataclass
+class BaseQuizConfirmKeyboardBuilder(
+    NavigationKeyboardBuilderMixin,
+    BaseKeyboardBuilder,
+    ABC,
+    Generic[It],
+):
+    current_item: It
+
+    def build(self) -> InlineKeyboardMarkup:
+        builder = InlineKeyboardBuilder()
+        btns = self._build_quiz_confirm_buttons()
+        for btn in btns:
+            builder.button(**btn)
+        return builder.as_markup()
+
+    def _build_quiz_confirm_buttons(self) -> list[dict]:
+        return [
+            {
+                "text": self.i18n.get("ist-resources-start_quiz-confirm"),
+                "callback_data": self._quiz_confirm_callback(self.current_item),
+            },
+            {
+                "text": self.i18n.get("common-back"),
+                "callback_data": self._navigation_callback(self.current_item),
+            },
+        ]
 
     @abstractmethod
     def _quiz_confirm_callback(self, item: It) -> CallbackData:

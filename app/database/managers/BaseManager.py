@@ -8,7 +8,7 @@ from database.orm import AsyncSessionLocal
 
 
 class HasId(Protocol):
-    id: Mapped[int]
+    item_id: Mapped[int]
 
 
 T = TypeVar("T", bound=HasId)
@@ -27,7 +27,7 @@ class BaseManager(Generic[T, S]):
             raise AttributeError("No schema provided")
         async with AsyncSessionLocal() as session:
             statement = select(cls.model).where(
-                cls.model.id == item_id,
+                cls.model.item_id == item_id,
             )
 
             item = (await session.execute(statement)).scalars().first()
@@ -47,13 +47,13 @@ class BaseManager(Generic[T, S]):
             await session.commit()
 
     @classmethod
-    async def update(cls, id: UUID4, new_data: BaseModel) -> None:
+    async def update(cls, item_id: UUID4, new_data: BaseModel) -> None:
         async with AsyncSessionLocal() as session:
             if cls.model is None:
                 raise AttributeError("No model provided")
             statement = (
                 update(cls.model)
-                .where(cls.model.id == id)
+                .where(cls.model.item_id == item_id)
                 .values(
                     **new_data.model_dump(),
                 )
@@ -62,11 +62,11 @@ class BaseManager(Generic[T, S]):
             await session.commit()
 
     @classmethod
-    async def delete(cls, id: UUID4) -> None:
+    async def delete(cls, item_id: UUID4) -> None:
         async with AsyncSessionLocal() as session:
             if cls.model is None:
                 raise AttributeError("No model provided")
-            statement = select(cls.model).where(cls.model.id == id)
+            statement = select(cls.model).where(cls.model.item_id == item_id)
             category = (await session.execute(statement)).scalars().first()
             if not category:
                 raise ValueError("No such category")

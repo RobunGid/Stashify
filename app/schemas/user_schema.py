@@ -23,5 +23,5 @@ class UserSchema(PlainUserSchema):
     quiz_ratings: List[QuizRatingWithoutUserSchema] = Field(default_factory=list)
 
 
-from schemas.quiz_rating_schema import QuizRatingWithoutUserSchema
-from schemas.quiz_result_schema import QuizResultWithoutUserAndQuizSchema
+from schemas.quiz_rating_schema import QuizRatingWithoutUserSchema  # noqa
+from schemas.quiz_result_schema import QuizResultWithoutUserAndQuizSchema  # noqa

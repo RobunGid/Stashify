@@ -225,7 +225,7 @@ async def delete_resource_name_confirm(callback: CallbackQuery, state: FSMContex
         {},
     )
     try:
-        await ResourceManager.delete(id=resource_data["resource_id"])
+        await ResourceManager.delete(resource_id=resource_data["resource_id"])
     except IntegrityError, ValueError:
         await callback.message.answer(
             text=t(

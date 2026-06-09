@@ -21,4 +21,4 @@ class QuizRatingSchema(BaseModel):
     user: UserSchema
 
 
-from schemas.user_schema import UserSchema
+from schemas.user_schema import UserSchema  # noqa

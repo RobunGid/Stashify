@@ -22,4 +22,4 @@ class QuizQuestionWithoutResourceSchema(QuizQuestionBaseSchema):
     quiz: PlainQuizSchema
 
 
-from schemas.quiz_schema import PlainQuizSchema, QuizSchema
+from schemas.quiz_schema import PlainQuizSchema, QuizSchema  # noqa

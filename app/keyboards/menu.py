@@ -1,8 +1,8 @@
 from abc import ABC
 from dataclasses import dataclass
 
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from keyboards.base import BaseKeyboardBuilder
 
@@ -25,8 +25,9 @@ class BaseMenuKeyboardBuilder(BaseKeyboardBuilder, ABC):
             [InlineKeyboardButton(text=self.i18n.get("main-menu-keyboard-resources"), callback_data="resources")],
             [
                 InlineKeyboardButton(
-                    text=self.i18n.get("main-menu-keyboard-search-resource"), callback_data="search_resource"
-                )
+                    text=self.i18n.get("main-menu-keyboard-search-resource"),
+                    callback_data="search_resource",
+                ),
             ],
             [InlineKeyboardButton(text=self.i18n.get("main-menu-keyboard-favorite"), callback_data="list_favorites")],
         ]
@@ -47,18 +48,22 @@ class AdminMenuKeyboardBuilder(BaseMenuKeyboardBuilder):
         return [
             [
                 InlineKeyboardButton(
-                    text=self.i18n.get("main-menu-keyboard-manage-resources"), callback_data="manage_resources"
+                    text=self.i18n.get("main-menu-keyboard-manage-resources"),
+                    callback_data="manage_resources",
                 ),
                 InlineKeyboardButton(
-                    text=self.i18n.get("main-menu-keyboard-manage-categories"), callback_data="manage_categories"
+                    text=self.i18n.get("main-menu-keyboard-manage-categories"),
+                    callback_data="manage_categories",
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text=self.i18n.get("main-menu-keyboard-manage-users"), callback_data="manage_users"
+                    text=self.i18n.get("main-menu-keyboard-manage-users"),
+                    callback_data="manage_users",
                 ),
                 InlineKeyboardButton(
-                    text=self.i18n.get("main-menu-keyboard-manage-quizes"), callback_data="manage_quizes"
+                    text=self.i18n.get("main-menu-keyboard-manage-quizes"),
+                    callback_data="manage_quizes",
                 ),
             ],
         ]
@@ -70,10 +75,12 @@ class ManagerMenuKeyboardBuilder(BaseMenuKeyboardBuilder):
         return [
             [
                 InlineKeyboardButton(
-                    text=self.i18n.get("main-menu-keyboard-manage-resources"), callback_data="manage_resources"
+                    text=self.i18n.get("main-menu-keyboard-manage-resources"),
+                    callback_data="manage_resources",
                 ),
                 InlineKeyboardButton(
-                    text=self.i18n.get("main-menu-keyboard-manage-quizes"), callback_data="manage_quizes"
+                    text=self.i18n.get("main-menu-keyboard-manage-quizes"),
+                    callback_data="manage_quizes",
                 ),
             ],
         ]

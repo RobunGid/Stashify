@@ -20,4 +20,4 @@ class ResourceImageSchema(ResourceImageWithoutResourceSchema):
     resource: ResourceSchema
 
 
-from schemas.resource_schema import ResourceSchema
+from schemas.resource_schema import ResourceSchema  # noqa

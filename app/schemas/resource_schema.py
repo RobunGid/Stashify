@@ -27,7 +27,7 @@ class ResourceSchema(ResourceSchemaWithoutCategory):
     images: list["ResourceImageWithoutResourceSchema"] = Field(default_factory=list)
 
 
-from schemas.category_schema import CategorySchemaWithoutResources
-from schemas.quiz_schema import QuizSchemaWithoutResource
-from schemas.resource_image_schema import ResourceImageWithoutResourceSchema
-from schemas.resource_rating_schema import ResourceRatingWithoutUserAndResourceSchema
+from schemas.category_schema import CategorySchemaWithoutResources  # noqa
+from schemas.quiz_schema import QuizSchemaWithoutResource  # noqa
+from schemas.resource_image_schema import ResourceImageWithoutResourceSchema  # noqa
+from schemas.resource_rating_schema import ResourceRatingWithoutUserAndResourceSchema  # noqa

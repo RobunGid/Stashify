@@ -11,4 +11,4 @@ class CategorySchema(CategorySchemaWithoutResources):
     resources: list[ResourceSchemaWithoutCategory] = Field(default_factory=list)
 
 
-from schemas.resource_schema import ResourceSchemaWithoutCategory
+from schemas.resource_schema import ResourceSchemaWithoutCategory  # noqa

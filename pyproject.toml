@@ -117,3 +117,7 @@ line-length = 120
 
 [tool.mypy]
 explicit_package_bases = true
+[dependency-groups]
+dev = [
+    "pre-commit (>=4.6.0,<5.0.0)"
+]
