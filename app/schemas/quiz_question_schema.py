@@ -1,8 +1,11 @@
-from typing import List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, UUID4
 
-from schemas.quiz_schema import PlainQuizSchema, QuizSchema
+if TYPE_CHECKING:
+    from schemas.quiz_schema import PlainQuizSchema, QuizSchema
 
 
 class QuizQuestionBaseSchema(BaseModel):
@@ -11,10 +14,10 @@ class QuizQuestionBaseSchema(BaseModel):
 
     quiz_id: UUID4
 
-    options: List[str]
-    right_options: List[int]
+    options: list[str]
+    right_options: list[int]
 
-    image: Optional[str]
+    image: str | None
     model_config = ConfigDict(from_attributes=True)
 
 

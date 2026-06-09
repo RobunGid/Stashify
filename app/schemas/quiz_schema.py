@@ -1,9 +1,13 @@
-from typing import List
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field, UUID4
 
 from schemas.quiz_question_schema import QuizQuestionBaseSchema
-from schemas.resource_schema import ResourceSchema
+
+if TYPE_CHECKING:
+    from schemas.resource_schema import ResourceSchema
 
 
 class PlainQuizSchema(BaseModel):
@@ -15,7 +19,7 @@ class PlainQuizSchema(BaseModel):
 
 
 class QuizSchemaWithoutResource(PlainQuizSchema):
-    questions: List[QuizQuestionBaseSchema] = Field(default_factory=list)
+    questions: list[QuizQuestionBaseSchema] = Field(default_factory=list)
 
 
 class QuizSchema(QuizSchemaWithoutResource):

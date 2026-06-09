@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, Field, UUID4
 
 from schemas.quiz_schema import PlainQuizSchema
-from schemas.user_schema import PlainUserSchema
+
+if TYPE_CHECKING:
+    from schemas.user_schema import PlainUserSchema
 
 
 class QuizResultWithoutUserAndQuizSchema(BaseModel):
@@ -19,5 +23,5 @@ class QuizResultWithoutUserAndQuizSchema(BaseModel):
 
 
 class QuizResultSchema(QuizResultWithoutUserAndQuizSchema):
-    user: Optional[PlainUserSchema] = Field(default_factory=lambda: None)
-    quiz: Optional[PlainQuizSchema] = Field(default_factory=lambda: None)
+    user: PlainUserSchema | None = Field(default_factory=lambda: None)
+    quiz: PlainQuizSchema | None = Field(default_factory=lambda: None)

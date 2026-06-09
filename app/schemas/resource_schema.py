@@ -1,6 +1,6 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import List, Optional
-from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, UUID4
 
@@ -11,10 +11,6 @@ from schemas.resource_rating_schema import ResourceRatingWithoutUserAndResourceS
 from utils.OptionalSchema import AllOptional
 
 
-def default_category():
-    return CategorySchemaWithoutResources(id=uuid4(), name="")
-
-
 class ResourceSchemaWithoutCategory(BaseModel):
     resource_id: UUID4
 
@@ -22,21 +18,21 @@ class ResourceSchemaWithoutCategory(BaseModel):
     description: str
     links: str
     tags: str
-    verified: bool = Field(default_factory=lambda: False)
+    verified: bool = Field(default=False)
 
     category_id: UUID4
-    quiz: Optional["QuizSchemaWithoutResource"] = Field(default_factory=lambda: None)
+    quiz: QuizSchemaWithoutResource | None = Field(default=None)
 
     created_at: datetime = Field(default_factory=datetime.now)
     model_config = ConfigDict(from_attributes=True)
 
 
 class ResourceSchema(ResourceSchemaWithoutCategory):
-    category: "CategorySchemaWithoutResources" = Field(default_factory=default_category)
-    ratings: List["ResourceRatingWithoutUserAndResourceSchema"] = Field(
+    category: CategorySchemaWithoutResources
+    ratings: list[ResourceRatingWithoutUserAndResourceSchema] = Field(
         default_factory=list,
     )
-    images: List["ResourceImageWithoutResourceSchema"] = Field(default_factory=list)
+    images: list[ResourceImageWithoutResourceSchema] = Field(default_factory=list)
 
 
 class UpdateResourceSchemaWithoutCategory(
@@ -44,3 +40,8 @@ class UpdateResourceSchemaWithoutCategory(
     metaclass=AllOptional,
 ):
     pass
+
+
+from schemas.category_schema import CategorySchema  # noqa: E402
+
+CategorySchema.model_rebuild()

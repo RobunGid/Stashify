@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 
 from schemas.quiz_schema import QuizSchema
-from schemas.user_schema import UserSchema
+
+if TYPE_CHECKING:
+    from schemas.user_schema import UserSchema
 
 
 class QuizRatingSchema(BaseModel):

@@ -38,6 +38,6 @@ all:
 all-down:
 	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} ${ENV} down
 
-.PHONY: test
+.PHONY: app-test
 app-test:
 	${EXEC} ${APP_CONTAINER} pytest

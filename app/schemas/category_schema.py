@@ -1,9 +1,13 @@
-from typing import List
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, Field, UUID4
 
-from schemas.resource_schema import ResourceSchemaWithoutCategory
 from utils.OptionalSchema import AllOptional
+
+if TYPE_CHECKING:
+    from schemas.resource_schema import ResourceSchemaWithoutCategory
 
 
 class CategorySchemaWithoutResources(BaseModel):
@@ -13,7 +17,7 @@ class CategorySchemaWithoutResources(BaseModel):
 
 
 class CategorySchema(CategorySchemaWithoutResources):
-    resources: List[ResourceSchemaWithoutCategory] = Field(default_factory=list)
+    resources: list[ResourceSchemaWithoutCategory] = Field(default_factory=list)
 
 
 class UpdateCategorySchema(CategorySchemaWithoutResources, metaclass=AllOptional):
