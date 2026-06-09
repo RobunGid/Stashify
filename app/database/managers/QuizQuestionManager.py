@@ -67,14 +67,14 @@ class QuizQuestionManager:
         async with AsyncSessionLocal() as session:
             statement = (
                 select(QuizQuestionModel)
-                .join(QuizModel, QuizModel.id == QuizQuestionModel.quiz_id)
+                .join(QuizModel, QuizModel.quiz_id == QuizQuestionModel.quiz_id)
                 .where(QuizModel.resource_id == resource_id)
             )
             if quiz_question_number is not None:
                 quiz_questions = (await session.execute(statement)).scalars().all()
                 await session.delete(quiz_questions[quiz_question_number])
             if quiz_question_id is not None:
-                statement = statement.where(QuizQuestionModel.id == quiz_question_id)
+                statement = statement.where(QuizQuestionModel.quiz_question_id == quiz_question_id)
                 quiz_question = (await session.execute(statement)).scalars().first()
                 await session.delete(quiz_question)
             await session.commit()
@@ -104,7 +104,7 @@ class QuizQuestionManager:
         async with AsyncSessionLocal() as session:
             statement = (
                 update(QuizQuestionModel)
-                .where(QuizQuestionModel.id == quiz_question_data.id)
+                .where(QuizQuestionModel.quiz_question_id == quiz_question_data.quiz_question_id)
                 .values(**quiz_question_data.model_dump())
             )
             await session.execute(statement)

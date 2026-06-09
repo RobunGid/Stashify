@@ -1,11 +1,4 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
 from pydantic import BaseModel, ConfigDict, UUID4
-
-if TYPE_CHECKING:
-    from schemas.quiz_schema import PlainQuizSchema, QuizSchema
 
 
 class QuizQuestionBaseSchema(BaseModel):
@@ -27,3 +20,6 @@ class QuizQuestionSchema(QuizQuestionBaseSchema):
 
 class QuizQuestionWithoutResourceSchema(QuizQuestionBaseSchema):
     quiz: PlainQuizSchema
+
+
+from schemas.quiz_schema import PlainQuizSchema, QuizSchema

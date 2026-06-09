@@ -107,7 +107,7 @@ async def delete_category_choose(
     )
     categories_data = await state.get_data()
     category = next(
-        (category for category in categories_data["categories"] if category.id == callback_data.category_id),
+        (category for category in categories_data["categories"] if category.category_id == callback_data.category_id),
         None,
     )
     try:

@@ -1,14 +1,6 @@
-from __future__ import annotations
-
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field, UUID4
-
-from schemas.user_schema import PlainUserSchema
-
-if TYPE_CHECKING:
-    from schemas.resource_schema import ResourceSchema
 
 
 class ResourceRatingWithoutUserAndResourceSchema(BaseModel):
@@ -26,3 +18,7 @@ class ResourceRatingWithoutUserAndResourceSchema(BaseModel):
 class ResourceRatingSchema(ResourceRatingWithoutUserAndResourceSchema):
     user: PlainUserSchema
     resource: ResourceSchema
+
+
+from schemas.user_schema import PlainUserSchema
+from schemas.resource_schema import ResourceSchema

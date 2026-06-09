@@ -16,7 +16,7 @@ class FavoriteManager:
     async def create(cls, favorite_data: FavoriteSchema):
         async with AsyncSessionLocal() as session:
             favorite = FavoriteModel(
-                id=favorite_data.id,
+                id=favorite_data.favorite_id,
                 user_id=favorite_data.user_id,
                 resource_id=favorite_data.resource_id,
                 added_at=favorite_data.added_at,
@@ -78,7 +78,7 @@ class FavoriteManager:
     async def delete(cls, user_id=None, resource_id=None, favorite_id=None):
         async with AsyncSessionLocal() as session:
             if favorite_id:
-                statement = select(FavoriteModel).where(FavoriteModel.id == favorite_id)
+                statement = select(FavoriteModel).where(FavoriteModel.favorite_id == favorite_id)
                 favorite = (await session.execute(statement)).scalars().first()
                 await session.delete(favorite)
                 await session.commit()

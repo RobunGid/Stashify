@@ -36,14 +36,14 @@ class CategoryManager(BaseManager):
                     .select_from(QuizModel)
                     .outerjoin(
                         ResourceModel,
-                        ResourceModel.id == QuizModel.resource_id,
+                        ResourceModel.resource_id == QuizModel.resource_id,
                     )
                     .join(
                         CategoryModel,
-                        CategoryModel.id == ResourceModel.category_id,
+                        CategoryModel.category_id == ResourceModel.category_id,
                     )
                 )
-                statement = statement.where(CategoryModel.id.in_(subquery))
+                statement = statement.where(CategoryModel.category_id.in_(subquery))
 
             if has_resources:
                 subquery = (
@@ -51,10 +51,10 @@ class CategoryManager(BaseManager):
                     .select_from(CategoryModel)
                     .outerjoin(
                         ResourceModel,
-                        ResourceModel.category_id == CategoryModel.id,
+                        ResourceModel.category_id == CategoryModel.category_id,
                     )
                 )
-                statement = statement.where(CategoryModel.id.in_(subquery))
+                statement = statement.where(CategoryModel.category_id.in_(subquery))
 
             if favorites_user_id:
                 subquery = (
@@ -62,17 +62,17 @@ class CategoryManager(BaseManager):
                     .select_from(CategoryModel)
                     .outerjoin(
                         ResourceModel,
-                        ResourceModel.category_id == CategoryModel.id,
+                        ResourceModel.category_id == CategoryModel.category_id,
                     )
                     .outerjoin(
                         FavoriteModel,
-                        FavoriteModel.resource_id == ResourceModel.id,
+                        FavoriteModel.resource_id == ResourceModel.resource_id,
                     )
                     .where(
                         FavoriteModel.user_id == favorites_user_id,
                     )
                 )
-                statement = statement.where(CategoryModel.id.in_(subquery))
+                statement = statement.where(CategoryModel.category_id.in_(subquery))
 
             categories = (await session.execute(statement)).scalars().all()
             return [CategorySchema.model_validate(category, from_attributes=True) for category in categories]

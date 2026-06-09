@@ -42,10 +42,10 @@ async def list_resource_resource_add_favorite(
     resources = state_data["resources"]
     formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
-    favorite = FavoriteSchema(user_id=user_id, resource_id=resource.id)
+    favorite = FavoriteSchema(user_id=user_id, resource_id=resource.resource_id)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.id,
+        resource_id=resource.resource_id,
     )
     await FavoriteManager.create(favorite)
     await state.update_data(resources=resources)
@@ -91,10 +91,10 @@ async def list_resource_resource_remove_favorite(
     user_id = str(callback.from_user.id)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.id,
+        resource_id=resource.resource_id,
     )
 
-    await FavoriteManager.delete(user_id=user_id, resource_id=resource.id)
+    await FavoriteManager.delete(user_id=user_id, resource_id=resource.resource_id)
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
         photo=resource.image,

@@ -126,7 +126,7 @@ def search_resource_resource_item_keyboard(
             text=t("favorite.add", user_lang),
             callback_data=SearchResourceItemCallbackFactory(
                 action="add_favorite",
-                resource_id=resource.id,
+                resource_id=resource.resource_id,
                 rating=None,
             ),
         )
@@ -135,7 +135,7 @@ def search_resource_resource_item_keyboard(
             text=t("favorite.remove", user_lang),
             callback_data=SearchResourceItemCallbackFactory(
                 action="remove_favorite",
-                resource_id=resource.id,
+                resource_id=resource.resource_id,
                 rating=None,
             ),
         )
@@ -148,7 +148,7 @@ def search_resource_resource_item_keyboard(
             text=symbol,
             callback_data=SearchResourceItemCallbackFactory(
                 action="rate",
-                resource_id=resource.id,
+                resource_id=resource.resource_id,
                 rating=i,
             ),
         )

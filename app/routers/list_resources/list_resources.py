@@ -194,11 +194,11 @@ async def list_resource_resource_select(
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
     images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
-    is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
+    is_favorite = any(resource.resource_id == favorite.resource_id for favorite in favorites)
 
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.id,
+        resource_id=resource.resource_id,
     )
 
     await state.update_data(resources=resources, resource=resource)
@@ -257,10 +257,10 @@ async def list_resource_resource_change_page(
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
     images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
-    is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
+    is_favorite = any(resource.resource_id == favorite.resource_id for favorite in favorites)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.id,
+        resource_id=resource.resource_id,
     )
     await state.update_data(resources=resources, resource=resource)
     keyboard = list_resources_resource_item_keyboard(

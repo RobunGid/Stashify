@@ -30,7 +30,7 @@ def manage_quizes_delete_category_list_keyboard(
             text=category.name,
             callback_data=DeleteQuizChooseCategoryCallbackFactory(
                 action="select",
-                category_id=category.id,
+                category_id=category.category_id,
                 page=0,
             ),
         )

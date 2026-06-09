@@ -1,4 +1,6 @@
 import asyncio
+from aiogram_i18n import I18nMiddleware
+from aiogram_i18n.cores import FluentRuntimeCore
 
 from database.orm import init_models
 from routers import common, manage_users, menu
@@ -25,6 +27,10 @@ async def main():
         manage_users.router,
     )
 
+    i18n_middleware = I18nMiddleware(core=FluentRuntimeCore(path="locales/{locale}"))
+
+    dp.message.middleware(i18n_middleware)
+    i18n_middleware.setup(dispatcher=dp)
     await dp.start_polling(bot)
 
 

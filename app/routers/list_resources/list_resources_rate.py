@@ -44,14 +44,14 @@ async def list_resource_resource_rate(
     formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
-    is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
+    is_favorite = any(resource.resource_id == favorite.resource_id for favorite in favorites)
     rating = callback_data.rating
     existing_resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.id,
+        resource_id=resource.resource_id,
     )
     if existing_resource_rating:
-        await ResourceRatingManager.delete(user_id=user_id, resource_id=resource.id)
+        await ResourceRatingManager.delete(user_id=user_id, resource_id=resource.resource_id)
     resource_rating = ResourceRatingWithoutUserAndResourceSchema(
         id=uuid4(),
         resource_id=resource_id,

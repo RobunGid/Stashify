@@ -30,7 +30,7 @@ def manage_categories_edit_keyboard(
             text=category.name,
             callback_data=EditCategoryIdCallbackFactory(
                 action="select",
-                category_id=category.id,
+                category_id=category.category_id,
                 page=0,
             ),
         )

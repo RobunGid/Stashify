@@ -1,12 +1,8 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field, UUID4
-
-if TYPE_CHECKING:
-    from schemas.resource_schema import ResourceSchema
 
 
 class ResourceImageWithoutResourceSchema(BaseModel):
@@ -22,3 +18,6 @@ class ResourceImageWithoutResourceSchema(BaseModel):
 
 class ResourceImageSchema(ResourceImageWithoutResourceSchema):
     resource: ResourceSchema
+
+
+from schemas.resource_schema import ResourceSchema

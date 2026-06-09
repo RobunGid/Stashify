@@ -339,7 +339,7 @@ async def add_question_confirm(message: Message, state: FSMContext):
     state_data = await state.get_data()
     resource_id = state_data["resource_id"]
     quiz = await QuizManager.get_one(resource_id=resource_id)
-    quiz_id = UUID(str(quiz.id))
+    quiz_id = UUID(str(quiz.quiz_id))
     question_data = message.html_text.split("\n")
     question_text = question_data[0]
     question_options = question_data[1:]
@@ -454,14 +454,14 @@ async def edit_question_text(message: Message, state: FSMContext):
     questions = await QuizQuestionManager.get_many(resource_id)
     question_id = questions[question_number].id
     quiz = await QuizManager.get_one(resource_id=resource_id)
-    quiz_id = UUID(str(quiz.id))
+    quiz_id = UUID(str(quiz.quiz_id))
     question_data = message.html_text.split("\n")
     question_text = question_data[0]
     question_options = question_data[1:]
     right_options = [index for index, option in enumerate(question_options) if option.startswith("!")]
 
     question = QuizQuestionBaseSchema(
-        id=question_id,
+        quiz_question_id=question_id,
         quiz_id=quiz_id,
         image=message.photo[0].file_id if message.photo else None,
         options=question_options,

@@ -5,7 +5,7 @@ from aiogram.types import CallbackQuery, Message
 from aiogram_i18n import I18nContext
 
 from database.managers import UserManager
-from keyboards.main_menu_keyboard import main_menu_keyboard
+from routers.constants import ROLE_MENU_KEYBOARD_BUILDER_MAP
 from settings.config import bot
 
 router = Router()
@@ -16,13 +16,16 @@ async def main_menu_command(message: Message, i18n: I18nContext):
     if not message.from_user or not message.from_user.id:
         return
 
-    user = await UserManager.get_one(str(message.from_user.id))
-    user_role = user.role
+    existing_user = await UserManager.get_one(str(message.from_user.id))
+    existing_user_role = existing_user.role
 
-    reply_keyboard = main_menu_keyboard(user_role, message.from_user.language_code)
+    KeyboardBuilder = ROLE_MENU_KEYBOARD_BUILDER_MAP[existing_user_role]
+    keyboard_builder = KeyboardBuilder(i18n)
+    keyboard = keyboard_builder.build()
+
     await message.answer(
         i18n.get("main-menu-text"),
-        reply_markup=reply_keyboard,
+        reply_markup=keyboard,
     )
 
 
@@ -35,11 +38,14 @@ async def main_menu(callback: CallbackQuery, i18n: I18nContext):
         message_id=callback.message.message_id,
     )
 
-    user = await UserManager.get_one(str(callback.from_user.id))
-    user_role = user.role
-    reply_keyboard = main_menu_keyboard(user_role, callback.from_user.language_code)
+    existing_user = await UserManager.get_one(str(callback.from_user.id))
+    existing_user_role = existing_user.role
+
+    KeyboardBuilder = ROLE_MENU_KEYBOARD_BUILDER_MAP[existing_user_role]
+    keyboard_builder = KeyboardBuilder(i18n)
+    keyboard = keyboard_builder.build()
 
     await callback.message.answer(
         i18n.get("main-menu-text"),
-        reply_markup=reply_keyboard,
+        reply_markup=keyboard,
     )

@@ -14,7 +14,7 @@ class QuizModel(Base):
 
     resource_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("resource.id"),
+        ForeignKey("resource.resource_id"),
         unique=True,
         nullable=False,
     )

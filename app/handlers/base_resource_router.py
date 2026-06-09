@@ -51,10 +51,10 @@ class BaseResourceRouter(ABC):
     ):
         formatted_text = format_resource_text(resource)
         favorites = await FavoriteManager.get_many(user_id=user_id)
-        is_favorite = any(resource.id == fav.resource_id for fav in favorites)
+        is_favorite = any(resource.resource_id == fav.resource_id for fav in favorites)
         resource_rating = await ResourceRatingManager.get_one(
             user_id=user_id,
-            resource_id=resource.id,
+            resource_id=resource.resource_id,
         )
 
         await message.answer_photo(

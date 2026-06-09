@@ -31,7 +31,7 @@ class ResourceManager:
     @classmethod
     async def delete(cls, id: UUID4):
         async with AsyncSessionLocal() as session:
-            statement = select(ResourceModel).where(ResourceModel.id == id)
+            statement = select(ResourceModel).where(ResourceModel.resource_id == id)
             resource = (await session.execute(statement)).scalars().first()
             if not resource:
                 raise ValueError("No such resource")
@@ -42,7 +42,9 @@ class ResourceManager:
     async def update(cls, resource_data: ResourceSchema):
         async with AsyncSessionLocal() as session:
             statement = (
-                update(ResourceModel).where(ResourceModel.id == resource_data.id).values(**resource_data.model_dump())
+                update(ResourceModel)
+                .where(ResourceModel.resource_id == resource_data.resource_id)
+                .values(**resource_data.model_dump())
             )
             await session.execute(statement)
             await session.commit()
@@ -51,7 +53,7 @@ class ResourceManager:
     async def get_one(cls, resource_id: UUID4) -> ResourceSchema | None:
         async with AsyncSessionLocal() as session:
             statement = select(ResourceModel).where(
-                ResourceModel.id == resource_id,
+                ResourceModel.resource_id == resource_id,
             )
 
             resource = (await session.execute(statement)).scalars().first()
@@ -102,7 +104,7 @@ class ResourceManager:
             if favorites_user_id:
                 statement = statement.join(
                     FavoriteModel,
-                    FavoriteModel.resource_id == ResourceModel.id,
+                    FavoriteModel.resource_id == ResourceModel.resource_id,
                 ).where(FavoriteModel.user_id == favorites_user_id)
 
             resources = (await session.execute(statement)).unique().scalars().all()

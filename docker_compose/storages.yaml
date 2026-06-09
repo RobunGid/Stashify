@@ -1,5 +1,5 @@
 services:
-  postgresql:
+  stashify-database:
     image: postgres:17.5
     container_name: stashify-database
     environment:
@@ -10,7 +10,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./pgdata:/var/lib/postgresql/data/pgdata
+      - ../pgdata:/var/lib/postgresql/data/pgdata
     networks:
       - backend
 

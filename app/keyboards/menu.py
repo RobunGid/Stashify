@@ -22,15 +22,21 @@ class BaseMenuKeyboardBuilder(BaseKeyboardBuilder, ABC):
 
     def _base_buttons(self) -> list[list[InlineKeyboardButton]]:
         return [
-            [InlineKeyboardButton(text=self.i18n.get("main-menu-keyboard.resources"), callback_data="resources")],
+            [InlineKeyboardButton(text=self.i18n.get("main-menu-keyboard-resources"), callback_data="resources")],
             [
                 InlineKeyboardButton(
-                    text=self.i18n.get("main-menu-keyboard.search_resource"), callback_data="search_resource"
+                    text=self.i18n.get("main-menu-keyboard-search-resource"), callback_data="search_resource"
                 )
             ],
-            [InlineKeyboardButton(text=self.i18n.get("main-menu-keyboard.favorite"), callback_data="list_favorites")],
+            [InlineKeyboardButton(text=self.i18n.get("main-menu-keyboard-favorite"), callback_data="list_favorites")],
         ]
 
+    def _role_buttons(self) -> list[list[InlineKeyboardButton]]:
+        return []
+
+
+@dataclass
+class UserMenuKeyboardBuilder(BaseMenuKeyboardBuilder):
     def _role_buttons(self) -> list[list[InlineKeyboardButton]]:
         return []
 

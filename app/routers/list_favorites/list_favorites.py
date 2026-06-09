@@ -269,7 +269,7 @@ class ListFavoritesRouter(BaseResourceRouter):
         if not resource:
             return
         user_id = str(callback.from_user.id)
-        await self._handle_add_favorite(user_id=user_id, resource_id=resource.id)
+        await self._handle_add_favorite(user_id=user_id, resource_id=resource.resource_id)
         await self._send_resource_photo(
             message=callback.message,
             resource=resource,
@@ -300,7 +300,7 @@ class ListFavoritesRouter(BaseResourceRouter):
         if not resource:
             return
         user_id = str(callback.from_user.id)
-        await self._handle_remove_favorite(user_id=user_id, resource_id=resource.id)
+        await self._handle_remove_favorite(user_id=user_id, resource_id=resource.resource_id)
         await self._send_resource_photo(
             message=callback.message,
             resource=resource,
@@ -334,7 +334,7 @@ class ListFavoritesRouter(BaseResourceRouter):
         user_id = str(callback.from_user.id)
         await self._handle_rate(
             user_id=user_id,
-            resource_id=resource.id,
+            resource_id=resource.resource_id,
             rating=callback_data.rating,
         )
         await self._send_resource_photo(

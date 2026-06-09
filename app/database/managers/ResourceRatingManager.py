@@ -48,7 +48,7 @@ class ResourceRatingManager:
         async with AsyncSessionLocal() as session:
             if resource_rating_id:
                 statement = select(ResourceRatingModel).where(
-                    ResourceRatingModel.id == resource_rating_id,
+                    ResourceRatingModel.resource_rating_id == resource_rating_id,
                 )
                 favorite = (await session.execute(statement)).scalars().first()
                 await session.delete(favorite)

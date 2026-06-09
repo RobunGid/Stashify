@@ -23,7 +23,7 @@ class ResourceImageManager:
     async def delete(cls, resource_image_id: UUID4):
         async with AsyncSessionLocal() as session:
             statement = select(ResourceImageModel).where(
-                ResourceImageModel.id == resource_image_id,
+                ResourceImageModel.resource_image_id == resource_image_id,
             )
             favorite = (await session.execute(statement)).scalars().first()
             await session.delete(favorite)
@@ -33,7 +33,7 @@ class ResourceImageManager:
     async def get_one(cls, resource_image_id: UUID4) -> ResourceImageModel | None:
         async with AsyncSessionLocal() as session:
             statement = select(ResourceImageModel).where(
-                ResourceImageModel.id == resource_image_id,
+                ResourceImageModel.resource_image_id == resource_image_id,
             )
             resource_image = (await session.execute(statement)).scalars().first()
 

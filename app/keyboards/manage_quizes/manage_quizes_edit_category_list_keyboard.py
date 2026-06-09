@@ -30,7 +30,7 @@ def manage_quizes_edit_category_list_keyboard(
             text=category.name,
             callback_data=EditQuizChooseCategoryCallbackFactory(
                 action="select",
-                category_id=category.id,
+                category_id=category.category_id,
                 page=0,
             ),
         )

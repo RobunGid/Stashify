@@ -33,7 +33,7 @@ def manage_resources_edit_category_list_keyboard(
             text=category.name,
             callback_data=EditResourceChooseCategoryCallbackFactory(
                 action="select",
-                category_id=category.id,
+                category_id=category.category_id,
                 page=0,
             ),
         )

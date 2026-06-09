@@ -218,7 +218,7 @@ async def edit_resource_name(callback: CallbackQuery, state: FSMContext):
     )
     state_data = await state.get_data()
     resource_name = next(
-        (resource.name for resource in state_data["resources"] if resource.id == state_data["resource_id"]),
+        (resource.name for resource in state_data["resources"] if resource.resource_id == state_data["resource_id"]),
         "Unknown",
     )
 
@@ -283,7 +283,11 @@ async def edit_resource_description(callback: CallbackQuery, state: FSMContext):
     )
     state_data = await state.get_data()
     resource_description = next(
-        (resource.description for resource in state_data["resources"] if resource.id == state_data["resource_id"]),
+        (
+            resource.description
+            for resource in state_data["resources"]
+            if resource.resource_id == state_data["resource_id"]
+        ),
         "Unknown",
     )
 
@@ -348,7 +352,7 @@ async def edit_resource_tags(callback: CallbackQuery, state: FSMContext):
     )
     state_data = await state.get_data()
     resource_tags = next(
-        (resource.tags for resource in state_data["resources"] if resource.id == state_data["resource_id"]),
+        (resource.tags for resource in state_data["resources"] if resource.resource_id == state_data["resource_id"]),
         "Unknown",
     )
 
@@ -413,7 +417,7 @@ async def edit_resource_image(callback: CallbackQuery, state: FSMContext):
     )
     state_data = await state.get_data()
     resource_image = next(
-        (resource.image for resource in state_data["resources"] if resource.id == state_data["resource_id"]),
+        (resource.image for resource in state_data["resources"] if resource.resource_id == state_data["resource_id"]),
         "Unknown",
     )
 

@@ -46,7 +46,7 @@ class FavoritesResourceListKeyboard(BaseListKeyboard):
                 text=resource.name,
                 callback_data=ListFavoritesChooseResourceCallbackFactory(
                     action="select",
-                    resource_id=resource.id,
+                    resource_id=resource.resource_id,
                     page=0,
                 ),
             )

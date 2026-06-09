@@ -1,13 +1,6 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
 from pydantic import BaseModel, Field, UUID4
 
 from utils.OptionalSchema import AllOptional
-
-if TYPE_CHECKING:
-    from schemas.resource_schema import ResourceSchemaWithoutCategory
 
 
 class CategorySchemaWithoutResources(BaseModel):
@@ -22,3 +15,6 @@ class CategorySchema(CategorySchemaWithoutResources):
 
 class UpdateCategorySchema(CategorySchemaWithoutResources, metaclass=AllOptional):
     pass
+
+
+from schemas.resource_schema import ResourceSchemaWithoutCategory

@@ -4,8 +4,6 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from database.models.user import Role
-from schemas.quiz_rating_schema import QuizRatingSchema
-from schemas.quiz_result_schema import QuizResultWithoutUserAndQuizSchema
 
 
 class PlainUserSchema(BaseModel):
@@ -22,4 +20,8 @@ class UserSchema(PlainUserSchema):
     quiz_results: List[QuizResultWithoutUserAndQuizSchema] = Field(
         default_factory=list,
     )
-    quiz_ratings: List[QuizRatingSchema] = Field(default_factory=list)
+    quiz_ratings: List[QuizRatingWithoutUserSchema] = Field(default_factory=list)
+
+
+from schemas.quiz_rating_schema import QuizRatingWithoutUserSchema
+from schemas.quiz_result_schema import QuizResultWithoutUserAndQuizSchema

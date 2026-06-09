@@ -13,7 +13,7 @@ class UserManager:
         async with AsyncSessionLocal() as session:
             statement = (
                 select(UserModel)
-                .where(UserModel.id == user_id)
+                .where(UserModel.user_id == user_id)
                 .options(
                     selectinload(UserModel.quiz_results),
                 )
@@ -34,7 +34,7 @@ class UserManager:
     @classmethod
     async def create(cls, user_data: UserSchema):
         async with AsyncSessionLocal() as session:
-            statement = select(UserModel).where(UserModel.id == user_data.id)
+            statement = select(UserModel).where(UserModel.user_id == user_data.user_id)
             existing_user = (await session.execute(statement)).scalars().first()
             if existing_user:
                 return

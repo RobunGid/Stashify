@@ -33,7 +33,7 @@ def manage_resources_edit_resource_list_keyboard(
             text=resource.name,
             callback_data=EditResourceChooseResourceCallbackFactory(
                 action="select",
-                resource_id=resource.id,
+                resource_id=resource.resource_id,
                 page=0,
             ),
         )

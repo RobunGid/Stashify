@@ -87,7 +87,7 @@ class FavoritesResourceItemKeyboard(BaseItemKeyboard):
                 text=t("favorite.remove", self.user_lang),
                 callback_data=ListFavoritesItemCallbackFactory(
                     action="remove_favorite",
-                    resource_id=self.resource.id,
+                    resource_id=self.resource.resource_id,
                     rating=0,
                 ),
             )
@@ -96,7 +96,7 @@ class FavoritesResourceItemKeyboard(BaseItemKeyboard):
                 text=t("favorite.add", self.user_lang),
                 callback_data=ListFavoritesItemCallbackFactory(
                     action="add_favorite",
-                    resource_id=self.resource.id,
+                    resource_id=self.resource.resource_id,
                     rating=0,
                 ),
             )
@@ -107,7 +107,7 @@ class FavoritesResourceItemKeyboard(BaseItemKeyboard):
                 text=symbol,
                 callback_data=ListFavoritesItemCallbackFactory(
                     action="rate",
-                    resource_id=self.resource.id,
+                    resource_id=self.resource.resource_id,
                     rating=i,
                 ),
             )

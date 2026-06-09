@@ -12,13 +12,18 @@ from aiogram.filters.callback_data import CallbackData
 class BackKeyboardBuilderMixin:
     i18n: I18nContext
 
-    def build_back_keyboard(self):
-        builder = InlineKeyboardBuilder()
+    def _append_back_button(self, builder: InlineKeyboardBuilder):
         builder.row(
-            InlineKeyboardButton(text=self.i18n.get("common.back"), callback_data="menu"),
+            InlineKeyboardButton(
+                text=self.i18n.get("common-back"),
+                callback_data=self._back_callback(),
+            )
         )
 
-        return builder.as_markup()
+    @abstractmethod
+    def _back_callback(self) -> str:
+        """callback_data for 'Back' button"""
+        pass
 
 
 @dataclass
@@ -52,14 +57,6 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
         self._append_back_button(builder)
         return builder.as_markup()
 
-    def _append_back_button(self, builder: InlineKeyboardBuilder):
-        builder.row(
-            InlineKeyboardButton(
-                text=self.i18n.get("common.back"),
-                callback_data=self._back_callback(),
-            )
-        )
-
     def _build_pagination_buttons(self) -> list[dict]:
         pages, total_pages = self.current_page, self.total_pages
 
@@ -91,10 +88,5 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
 
     @abstractmethod
     def _item_button(self, item: It) -> dict:
-        """Returns kwargs for builder.button() — text and callback_data"""
-        pass
-
-    @abstractmethod
-    def _back_callback(self) -> str:
-        """callback_data для кнопки «Назад»"""
+        """Convert item to kwargs for builder.button() - text and callback_data"""
         pass

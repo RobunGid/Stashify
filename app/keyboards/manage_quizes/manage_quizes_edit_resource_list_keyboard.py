@@ -30,7 +30,7 @@ def manage_quizes_edit_resource_list_keyboard(
             text=resource.name,
             callback_data=EditQuizChooseResourceCallbackFactory(
                 action="select",
-                resource_id=resource.id,
+                resource_id=resource.resource_id,
                 page=0,
             ),
         )

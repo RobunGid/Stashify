@@ -19,7 +19,7 @@ class ResourceModel(Base):
     tags = Column(String, nullable=False)
     verified = Column(Boolean(), default=False, nullable=False)
 
-    category_id = Column(UUID(as_uuid=True), ForeignKey("category.id"), nullable=False)
+    category_id = Column(UUID(as_uuid=True), ForeignKey("category.category_id"), nullable=False)
     category = relationship("CategoryModel", back_populates="resources", lazy="joined")
 
     quiz = relationship(

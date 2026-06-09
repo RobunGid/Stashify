@@ -30,7 +30,7 @@ def search_resource_resource_list_keyboard(
             text=resource.name,
             callback_data=SearchResourceResourceListCallbackFactory(
                 action="select",
-                resource_id=resource.id,
+                resource_id=resource.resource_id,
                 page=0,
             ),
         )

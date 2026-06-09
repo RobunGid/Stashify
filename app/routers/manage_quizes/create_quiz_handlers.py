@@ -201,7 +201,7 @@ async def create_quiz_choose(
     if not resource_id:
         return
 
-    quiz_resource = next(resource for resource in state_data["resources"] if resource.id == resource_id)
+    quiz_resource = next(resource for resource in state_data["resources"] if resource.resource_id == resource_id)
     quiz = QuizSchema(
         id=uuid4(),
         resource_id=resource_id,

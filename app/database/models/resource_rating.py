@@ -13,10 +13,10 @@ class ResourceRatingModel(Base):
 
     resource_rating_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
-    resource_id = Column(UUID(as_uuid=True), ForeignKey("resource.id"), nullable=False)
+    resource_id = Column(UUID(as_uuid=True), ForeignKey("resource.resource_id"), nullable=False)
     resource = relationship("ResourceModel", back_populates="ratings")
 
-    user_id = Column(String, ForeignKey("user.id"), nullable=False)
+    user_id = Column(String, ForeignKey("user.user_id"), nullable=False)
     user = relationship("UserModel", back_populates="resource_ratings")
 
     created_at = Column(DateTime, default=func.now())

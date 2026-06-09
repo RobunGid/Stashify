@@ -57,7 +57,7 @@ async def list_resource_start_quiz(
         ),
         reply_markup=list_resources_start_quiz_confirm_keyboard(
             user_lang=callback.from_user.language_code,
-            resource_id=resource.id,
+            resource_id=resource.resource_id,
             page=page,
         ),
     )
@@ -142,7 +142,7 @@ async def list_resource_quiz_question_answer(
                     question=quiz.questions[question_number + 1],
                     question_number=question_number + 1,
                     page=page,
-                    resource_id=resource.id,
+                    resource_id=resource.resource_id,
                     user_lang=callback.from_user.language_code,
                 ),
             )
@@ -152,7 +152,7 @@ async def list_resource_quiz_question_answer(
                 reply_markup=list_resources_quiz_question_keyboard(
                     question=quiz.questions[question_number + 1],
                     question_number=question_number + 1,
-                    resource_id=resource.id,
+                    resource_id=resource.resource_id,
                     page=page,
                     user_lang=callback.from_user.language_code,
                 ),
@@ -168,15 +168,15 @@ async def list_resource_quiz_question_answer(
         state_data = await state.get_data()
         resource = state_data["resource"]
         existing_quiz_result = await QuizResultManager.get_one(
-            resource.id,
+            resource.resource_id,
             str(callback.from_user.id),
         )
         if existing_quiz_result:
-            await QuizResultManager.delete(resource.id, str(callback.from_user.id))
+            await QuizResultManager.delete(resource.resource_id, str(callback.from_user.id))
         quiz_result = QuizResultSchema(
             id=uuid4(),
             quiz=quiz,
-            quiz_id=quiz.id,
+            quiz_id=quiz.quiz_id,
             user_id=str(callback.from_user.id),
             percent=right_answer_percent,
         )
@@ -188,7 +188,7 @@ async def list_resource_quiz_question_answer(
             ),
             reply_markup=list_resources_quiz_final_keyboard(
                 user_lang=callback.from_user.language_code,
-                resource_id=resource.id,
+                resource_id=resource.resource_id,
                 page=page,
             ),
         )

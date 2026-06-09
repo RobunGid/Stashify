@@ -33,8 +33,8 @@ def list_resources_resource_item_keyboard(
     quiz_percent: int = 0,
 ):
     builder = InlineKeyboardBuilder()
-    resource_id_list = [resource.id for resource in resources]
-    resource_index = resource_id_list.index(resource.id)
+    resource_id_list = [resource.resource_id for resource in resources]
+    resource_index = resource_id_list.index(resource.resource_id)
     resource_quantity = len(resources)
     first_line_buttons_quantity = 1
     if resource_index + 1 != resource_quantity and resource_index != 0:
@@ -137,7 +137,7 @@ def list_resources_resource_item_keyboard(
             text=t("favorite.add", user_lang),
             callback_data=ListResourcesItemCallbackFactory(
                 action="add_favorite",
-                resource_id=resource.id,
+                resource_id=resource.resource_id,
                 rating=0,
             ),
         )
@@ -146,7 +146,7 @@ def list_resources_resource_item_keyboard(
             text=t("favorite.remove", user_lang),
             callback_data=ListResourcesItemCallbackFactory(
                 action="remove_favorite",
-                resource_id=resource.id,
+                resource_id=resource.resource_id,
                 rating=0,
             ),
         )
@@ -156,7 +156,7 @@ def list_resources_resource_item_keyboard(
             text=symbol,
             callback_data=ListResourcesItemCallbackFactory(
                 action="rate",
-                resource_id=resource.id,
+                resource_id=resource.resource_id,
                 rating=i,
             ),
         )
@@ -166,7 +166,7 @@ def list_resources_resource_item_keyboard(
             text=t("start_quiz.completed", user_lang).format(percent=quiz_percent),
             callback_data=ListResourcesItemCallbackFactory(
                 action="start_quiz",
-                resource_id=resource.id,
+                resource_id=resource.resource_id,
                 rating=0,
             ),
         )
@@ -175,7 +175,7 @@ def list_resources_resource_item_keyboard(
             text=t("start_quiz.firstly", user_lang),
             callback_data=ListResourcesItemCallbackFactory(
                 action="start_quiz",
-                resource_id=resource.id,
+                resource_id=resource.resource_id,
                 rating=0,
             ),
         )

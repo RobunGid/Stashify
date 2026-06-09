@@ -193,7 +193,7 @@ async def delete_resource_select(
     resource_id = callback_data.resource_id
     state_data = await state.get_data()
     resource = next(
-        (resource for resource in state_data["resources"] if resource.id == resource_id),
+        (resource for resource in state_data["resources"] if resource.resource_id == resource_id),
         {"name": "Unknown"},
     )
     await state.update_data(resource_id=resource_id)
@@ -221,7 +221,7 @@ async def delete_resource_name_confirm(callback: CallbackQuery, state: FSMContex
     )
     resource_data = await state.get_data()
     resource = next(
-        (resource for resource in resource_data["resources"] if resource.id == resource_data["resource_id"]),
+        (resource for resource in resource_data["resources"] if resource.resource_id == resource_data["resource_id"]),
         {},
     )
     try:

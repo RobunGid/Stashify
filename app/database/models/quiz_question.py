@@ -13,7 +13,7 @@ class QuizQuestionModel(Base):
     quiz_question_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     text = Column(String, nullable=False)
 
-    quiz_id = Column(UUID(as_uuid=True), ForeignKey("quiz.id"), nullable=False)
+    quiz_id = Column(UUID(as_uuid=True), ForeignKey("quiz.quiz_id"), nullable=False)
     quiz = relationship("QuizModel", back_populates="questions")
 
     options = Column(ARRAY(String), nullable=False)

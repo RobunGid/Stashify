@@ -46,7 +46,7 @@ class FavoritesCategoryListKeyboard(BaseListKeyboard):
                 text=category.name,
                 callback_data=ListFavoritesChooseCategoryCallbackFactory(
                     action="select",
-                    category_id=category.id,
+                    category_id=category.category_id,
                     page=0,
                 ),
             )
