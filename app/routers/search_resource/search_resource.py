@@ -7,10 +7,10 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.media_group import MediaGroupBuilder
 
+from aiogram_i18n import I18nContext
 from constants import FIND_RESOURCE_RESOURCES_ON_PAGE
 
 from database.managers import FavoriteManager, ResourceManager, ResourceRatingManager
-from i18n.translate import t
 from keyboards.list_resources.list_resources_resource_list_keyboard import ListResourcesChooseResourceCallbackFactory
 from keyboards.search_resource.search_resource_back_keyboard import search_resource_back_keyboard
 from keyboards.search_resource.search_resource_resource_item_keyboard import (
@@ -36,7 +36,7 @@ class SearchResourceState(StatesGroup):
 
 
 @router.callback_query(F.data == "search_resource")
-async def search_resource_start(callback: CallbackQuery, state: FSMContext):
+async def search_resource_start(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
     await bot.delete_message(
@@ -45,7 +45,7 @@ async def search_resource_start(callback: CallbackQuery, state: FSMContext):
     )
 
     await callback.message.answer(
-        text=t("search_resource.enter_text", callback.from_user.language_code),
+        text=i18n.get("search_resource.enter_text"),
         reply_markup=search_resource_back_keyboard(
             user_lang=callback.from_user.language_code,
         ),
@@ -54,7 +54,7 @@ async def search_resource_start(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(SearchResourceState.text)
-async def search_resource_search(message: Message, state: FSMContext):
+async def search_resource_search(message: Message, state: FSMContext, i18n: I18nContext):
     if not message.from_user or not message.from_user.language_code or not message:
         return
 
@@ -63,7 +63,7 @@ async def search_resource_search(message: Message, state: FSMContext):
     await state.update_data(total_pages=total_pages, resources=resources)
 
     await message.answer(
-        text=t("search_resource.select", message.from_user.language_code),
+        text=i18n.get("search-resource-select"),
         reply_markup=search_resource_resource_list_keyboard(
             user_lang=message.from_user.language_code,
             resources=resources,
@@ -80,6 +80,7 @@ async def search_resource_change_page(
     callback: CallbackQuery,
     state: FSMContext,
     callback_data: SearchResourceResourceListCallbackFactory,
+    i18n: I18nContext,
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
@@ -99,7 +100,7 @@ async def search_resource_change_page(
     total_pages = state_data["total_pages"]
 
     await callback.message.answer(
-        text=t("search_resource.select", callback.from_user.language_code),
+        text=i18n.get("search-resource-select"),
         reply_markup=search_resource_resource_list_keyboard(
             resources=resources,
             user_lang=callback.from_user.language_code,
@@ -137,11 +138,11 @@ async def search_resource_select(
     resources = state_data["resources"]
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
-    is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
+    is_favorite = any(resource.resource_id == favorite.resource_id for favorite in favorites)
     formatted_text = format_resource_text(resource)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.id,
+        resource_id=resource.resource_id,
     )
     media_group = MediaGroupBuilder(caption=formatted_text)
     for photo in resource.images:
@@ -186,10 +187,10 @@ async def search_resource_resource_change_page(
     formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
-    is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
+    is_favorite = any(resource.resource_id == favorite.resource_id for favorite in favorites)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.id,
+        resource_id=resource.resource_id,
     )
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
@@ -232,10 +233,10 @@ async def list_resource_resource_add_favorite(
     resources = state_data["resources"]
     formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
-    favorite = FavoriteSchema(user_id=user_id, resource_id=resource.id)
+    favorite = FavoriteSchema(user_id=user_id, resource_id=resource.resource_id)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.id,
+        resource_id=resource.resource_id,
     )
     await FavoriteManager.create(favorite)
     await state.update_data(resources=resources)
@@ -281,10 +282,10 @@ async def list_resource_resource_remove_favorite(
     user_id = str(callback.from_user.id)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.id,
+        resource_id=resource.resource_id,
     )
 
-    await FavoriteManager.delete(user_id=user_id, resource_id=resource.id)
+    await FavoriteManager.delete(user_id=user_id, resource_id=resource.resource_id)
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
         photo=resource.image,
@@ -327,14 +328,14 @@ async def list_resource_resource_rate(
     formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
-    is_favorite = any(resource.id == favorite.resource_id for favorite in favorites)
+    is_favorite = any(resource.resource_id == favorite.resource_id for favorite in favorites)
     rating = callback_data.rating
     existing_resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.id,
+        resource_id=resource.resource_id,
     )
     if existing_resource_rating:
-        await ResourceRatingManager.delete(user_id=user_id, resource_id=resource.id)
+        await ResourceRatingManager.delete(user_id=user_id, resource_id=resource.resource_id)
     resource_rating = ResourceRatingWithoutUserAndResourceSchema(
         id=uuid4(),
         resource_id=resource_id,

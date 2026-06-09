@@ -2,9 +2,10 @@ from aiogram import Router
 from aiogram.filters.command import CommandStart
 from aiogram.types import Message
 
+from aiogram_i18n import I18nContext
+
 from database.managers.UserManager import UserManager
 from database.models.user import Role
-from i18n.translate import t
 from keyboards.main_menu_keyboard import main_menu_keyboard
 from schemas.user_schema import UserSchema
 
@@ -12,7 +13,7 @@ router = Router()
 
 
 @router.message(CommandStart())
-async def start(message: Message):
+async def start(message: Message, i18n: I18nContext):
     if not message.from_user or not message.from_user.id:
         return
     user_data = {
@@ -30,6 +31,8 @@ async def start(message: Message):
 
     reply_keyboard = main_menu_keyboard(role, message.from_user.language_code)
     await message.answer(
-        t("main_menu.welcome", message.from_user.language_code),
+        i18n.get(
+            "main-menu-welcome",
+        ),
         reply_markup=reply_keyboard,
     )

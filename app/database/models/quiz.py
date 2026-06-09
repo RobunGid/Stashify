@@ -10,7 +10,7 @@ from database.orm import Base
 class QuizModel(Base):
     __tablename__ = "quiz"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    quiz_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     resource_id = Column(
         UUID(as_uuid=True),
