@@ -3,7 +3,6 @@ from typing import Optional
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardButton
 
-from database.models.user import Role
 from i18n.translate import t
 
 def manage_quizes_back_keyboard(user_lang: Optional[str]):
