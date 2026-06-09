@@ -42,7 +42,7 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
 
     callback_factory: CallbackData
 
-    def build_list_keyboard(self) -> InlineKeyboardMarkup:
+    def build(self) -> InlineKeyboardMarkup:
         builder = InlineKeyboardBuilder()
         for item in self.items:
             builder.button(**self._item_button(item))
@@ -83,7 +83,7 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
 
     @abstractmethod
     def _pagination_callback(self, page: int) -> CallbackData:
-        """Rerusn callback_data for pagination button"""
+        """Return callback_data for pagination button"""
         pass
 
     @abstractmethod

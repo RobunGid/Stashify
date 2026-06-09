@@ -23,10 +23,7 @@ from keyboards.list_resources.list_resources_resource_item_keyboard import (
     list_resources_resource_item_keyboard,
     ListResourcesItemCallbackFactory,
 )
-from keyboards.list_resources.list_resources_resource_list_keyboard import (
-    list_resources_resource_list_keyboard,
-    ListResourcesChooseResourceCallbackFactory,
-)
+from keyboards.resources import ResourceListKeyboardBuilder
 from settings.config import bot
 from utils.format_resource_text import format_resource_text
 
@@ -115,19 +112,24 @@ async def list_resources_category_select(
     await state.update_data(category_id=category_id)
     resources = await ResourceManager.get_many(category_id=category_id)
     total_resources_pages = ceil(len(resources) / LIST_RESOURCES_RESOURCES_ON_PAGE)
+
+    keyboard_builder = ResourceListKeyboardBuilder(
+        i18n,
+        items=resources,
+        current_page=1,
+        total_pages=total_resources_pages,
+        callback_factory=ListResourcesChooseCategoryCallbackFactory,
+    )
+    keyboard = keyboard_builder.build()
+
     await state.update_data(
         category_id=category_id,
         resources=resources,
         total_resources_pages=total_resources_pages,
     )
     await callback.message.answer(
-        text=t("list_resources.choose_resource", callback.from_user.language_code),
-        reply_markup=list_resources_resource_list_keyboard(
-            resources=resources,
-            user_lang=callback.from_user.language_code,
-            total_pages=total_resources_pages,
-            page=1,
-        ),
+        text=t("list_resources-choose_resource", callback.from_user.language_code),
+        reply_markup=keyboard,
     )
 
 
