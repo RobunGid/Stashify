@@ -12,6 +12,9 @@ services:
     networks:
       - backend
     restart: always
+    depends_on:
+      stashify-database:
+        condition: service_healthy
 
 networks:
   backend:

@@ -8,6 +8,7 @@ STORAGES_FILE = docker_compose/storages.yaml
 
 APP_CONTAINER = main-app
 DATABASE_CONTAINER = stashify-database
+DATABASE_UI_CONTAINER = stashify-database-ui
 
 .PHONY: app
 app:
@@ -24,6 +25,10 @@ storages:
 .PHONY: storages-logs
 storages-logs:
 	${LOGS} ${DATABASE_CONTAINER} -f
+
+.PHONY: db-ui-logs
+db-ui-logs:
+	${LOGS} ${DATABASE_UI_CONTAINER} -f
 
 .PHONY: storages-down
 storages-down:

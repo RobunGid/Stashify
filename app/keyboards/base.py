@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Generic, TypeVar
+from uuid import UUID
 
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -39,8 +40,6 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
     items: list[It]
     current_page: int
     total_pages: int
-
-    callback_factory: CallbackData
 
     def build(self) -> InlineKeyboardMarkup:
         builder = InlineKeyboardBuilder()
@@ -90,3 +89,137 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
     def _item_button(self, item: It) -> dict:
         """Convert item to kwargs for builder.button() - text and callback_data"""
         pass
+
+
+@dataclass
+class BaseItemKeyboardBuilder(BaseKeyboardBuilder, Generic[It]):
+    items: list[It]
+    current_item: It
+
+    is_favorite: bool
+    rating: int | None
+    has_quiz: bool
+    quiz_percent: int
+
+    def build(self) -> InlineKeyboardMarkup:
+        builder = InlineKeyboardBuilder()
+
+        nav_buttons = self._build_navigation_buttons()
+        for btns in nav_buttons:
+            builder.button(**btns)
+
+        return builder.as_markup()
+
+    def _build_navigation_buttons(self) -> list[dict]:
+        item_ids = [self._get_item_id(item) for item in self.items]
+        current_item_id = self._get_item_id(self.current_item)
+        current_item_id_index = item_ids.index(current_item_id)
+        total_items = len(self.items)
+
+        is_at_start = current_item_id_index == 0
+        is_at_end = current_item_id_index == total_items - 1
+
+        buttons: list[dict] = []
+
+        if not is_at_start:
+            buttons += [
+                {
+                    "text": self.i18n.get("items-start"),
+                    "callback_data": self._navigation_callback(self.items[0]),
+                },
+                {
+                    "text": self.i18n.get("items-back"),
+                    "callback_data": self._navigation_callback(self.items[current_item_id_index - 1]),
+                },
+            ]
+        buttons.append({"text": f"{current_item_id_index + 1}/{total_items}", "callback_data": " "})
+        if not is_at_end:
+            buttons += [
+                {
+                    "text": self.i18n.get("items-forward"),
+                    "callback_data": self._navigation_callback(self.items[current_item_id_index + 1]),
+                },
+                {
+                    "text": self.i18n.get("items-end"),
+                    "callback_data": self._navigation_callback(self.items[-1]),
+                },
+            ]
+        return buttons
+
+    def _build_favorite_buttons(self) -> list[dict]:
+        if self.is_favorite:
+            return [
+                {
+                    "text": self.i18n.get("favorite-remove"),
+                    "callback_data": self._remove_favorite_callback(self.current_item),
+                }
+            ]
+        return [
+            {
+                "text": self.i18n.get("favorite-add"),
+                "callback_data": self._add_favorite_callback(self.current_item),
+            }
+        ]
+
+    def _build_rating_buttons(self) -> list[dict]:
+        return [
+            {
+                "text": "⭐" if self.rating and i <= self.rating else "☆",
+                "callback_data": self._rating_callback(self.current_item, i),
+            }
+            for i in range(1, 6)
+        ]
+
+    def _build_quiz_buttons(self) -> list[dict]:
+        if not self.has_quiz:
+            return []
+        if self.quiz_percent:
+            text = self.i18n.get("start-quiz-completed").format(percent=self.quiz_percent)
+        else:
+            text = self.i18n.get("start-quiz-firstly")
+        return [
+            {
+                "text": text,
+                "callback_data": self._quiz_callback(self.current_item),
+            }
+        ]
+
+    def _build_quiz_confirm_buttons(self) -> list[dict]:
+        return [
+            {
+                "text": self.i18n.get("ist-resources-start_quiz-confirm"),
+                "callback_data": self._quiz_confirm_callback(self.current_item),
+            },
+            {
+                "text": self.i18n.get("common-back"),
+                "callback_data": self._navigation_callback(self.current_item),
+            },
+        ]
+
+    @abstractmethod
+    def _get_item_id(self, item: It) -> str | UUID | int:
+        """Get item id callback"""
+
+    @abstractmethod
+    def _navigation_callback(self, item: It) -> CallbackData:
+        """Return callback_data for pagination button"""
+
+    @abstractmethod
+    def _remove_favorite_callback(self, item: It) -> CallbackData:
+        """Return callback_data for removing item from favorites"""
+
+    @abstractmethod
+    def _add_favorite_callback(self, item: It) -> CallbackData:
+        """Return callback_data for adding item in favorites"""
+
+    @abstractmethod
+    def _rating_callback(self, item: It, rating: int) -> CallbackData:
+        """Return callback_data for rate item"""
+
+    @abstractmethod
+    def _quiz_callback(self, item: It) -> CallbackData:
+        """Return callback_data for start quiz"""
+
+    @abstractmethod
+    def _quiz_confirm_callback(self, item: It) -> CallbackData:
+        """Return callback_data for confirm starting quiz"""
