@@ -1,10 +1,11 @@
 from schemas.resource_schema import ResourceSchema
 
+
 def format_resource_text(resource: ResourceSchema) -> str:
     formatted_is_checked = "✅ Да" if resource.verified else "❌ Нет"
-    formatted_tags = ' '.join(f'{t.strip()}' for t in resource.tags.split())
-    formatted_created_at = resource.created_at.strftime('%d %B %Y, %H:%M')
-    
+    formatted_tags = " ".join(f"{t.strip()}" for t in resource.tags.split())
+    formatted_created_at = resource.created_at.strftime("%d %B %Y, %H:%M")
+
     text = f"""
 <b>{resource.name}</b>
 

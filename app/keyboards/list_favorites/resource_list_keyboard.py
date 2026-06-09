@@ -1,20 +1,30 @@
 from typing import List, Literal, Union
 
 from aiogram.filters.callback_data import CallbackData
+
 from pydantic import UUID4
 
-from schemas.resource_schema import ResourceSchema
 from keyboards.base import BaseListKeyboard
+from schemas.resource_schema import ResourceSchema
 
 
-class ListFavoritesChooseResourceCallbackFactory(CallbackData, prefix="list_favorites_rsc"):
+class ListFavoritesChooseResourceCallbackFactory(
+    CallbackData,
+    prefix="list_favorites_rsc",
+):
     action: Union[Literal["select"], Literal["change_page"]]
     resource_id: UUID4 | None
     page: int
 
 
 class FavoritesResourceListKeyboard(BaseListKeyboard):
-    def __init__(self, resources: List[ResourceSchema], page: int, total_pages: int, user_lang: str = "en"):
+    def __init__(
+        self,
+        resources: List[ResourceSchema],
+        page: int,
+        total_pages: int,
+        user_lang: str = "en",
+    ):
         super().__init__(user_lang)
         self.resources = resources
         self.page = page
@@ -24,14 +34,20 @@ class FavoritesResourceListKeyboard(BaseListKeyboard):
         return "list_favorites"
 
     def _page_callback(self, page: int) -> ListFavoritesChooseResourceCallbackFactory:
-        return ListFavoritesChooseResourceCallbackFactory(action="change_page", resource_id=None, page=page)
+        return ListFavoritesChooseResourceCallbackFactory(
+            action="change_page",
+            resource_id=None,
+            page=page,
+        )
 
     def build(self):
         for resource in self.resources:
             self.builder.button(
                 text=resource.name,
                 callback_data=ListFavoritesChooseResourceCallbackFactory(
-                    action="select", resource_id=resource.id, page=0
+                    action="select",
+                    resource_id=resource.id,
+                    page=0,
                 ),
             )
 

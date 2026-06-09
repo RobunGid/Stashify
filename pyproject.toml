@@ -19,7 +19,99 @@ dependencies = [
     "aiogram-media-group (>=0.5.1,<0.6.0)"
 ]
 
+[tool.isort]
+profile="black"
+line_length=120
+lines_between_sections=1
+lines_between_types=0
+force_alphabetical_sort_within_sections=true
+ensure_newline_before_comments=true
+combine_as_imports=true
+combine_star=true
+skip_gitignore=true
+src_paths=["core", ]
+skip_glob=[
+    ".git",
+    ".idea",
+    ".vscode",
+    "venv",
+    ".venv",
+]
+known_fastapi=["aiogram"]
+known_first_party=["database","filters","handlers","i18n","keyboards","routers","schemas","settings","utils"]
+sections=[
+    "FUTURE",
+    "STDLIB",
+    "FASTAPI",
+    "THIRDPARTY",
+    "FIRSTPARTY",
+    "LOCALFOLDER",
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+src=["./app"]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+line-length = 120
+indent-width = 4
+
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+
+fixable = ["ALL"]
+unfixable = []
+
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+quote-style = "double"
+
+indent-style = "space"
+
+skip-magic-trailing-comma = false
+
+line-ending = "auto"
+
+docstring-code-format = false
+
+docstring-code-line-length = "dynamic"
+
+[tool.black]
+line-length = 120
+
+[tool.mypy]
+explicit_package_bases = true

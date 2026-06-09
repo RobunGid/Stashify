@@ -1,21 +1,30 @@
 from typing import List, Literal, Union
 
 from aiogram.filters.callback_data import CallbackData
+
 from pydantic import UUID4
 
-from i18n.translate import t
-from schemas.category_schema import CategorySchema
 from keyboards.base import BaseListKeyboard
+from schemas.category_schema import CategorySchema
 
 
-class ListFavoritesChooseCategoryCallbackFactory(CallbackData, prefix="list_favorites_ctg"):
+class ListFavoritesChooseCategoryCallbackFactory(
+    CallbackData,
+    prefix="list_favorites_ctg",
+):
     action: Union[Literal["select"], Literal["change_page"]]
     category_id: UUID4 | None
     page: int
 
 
 class FavoritesCategoryListKeyboard(BaseListKeyboard):
-    def __init__(self, categories: List[CategorySchema], page: int, total_pages: int, user_lang: str = "en"):
+    def __init__(
+        self,
+        categories: List[CategorySchema],
+        page: int,
+        total_pages: int,
+        user_lang: str = "en",
+    ):
         super().__init__(user_lang)
         self.categories = categories
         self.page = page
@@ -25,14 +34,20 @@ class FavoritesCategoryListKeyboard(BaseListKeyboard):
         return "menu"
 
     def _page_callback(self, page: int) -> ListFavoritesChooseCategoryCallbackFactory:
-        return ListFavoritesChooseCategoryCallbackFactory(action="change_page", category_id=None, page=page)
+        return ListFavoritesChooseCategoryCallbackFactory(
+            action="change_page",
+            category_id=None,
+            page=page,
+        )
 
     def build(self):
         for category in self.categories:
             self.builder.button(
                 text=category.name,
                 callback_data=ListFavoritesChooseCategoryCallbackFactory(
-                    action="select", category_id=category.id, page=0
+                    action="select",
+                    category_id=category.id,
+                    page=0,
                 ),
             )
 
