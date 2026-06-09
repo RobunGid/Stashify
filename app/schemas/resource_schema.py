@@ -2,8 +2,6 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, UUID4
 
-from utils.OptionalSchema import AllOptional
-
 
 class ResourceSchemaWithoutCategory(BaseModel):
     resource_id: UUID4
@@ -27,13 +25,6 @@ class ResourceSchema(ResourceSchemaWithoutCategory):
         default_factory=list,
     )
     images: list["ResourceImageWithoutResourceSchema"] = Field(default_factory=list)
-
-
-class UpdateResourceSchemaWithoutCategory(
-    ResourceSchemaWithoutCategory,
-    metaclass=AllOptional,
-):
-    pass
 
 
 from schemas.category_schema import CategorySchemaWithoutResources

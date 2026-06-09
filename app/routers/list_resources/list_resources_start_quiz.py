@@ -3,18 +3,15 @@ from uuid import uuid4
 from aiogram import F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
+from aiogram_i18n import I18nContext
 
 from database.managers import QuizManager, QuizResultManager
-from i18n.translate import t
 from keyboards.list_resources.list_resources_quiz_final_keyboard import list_resources_quiz_final_keyboard
 from keyboards.list_resources.list_resources_quiz_question_keyboard import (
     list_resources_quiz_question_keyboard,
     ListResourcesQuizQuestionCallbackFactory,
 )
-from keyboards.list_resources.list_resources_resource_item_keyboard import ListResourcesItemCallbackFactory
-from keyboards.list_resources.list_resources_start_quiz_confirm_keyboard import (
-    list_resources_start_quiz_confirm_keyboard,
-)
+from keyboards.resources import ListResourcesItemCallbackFactory
 from schemas.quiz_result_schema import QuizResultSchema
 from settings.config import bot
 
@@ -25,9 +22,7 @@ from .router import router
     ListResourcesItemCallbackFactory.filter(F.action == "start_quiz"),
 )
 async def list_resource_start_quiz(
-    callback: CallbackQuery,
-    state: FSMContext,
-    callback_data: ListResourcesItemCallbackFactory,
+    callback: CallbackQuery, state: FSMContext, callback_data: ListResourcesItemCallbackFactory, i18n: I18nContext
 ):
     if (
         not callback.from_user
@@ -48,9 +43,8 @@ async def list_resource_start_quiz(
     page = state_data["current_page"]
 
     await callback.message.answer(
-        text=t(
-            "list_resources.start_quiz.question",
-            lang=callback.from_user.language_code,
+        text=i18n.get(
+            "list-resources-start-quiz-question",
         ).format(
             question_count=len(resource.quiz.questions),
             resource_name=resource.name,

@@ -1,4 +1,5 @@
 from math import ceil
+from uuid import uuid4
 
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
@@ -23,8 +24,9 @@ from keyboards.resources import (
     ResourceItemKeyboardBuilder,
     ResourceListKeyboardBuilder,
 )
+from schemas.favorite_schema import FavoriteSchema
+from schemas.resource_rating_schema import ResourceRatingWithoutUserAndResourceSchema
 from settings.config import bot
-from utils.format_resource_text import format_resource_text
 
 router = Router()
 
@@ -205,7 +207,6 @@ async def list_resource_resource_select(
 
     category_id = state_data["category_id"]
     resources = await ResourceManager.get_many(category_id=category_id)
-    formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
     images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
@@ -240,7 +241,7 @@ async def list_resource_resource_select(
         )
 
     await callback.message.answer(
-        text=formatted_text,
+        text=i18n.get("list-resource-item", resource=resource),
         reply_markup=keyboard,
     )
 
@@ -271,7 +272,6 @@ async def list_resource_resource_change_page(
         return
     state_data = await state.get_data()
     resources = state_data["resources"]
-    formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
     images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
@@ -293,7 +293,7 @@ async def list_resource_resource_change_page(
     )
     keyboard = keyboard_builder.build()
     if images:
-        media_group = MediaGroupBuilder(caption=formatted_text)
+        media_group = MediaGroupBuilder()
         for photo in images:
             media_group.add_photo(type="photo", media=photo)
         await callback.message.answer_media_group(
@@ -302,6 +302,187 @@ async def list_resource_resource_change_page(
         )
     else:
         await callback.message.answer(
-            text=formatted_text,
+            text=i18n.get("list-resource-item", resource=resource),
             reply_markup=keyboard,
         )
+
+
+# FAVORITES
+# TODO: Make multiple callback factories for pagination, select, etc.
+
+
+@router.callback_query(
+    ListResourcesItemCallbackFactory.filter(F.action == "add_favorite"),
+)
+async def list_resource_resource_add_favorite(
+    callback: CallbackQuery,
+    state: FSMContext,
+    callback_data: ListResourcesChooseResourceCallbackFactory,
+    i18n: I18nContext,
+):
+    if (
+        not callback.from_user
+        or not callback.from_user.language_code
+        or not callback.message
+        or not callback.data
+        or not callback_data.resource_id
+    ):
+        return
+    await bot.delete_message(
+        chat_id=callback.message.chat.id,
+        message_id=callback.message.message_id,
+    )
+    resource = await ResourceManager.get_one(resource_id=callback_data.resource_id)
+    if not resource:
+        return
+    state_data = await state.get_data()
+    resources = state_data["resources"]
+    user_id = str(callback.from_user.id)
+    favorite = FavoriteSchema(user_id=user_id, resource_id=resource.resource_id)
+    resource_rating = await ResourceRatingManager.get_one(
+        user_id=user_id,
+        resource_id=resource.resource_id,
+    )
+    await FavoriteManager.create(favorite)
+    images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
+    resource_rating_number = resource_rating.rating if resource_rating else None
+    await state.update_data(resources=resources)
+    keyboard_builder = ResourceItemKeyboardBuilder(
+        i18n=i18n,
+        items=resources,
+        current_item=resource,
+        has_quiz=bool(resource.quiz),
+        is_favorite=True,
+        quiz_percent=0,
+        rating=resource_rating_number,
+    )
+    keyboard = keyboard_builder.build()
+    # TODO: MAKE QUIZ_PERCENT GETTING!!
+    if images:
+        media_group = MediaGroupBuilder()
+        for photo in images:
+            media_group.add_photo(type="photo", media=photo)
+        await callback.message.answer_media_group(
+            media=list(media_group.build()),
+        )
+    await callback.message.answer(text=i18n.get("list-resource-item", resource=resource), reply_markup=keyboard)
+
+
+@router.callback_query(
+    ListResourcesItemCallbackFactory.filter(F.action == "remove_favorite"),
+)
+async def list_resource_resource_remove_favorite(
+    callback: CallbackQuery,
+    state: FSMContext,
+    callback_data: ListResourcesChooseResourceCallbackFactory,
+    i18n: I18nContext,
+):
+    if (
+        not callback.from_user
+        or not callback.from_user.language_code
+        or not callback.message
+        or not callback.data
+        or not callback_data.resource_id
+    ):
+        return
+    await bot.delete_message(
+        chat_id=callback.message.chat.id,
+        message_id=callback.message.message_id,
+    )
+    resource = await ResourceManager.get_one(resource_id=callback_data.resource_id)
+    images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
+    if not resource:
+        return
+    state_data = await state.get_data()
+    resources = state_data["resources"]
+    user_id = str(callback.from_user.id)
+    resource_rating = await ResourceRatingManager.get_one(
+        user_id=user_id,
+        resource_id=resource.resource_id,
+    )
+
+    await FavoriteManager.delete(user_id=user_id, resource_id=resource.resource_id)
+    resource_rating_number = resource_rating.rating if resource_rating else None
+    await state.update_data(resources=resources)
+    keyboard_builder = ResourceItemKeyboardBuilder(
+        i18n=i18n,
+        items=resources,
+        current_item=resource,
+        has_quiz=bool(resource.quiz),
+        is_favorite=True,
+        quiz_percent=0,
+        rating=resource_rating_number,
+    )
+    keyboard = keyboard_builder.build()
+    if images:
+        media_group = MediaGroupBuilder()
+        for photo in images:
+            media_group.add_photo(type="photo", media=str(photo.image))
+
+        await callback.message.answer_media_group(
+            media=list(media_group.build()),
+        )
+    await callback.message.answer(text=i18n.get("list-resource-item", resource=resource), reply_markup=keyboard)
+
+
+@router.callback_query(ListResourcesItemCallbackFactory.filter(F.action == "rate"))
+async def list_resource_resource_rate(
+    callback: CallbackQuery, state: FSMContext, callback_data: ListResourcesItemCallbackFactory, i18n: I18nContext
+):
+    if (
+        not callback.from_user
+        or not callback.from_user.language_code
+        or not callback.message
+        or not callback.data
+        or not callback_data.resource_id
+        or not callback_data.rating
+    ):
+        return
+    await bot.delete_message(
+        chat_id=callback.message.chat.id,
+        message_id=callback.message.message_id,
+    )
+    resource_id = callback_data.resource_id
+    resource = await ResourceManager.get_one(resource_id=resource_id)
+    if not resource:
+        return
+    state_data = await state.get_data()
+    resources = state_data["resources"]
+    user_id = str(callback.from_user.id)
+    favorites = await FavoriteManager.get_many(user_id=user_id)
+    is_favorite = any(resource.resource_id == favorite.resource_id for favorite in favorites)
+    rating = callback_data.rating
+    existing_resource_rating = await ResourceRatingManager.get_one(
+        user_id=user_id,
+        resource_id=resource.resource_id,
+    )
+    if existing_resource_rating:
+        await ResourceRatingManager.delete(user_id=user_id, resource_id=resource.resource_id)
+    resource_rating = ResourceRatingWithoutUserAndResourceSchema(
+        resource_rating_id=uuid4(),
+        resource_id=resource_id,
+        rating=rating,
+        user_id=user_id,
+    )
+    resource_rating_number = resource_rating.rating if resource_rating else None
+    keyboard_builder = ResourceItemKeyboardBuilder(
+        i18n=i18n,
+        items=resources,
+        current_item=resource,
+        has_quiz=bool(resource.quiz),
+        is_favorite=is_favorite,
+        quiz_percent=0,
+        rating=resource_rating_number,
+    )
+    keyboard = keyboard_builder.build()
+    await ResourceRatingManager.create(resource_rating)
+    await state.update_data(resources=resources)
+    images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
+    if images:
+        media_group = MediaGroupBuilder()
+        for photo in images:
+            media_group.add_photo(type="photo", media=photo)
+        await callback.message.answer_media_group(
+            media=list(media_group.build()),
+        )
+    await callback.message.answer(text=i18n.get("list-resource-item", resource=resource), reply_markup=keyboard)

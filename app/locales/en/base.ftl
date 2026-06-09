@@ -299,6 +299,28 @@ manage-quizes-edit-edit-question-success = ❌ Something went wrong with editing
 manage-quizes-edit-edit-question-fail = ✅ Quiz question updated successfully
 
 # List Resources
+list-resources-item = 
+    <b>${resource.name}</b>
+    
+    <i>${resource.description}</i>
+    
+    ${resource.links}
+    
+    Category: ${resource.category.name}
+    
+    Verified:
+    <#if resource.verified>
+      ✅ Yes
+    <#else>
+      ❌ No
+    </#if>
+    
+    Tags:
+    <#list resource.tags?split(" ") as tag>
+      ${tag}
+    </#list>
+    
+    🕒 ${resource.created_at?string("dd MMMM yyyy, HH:mm")}
 list-resources-choose-category = 📤 Select category
 list-resources-choose-resource = 📤 Select resource
 list-resources-change-page = 📤 Select resource
