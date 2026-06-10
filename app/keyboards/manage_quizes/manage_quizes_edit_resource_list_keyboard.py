@@ -1,18 +1,11 @@
-from typing import List, Literal, Union
-from uuid import UUID
+from typing import List
 
-from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from i18n.translate import t
+from keyboards.quizes import EditQuizChooseResourceCallbackFactory
 from schemas.resource_schema import ResourceSchema
-
-
-class EditQuizChooseResourceCallbackFactory(CallbackData, prefix="edit_quiz_rsc"):  # type: ignore[call-arg]
-    action: Union[Literal["select"], Literal["change_page"]]
-    resource_item_id: UUID | None
-    page: int
 
 
 def manage_quizes_edit_resource_list_keyboard(

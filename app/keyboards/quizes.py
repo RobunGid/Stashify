@@ -4,7 +4,9 @@ from uuid import UUID
 
 from aiogram.filters.callback_data import CallbackData
 
-from keyboards.base import BaseManageEntryKeyboardBuilder
+from keyboards.base import BaseListKeyboardBuilder, BaseManageBackKeyboardBuilder, BaseManageEntryKeyboardBuilder
+from schemas.category_schema import CategorySchema
+from schemas.resource_schema import ResourceSchema
 
 
 class EditQuizActionCallbackFactory(CallbackData, prefix="edit_quiz_actn"):  # type: ignore[call-arg]
@@ -43,3 +45,65 @@ class QuizManageEntryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
 
     def _back_callback(self) -> str:
         return "menu"
+
+
+class EditQuizChooseResourceCallbackFactory(CallbackData, prefix="edit_quiz_rsc"):  # type: ignore[call-arg]
+    action: Union[Literal["select"], Literal["change_page"]]
+    resource_item_id: UUID | None
+    page: int
+
+
+class ManageQuizesEditResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceSchema]):
+    def _back_callback(self) -> str | CallbackData | None:
+        return EditQuizChooseResourceCallbackFactory(
+            action="change_page",
+            resource_item_id=None,
+            page=self.current_page - 1,
+        )
+
+    def _pagination_callback(self, page: int) -> CallbackData:
+        return EditQuizChooseResourceCallbackFactory(action="change_page", resource_item_id=None, page=page)
+
+    def _item_button(self, item: ResourceSchema) -> dict:
+        return {
+            "text": item.name,
+            "callback_data": EditQuizChooseResourceCallbackFactory(
+                action="select",
+                resource_item_id=item.resource_item_id,
+                page=0,
+            ),
+        }
+
+
+class EditQuizChooseCategoryCallbackFactory(CallbackData, prefix="edit_quiz_ctg"):  # type: ignore[call-arg]
+    action: Union[Literal["select"], Literal["change_page"]]
+    category_id: UUID | None
+    page: int
+
+
+class ManageQuizesEditCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
+    def _back_callback(self) -> str | CallbackData | None:
+        return EditQuizChooseCategoryCallbackFactory(
+            action="change_page",
+            category_id=None,
+            page=self.current_page - 1,
+        )
+
+    def _pagination_callback(self, page: int) -> CallbackData:
+        return EditQuizChooseCategoryCallbackFactory(action="change_page", category_id=None, page=page)
+
+    def _item_button(self, item: ResourceSchema) -> dict:
+        return {
+            "text": item.name,
+            "callback_data": EditQuizChooseCategoryCallbackFactory(
+                action="select",
+                category_id=item.category_id,
+                page=0,
+            ),
+        }
+
+
+@dataclass
+class ManageQuizesBackKeyboardBuilder(BaseManageBackKeyboardBuilder):
+    def _back_callback(self) -> str | CallbackData | None:
+        return "manage_quizes"

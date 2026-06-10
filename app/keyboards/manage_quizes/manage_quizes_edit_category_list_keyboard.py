@@ -1,19 +1,11 @@
-from typing import List, Literal, Union
+from typing import List
 
-from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from pydantic import UUID
-
 from i18n.translate import t
+from keyboards.quizes import EditQuizChooseCategoryCallbackFactory
 from schemas.category_schema import CategorySchema
-
-
-class EditQuizChooseCategoryCallbackFactory(CallbackData, prefix="edit_quiz_ctg"):  # type: ignore[call-arg]
-    action: Union[Literal["select"], Literal["change_page"]]
-    category_id: UUID | None
-    page: int
 
 
 def manage_quizes_edit_category_list_keyboard(
