@@ -76,3 +76,10 @@ class ResourceQuizQuestionKeyboardBuilder(
             option_number=option_number,
             question_number=question_number,
         )
+
+    def _back_callback(self) -> str | CallbackData | None:
+        return ListResourcesChooseResourceCallbackFactory(
+            action="change_page",
+            page=self.page,
+            resource_item_id=self.item.resource_item_id,
+        )
