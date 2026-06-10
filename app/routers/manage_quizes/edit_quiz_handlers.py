@@ -18,16 +18,13 @@ from database.managers import (
 )
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
-from keyboards.manage_quizes.manage_quizes_edit_category_list_keyboard import (
-    manage_quizes_edit_category_list_keyboard,
-)
 from keyboards.quizes import (
     EditQuizActionCallbackFactory,
+    EditQuizCategoryListKeyboardBuilder,
     EditQuizChooseCategoryCallbackFactory,
     EditQuizChooseResourceCallbackFactory,
+    EditQuizResourceListKeyboardBuilder,
     ManageQuizesBackKeyboardBuilder,
-    ManageQuizesEditCategoryListKeyboardBuilder,
-    ManageQuizesEditResourceListKeyboardBuilder,
     QuizManageEntryKeyboardBuilder,
 )
 from schemas.quiz_question_schema import QuizQuestionBaseSchema
@@ -63,7 +60,7 @@ async def edit_quiz_callback_handler(callback: CallbackQuery, state: FSMContext,
     total_pages = ceil(len(categories) / EDIT_QUIZ_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
 
-    keyboard_builder = ManageQuizesEditCategoryListKeyboardBuilder(
+    keyboard_builder = EditQuizCategoryListKeyboardBuilder(
         i18n=i18n,
         total_pages=total_pages,
         current_page=1,
@@ -105,16 +102,19 @@ async def edit_quiz_category_page(
     ]
     total_pages = state_data["total_pages"]
 
+    keyboard_builder = EditQuizCategoryListKeyboardBuilder(
+        i18n=i18n,
+        items=categories,
+        total_pages=total_pages,
+        current_page=current_page,
+    )
+    keyboard = keyboard_builder.build()
+
     await callback.message.answer(
         text=i18n.get(
             "manage-quizes-edit-choose-category",
         ),
-        reply_markup=manage_quizes_edit_category_list_keyboard(
-            categories=categories,
-            user_lang=callback.from_user.language_code,
-            total_pages=total_pages,
-            page=int(current_page),
-        ),
+        reply_markup=keyboard,
     )
 
 
@@ -141,7 +141,7 @@ async def edit_quizes_category_choose(
 
     await state.update_data(category_id=category_id)
 
-    keyboard_builder = ManageQuizesEditResourceListKeyboardBuilder(
+    keyboard_builder = EditQuizResourceListKeyboardBuilder(
         i18n=i18n,
         items=resources,
         current_page=1,
@@ -181,7 +181,7 @@ async def edit_quiz_page(
     ]
     total_pages = resources_data["total_pages"]
 
-    keyboard_builder = ManageQuizesEditResourceListKeyboardBuilder(
+    keyboard_builder = EditQuizResourceListKeyboardBuilder(
         i18n=i18n,
         items=resources,
         current_page=current_page,
@@ -222,7 +222,7 @@ async def edit_resource_choose(
     resource_item_id = callback_data.resource_item_id
     await state.update_data(resource_item_id=resource_item_id)
 
-    keyboard_builder = QuizManageEntryKeyboardBuilder(i18n=i18n, resource_item_id=resource_item_id)
+    keyboard_builder = QuizManageEntryKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
     await callback.message.answer(

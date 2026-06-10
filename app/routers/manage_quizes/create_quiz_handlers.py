@@ -6,18 +6,15 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
+from aiogram_i18n import I18nContext
 from constants import CREATE_QUIZ_CATEGORIES_ON_PAGE, CREATE_QUIZ_RESOURCES_ON_PAGE
 from sqlalchemy.exc import IntegrityError
 
 from database.managers import CategoryManager, QuizManager, ResourceManager
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
-from i18n.translate import t
 from keyboards.manage_quizes.manage_quizes_add_question_keyboard import (
     manage_quizes_add_question_keyboard,
-)
-from keyboards.manage_quizes.manage_quizes_back_keyboard import (
-    manage_quizes_back_keyboard,
 )
 from keyboards.manage_quizes.manage_quizes_create_category_list_keyboard import (
     CreateQuizChooseCategoryCallbackFactory,
@@ -27,6 +24,7 @@ from keyboards.manage_quizes.manage_quizes_create_resource_list_keyboard import 
     CreateQuizChooseResourceCallbackFactory,
     manage_quizes_create_resource_list_keyboard,
 )
+from keyboards.quizes import ManageQuizesBackKeyboardBuilder
 from schemas.quiz_question_schema import QuizQuestionSchema
 from schemas.quiz_schema import QuizSchema
 from settings.config import bot
@@ -52,7 +50,7 @@ class CreateQuizState(StatesGroup):
     F.data == "create_quiz",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def create_quiz_callback_handler(callback: CallbackQuery, state: FSMContext):
+async def create_quiz_callback_handler(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
     await bot.delete_message(
@@ -65,8 +63,8 @@ async def create_quiz_callback_handler(callback: CallbackQuery, state: FSMContex
     await state.update_data(total_pages=total_pages, categories=categories)
 
     await callback.message.answer(
-        text=t(
-            "manage_quizes.create.choose_category",
+        text=i18n.get(
+            "manage-quizes.create.choose_category",
             callback.from_user.language_code,
         ),
         reply_markup=manage_quizes_create_category_list_keyboard(
@@ -86,6 +84,7 @@ async def create_quiz_category_page(
     callback: CallbackQuery,
     state: FSMContext,
     callback_data: CreateQuizChooseCategoryCallbackFactory,
+    i18n: I18nContext,
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
@@ -104,8 +103,8 @@ async def create_quiz_category_page(
     total_pages = state_data["total_pages"]
 
     await callback.message.answer(
-        text=t(
-            "manage_quizes.create.choose_category",
+        text=i18n.get(
+            "manage-quizes-create-choose-category",
             callback.from_user.language_code,
         ),
         reply_markup=manage_quizes_create_category_list_keyboard(
@@ -125,6 +124,7 @@ async def create_quiz_category_choose(
     callback: CallbackQuery,
     callback_data: CreateQuizChooseCategoryCallbackFactory,
     state: FSMContext,
+    i18n: I18nContext,
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
@@ -139,7 +139,7 @@ async def create_quiz_category_choose(
 
     await state.update_data(category_id=category_id)
     await callback.message.answer(
-        text=t("manage_quizes.create.choose", callback.from_user.language_code),
+        text=i18n.get("manage_quizes-create-choose", callback.from_user.language_code),
         reply_markup=manage_quizes_create_resource_list_keyboard(
             resources=resources,
             user_lang=callback.from_user.language_code,
@@ -157,6 +157,7 @@ async def create_quiz_page(
     callback: CallbackQuery,
     state: FSMContext,
     callback_data: CreateQuizChooseResourceCallbackFactory,
+    i18n: I18nContext,
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
@@ -175,7 +176,9 @@ async def create_quiz_page(
     total_pages = resources_data["total_pages"]
 
     await callback.message.answer(
-        text=t("manage_quizes.create.choose", callback.from_user.language_code),
+        text=i18n.get(
+            "manage-quizes-create-choose",
+        ),
         reply_markup=manage_quizes_create_resource_list_keyboard(
             resources=resources,
             user_lang=callback.from_user.language_code,
@@ -193,6 +196,7 @@ async def create_quiz_choose(
     callback: CallbackQuery,
     callback_data: CreateQuizChooseResourceCallbackFactory,
     state: FSMContext,
+    i18n: I18nContext,
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
@@ -209,23 +213,27 @@ async def create_quiz_choose(
         resource for resource in state_data["resources"] if resource.resource_item_id == resource_item_id
     )
     quiz = QuizSchema(
-        id=UUID(),
+        quiz_id=UUID(),
         resource_item_id=resource_item_id,
         questions=[],
         resource=quiz_resource,
     )
     await state.update_data(quiz=quiz, questions=[], resource_item_id=resource_item_id)
+
+    keyboard_builder = ManageQuizesBackKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
     await callback.message.answer(
-        text=t("manage_quizes.create.send_question", callback.from_user.language_code),
-        reply_markup=manage_quizes_back_keyboard(
-            user_lang=callback.from_user.language_code,
+        text=i18n.get(
+            "manage-quizes-create-send-question",
         ),
+        reply_markup=keyboard,
     )
     await state.set_state(CreateQuizState.questions)
 
 
 @router.message(CreateQuizState.questions, UserRoleFilter([Role.admin, Role.manager]))
-async def create_quiz_add_question(message: Message, state: FSMContext):
+async def create_quiz_add_question(message: Message, state: FSMContext, i18n: I18nContext):
     if not message.from_user or not message.from_user.language_code:
         return
 
@@ -237,7 +245,7 @@ async def create_quiz_add_question(message: Message, state: FSMContext):
     right_options = [index for index, option in enumerate(question_options) if option.startswith("!")]
 
     question = QuizQuestionSchema(
-        id=UUID(),
+        quiz_question_id=UUID(),
         image=message.photo[0].file_id if message.photo else None,
         quiz=state_data["quiz"],
         options=question_options,
@@ -250,7 +258,7 @@ async def create_quiz_add_question(message: Message, state: FSMContext):
     await state.set_state(CreateQuizState.questions)
 
     await message.answer(
-        text=t("manage_quizes.create.add_question", message.from_user.language_code),
+        text=i18n.get("manage-quizes-create-add-question", message.from_user.language_code),
         reply_markup=manage_quizes_add_question_keyboard(
             user_lang=message.from_user.language_code,
         ),
@@ -261,7 +269,7 @@ async def create_quiz_add_question(message: Message, state: FSMContext):
     F.data == "manage_quizes.stop",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def create_quiz_finish(callback: CallbackQuery, state: FSMContext):
+async def create_quiz_finish(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
 
@@ -270,27 +278,26 @@ async def create_quiz_finish(callback: CallbackQuery, state: FSMContext):
     quiz_questions = state_data["questions"]
     quiz.questions = quiz_questions
 
+    keyboard_builder = ManageQuizesBackKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
     try:
         await QuizManager.create(quiz)
     except IntegrityError:
         await callback.message.answer(
-            text=t(
-                "manage_quizes.create.fail",
-                callback.from_user.language_code,
-            ).format(
+            text=i18n.get(
+                "manage-quizes-create-fail",
                 resource_name=quiz.resource.name,
                 question_count=len(quiz_questions),
             ),
-            reply_markup=manage_quizes_back_keyboard(callback.from_user.language_code),
+            reply_markup=keyboard,
         )
     else:
         await callback.message.answer(
-            text=t(
-                "manage_quizes.create.success",
-                callback.from_user.language_code,
-            ).format(
+            text=i18n.get(
+                "manage-quizes-create-success",
                 resource_name=quiz.resource.name,
                 question_count=len(quiz_questions),
             ),
-            reply_markup=manage_quizes_back_keyboard(callback.from_user.language_code),
+            reply_markup=keyboard,
         )
