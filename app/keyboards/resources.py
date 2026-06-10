@@ -259,6 +259,37 @@ class DeleteResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Category
         }
 
 
+class DeleteResourceChooseResourceCallbackFactory(
+    CallbackData,
+    prefix="delete_resource_rsc",  # type: ignore[call-arg]
+):
+    action: Union[Literal["select"], Literal["change_page"]]
+    resource_item_id: UUID | None
+    page: int
+
+
+class DeleteResourceResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSchema], ABC):
+    def _pagination_callback(self, page: int) -> CallbackData:
+        return DeleteResourceChooseResourceCallbackFactory(
+            action="change_page",
+            resource_item_id=None,
+            page=page,
+        )
+
+    def _back_callback(self) -> str:
+        return "manage_resources"
+
+    def _item_button(self, item: ResourceItemSchema) -> dict:
+        return {
+            "text": item.name,
+            "callback_data": DeleteResourceChooseResourceCallbackFactory(
+                action="select",
+                resource_item_id=item.resource_item_id,
+                page=0,
+            ),
+        }
+
+
 class DeleteResourceConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
     def _build_quiz_confirm_buttons(self) -> list[dict]:
         return [

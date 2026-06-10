@@ -15,14 +15,12 @@ from sqlalchemy.exc import IntegrityError
 from database.managers import CategoryManager, ResourceManager
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
-from keyboards.manage_resources.manage_resources_delete_resource_list_keyboard import (
-    DeleteResourceChooseResourceCallbackFactory,
-    manage_resources_delete_resource_list_keyboard,
-)
 from keyboards.resources import (
     DeleteResourceCategoryListKeyboardBuilder,
     DeleteResourceChooseCategoryCallbackFactory,
+    DeleteResourceChooseResourceCallbackFactory,
     DeleteResourceConfirmKeyboardBuilder,
+    DeleteResourceResourceListKeyboardBuilder,
     ManageResourcesBackKeyboardBuilder,
 )
 from schemas.resource_schema import ResourceItemSchema
@@ -134,16 +132,20 @@ async def delete_resource_category_select(
     resources = await ResourceManager.get_many(category_id=category_id)
     total_pages = resources_data["total_pages"]
     await state.update_data(category_id=category_id, resources=resources)
+
+    keyboard_builder = DeleteResourceResourceListKeyboardBuilder(
+        i18n=i18n,
+        items=resources,
+        current_page=current_page,
+        total_pages=total_pages,
+    )
+    keyboard = keyboard_builder.build()
+
     await callback.message.answer(
         text=i18n.get(
             "manage-resources-delete-choose-resource",
         ),
-        reply_markup=manage_resources_delete_resource_list_keyboard(
-            resources=resources,
-            user_lang=callback.from_user.language_code,
-            total_pages=total_pages,
-            page=int(current_page),
-        ),
+        reply_markup=keyboard,
     )
 
 
@@ -171,16 +173,19 @@ async def delete_resource_page(
     ]
     total_pages = resources_data["total_pages"]
 
+    keyboard_builder = DeleteResourceResourceListKeyboardBuilder(
+        i18n=i18n,
+        items=resources,
+        current_page=current_page,
+        total_pages=total_pages,
+    )
+    keyboard = keyboard_builder.build()
+
     await callback.message.answer(
         text=i18n.get(
             "manage-resources-delete-choose-resource",
         ),
-        reply_markup=manage_resources_delete_resource_list_keyboard(
-            resources=resources,
-            user_lang=callback.from_user.language_code,
-            total_pages=total_pages,
-            page=int(current_page),
-        ),
+        reply_markup=keyboard,
     )
 
 
