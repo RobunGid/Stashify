@@ -5,7 +5,7 @@ from aiogram_i18n import I18nContext
 
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
-from keyboards.manage_quizes.manage_quizes_keyboard import manage_quizes_keyboard
+from keyboards.quizes import QuizManageEntryKeyboardBuilder
 from settings.config import bot
 
 router = Router()
@@ -22,9 +22,13 @@ async def manage_quizes(callback: CallbackQuery, i18n: I18nContext):
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
+
+    keyboard_builder = QuizManageEntryKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
     await callback.message.answer(
         text=i18n.get(
             "manage-quizes-text",
         ),
-        reply_markup=manage_quizes_keyboard(callback.from_user.language_code),
+        reply_markup=keyboard,
     )

@@ -1,10 +1,9 @@
 from typing import List, Literal, Union
+from uuid import UUID
 
 from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-
-from pydantic import UUID
 
 from i18n.translate import t
 from schemas.resource_schema import ResourceSchema
@@ -17,19 +16,19 @@ class SearchResourceItemCallbackFactory(CallbackData, prefix="srch_rsc_itm"):  #
         Literal["remove_favorite"],
         Literal["rate"],
     ]
-    resource_id: UUID | None
+    resource_item_id: UUID | None
     rating: int | None
 
 
 def search_resource_resource_item_keyboard(
     resources: List[ResourceSchema],
-    resource: ResourceSchema,
+    resource_item: ResourceSchema,
     user_lang: str = "en",
     is_favorite: bool = False,
     rating: int = 0,
 ):
     builder = InlineKeyboardBuilder()
-    resource_index = resources.index(resource)
+    resource_index = resources.index(resource_item)
     resource_quantity = len(resources)
     first_line_buttons_quantity = 1
 
@@ -38,7 +37,7 @@ def search_resource_resource_item_keyboard(
             text=t("items.start", user_lang),
             callback_data=SearchResourceItemCallbackFactory(
                 action="change_page",
-                resource_id=resources[0].id,
+                resource_item_id=resources[0].id,
                 rating=None,
             ),
         )
@@ -46,7 +45,7 @@ def search_resource_resource_item_keyboard(
             text=t("items.back", user_lang),
             callback_data=SearchResourceItemCallbackFactory(
                 action="change_page",
-                resource_id=resources[resource_index - 1].id,
+                resource_item_id=resources[resource_index - 1].id,
                 rating=None,
             ),
         )
@@ -58,7 +57,7 @@ def search_resource_resource_item_keyboard(
             text=t("items.forward", user_lang),
             callback_data=SearchResourceItemCallbackFactory(
                 action="change_page",
-                resource_id=resources[resource_index + 1].id,
+                resource_item_id=resources[resource_index + 1].id,
                 rating=None,
             ),
         )
@@ -66,7 +65,7 @@ def search_resource_resource_item_keyboard(
             text=t("items.end", user_lang),
             callback_data=SearchResourceItemCallbackFactory(
                 action="change_page",
-                resource_id=resources[-1].id,
+                resource_item_id=resources[-1].id,
                 rating=None,
             ),
         )
@@ -80,7 +79,7 @@ def search_resource_resource_item_keyboard(
             text=t("items.forward", user_lang),
             callback_data=SearchResourceItemCallbackFactory(
                 action="change_page",
-                resource_id=resources[resource_index + 1].id,
+                resource_item_id=resources[resource_index + 1].id,
                 rating=None,
             ),
         )
@@ -88,7 +87,7 @@ def search_resource_resource_item_keyboard(
             text=t("items.end", user_lang),
             callback_data=SearchResourceItemCallbackFactory(
                 action="change_page",
-                resource_id=resources[-1].id,
+                resource_item_id=resources[-1].id,
                 rating=None,
             ),
         )
@@ -98,7 +97,7 @@ def search_resource_resource_item_keyboard(
             text=t("items.start", user_lang),
             callback_data=SearchResourceItemCallbackFactory(
                 action="change_page",
-                resource_id=resources[0].id,
+                resource_item_id=resources[0].id,
                 rating=None,
             ),
         )
@@ -106,7 +105,7 @@ def search_resource_resource_item_keyboard(
             text=t("items.back", user_lang),
             callback_data=SearchResourceItemCallbackFactory(
                 action="change_page",
-                resource_id=resources[resource_index - 1].id,
+                resource_item_id=resources[resource_index - 1].id,
                 rating=None,
             ),
         )
@@ -126,7 +125,7 @@ def search_resource_resource_item_keyboard(
             text=t("favorite.add", user_lang),
             callback_data=SearchResourceItemCallbackFactory(
                 action="add_favorite",
-                resource_id=resource.resource_item_id,
+                resource_item_id=resource_item.resource_item_id,
                 rating=None,
             ),
         )
@@ -135,7 +134,7 @@ def search_resource_resource_item_keyboard(
             text=t("favorite.remove", user_lang),
             callback_data=SearchResourceItemCallbackFactory(
                 action="remove_favorite",
-                resource_id=resource.resource_item_id,
+                resource_item_id=resource_item.resource_item_id,
                 rating=None,
             ),
         )
@@ -148,7 +147,7 @@ def search_resource_resource_item_keyboard(
             text=symbol,
             callback_data=SearchResourceItemCallbackFactory(
                 action="rate",
-                resource_id=resource.resource_item_id,
+                resource_item_id=resource_item.resource_item_id,
                 rating=i,
             ),
         )

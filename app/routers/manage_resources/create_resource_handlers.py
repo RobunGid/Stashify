@@ -68,7 +68,7 @@ async def create_resource_callback_handler(callback: CallbackQuery, state: FSMCo
             page=1,
         ),
     )
-    await state.set_state("resource_id")
+    await state.set_state("resource_item_id")
 
 
 @router.callback_query(
@@ -226,7 +226,7 @@ async def new_resource_tags_choose(message: Message, state: FSMContext):
         for resource_image in state_data["images"]:
             image = ResourceImageWithoutResourceSchema(
                 id=UUID(),
-                resource_id=resource_data.id,
+                resource_item_id=resource_data.id,
                 image=resource_image,
             )
             await ResourceImageManager.create(image)

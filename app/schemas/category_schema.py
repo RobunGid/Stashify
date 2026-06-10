@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field, UUID
+from uuid import UUID
+
+from pydantic import BaseModel, Field
 
 
 class CategorySchemaWithoutResources(BaseModel):

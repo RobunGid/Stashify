@@ -45,18 +45,18 @@ async def list_resource_start_quiz(
     )
 
     state_data = await state.get_data()
-    resource = state_data["resource"]
+    resource_item = state_data["resource_item"]
     state_data = await state.get_data()
 
-    keyboard_builder = ResourceQuizConfirmKeyboardBuilder(i18n=i18n, current_item=resource)
+    keyboard_builder = ResourceQuizConfirmKeyboardBuilder(i18n=i18n, current_item=resource_item)
     keyboard = keyboard_builder.build()
 
     await callback.message.answer(
         text=i18n.get(
             "list-resources-start-quiz-question",
         ).format(
-            question_count=len(resource.quiz.questions),
-            resource_name=resource.name,
+            question_count=len(resource_item.quiz.questions),
+            resource_name=resource_item.name,
         ),
         reply_markup=keyboard,
     )
@@ -122,14 +122,14 @@ async def list_resource_quiz_question_answer(
     state_data = await state.get_data()
     quiz = state_data["quiz"]
     current_quiz_answers = state_data["quiz_answers"]
-    resource = state_data["resource"]
+    resource_item = state_data["resource"]
     question_number = callback_data.question_number
     page = state_data["current_page"]
 
     if question_number + 1 < len(quiz.questions):
         keyboard_builder = ResourceQuizQuestionKeyboardBuilder(
             i18n=i18n,
-            item=resource,
+            item=resource_item,
             page=page,
             question=quiz.questions[question_number + 1],
             question_number=question_number,
@@ -155,13 +155,13 @@ async def list_resource_quiz_question_answer(
         right_answer_percent = int(100 * right_answers_len / len(quiz_answers))
 
         state_data = await state.get_data()
-        resource = state_data["resource"]
+        resource_item = state_data["resource"]
         existing_quiz_result = await QuizResultManager.get_one(
-            resource.resource_item_id,
+            resource_item.resource_item_id,
             str(callback.from_user.id),
         )
         if existing_quiz_result:
-            await QuizResultManager.delete(resource.resource_item_id, str(callback.from_user.id))
+            await QuizResultManager.delete(resource_item.resource_item_id, str(callback.from_user.id))
         quiz_result = QuizResultWithoutUserAndQuizSchema(
             quiz_result_id=UUID(),
             quiz_id=quiz.quiz_id,
@@ -170,7 +170,7 @@ async def list_resource_quiz_question_answer(
         )
         await QuizResultManager.create(quiz_result)
 
-        keyboard_builder = ResourceQuizFinalKeyboardBuilder(i18n=i18n, item=resource, page=page)
+        keyboard_builder = ResourceQuizFinalKeyboardBuilder(i18n=i18n, item=resource_item, page=page)
         keyboard = keyboard_builder.build()
         await callback.message.answer(
             text=i18n.get("start-quiz-final", percent=right_answer_percent),

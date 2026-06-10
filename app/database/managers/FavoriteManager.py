@@ -40,12 +40,12 @@ class FavoriteManager:
                     ),
                 )
                 .options(
-                    selectinload(FavoriteModel.resource).selectinload(
+                    selectinload(FavoriteModel.resource_item).selectinload(
                         ResourceItemModel.category,
                     ),
                 )
                 .options(
-                    selectinload(FavoriteModel.resource).selectinload(
+                    selectinload(FavoriteModel.resource_item).selectinload(
                         ResourceItemModel.quiz,
                     ),
                 )

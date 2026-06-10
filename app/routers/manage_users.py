@@ -5,7 +5,7 @@ from aiogram_i18n import I18nContext
 
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
-from keyboards.users import ManageUsersKeyboardBuilder
+from keyboards.users import UserManageEntryKeyboardBuilder
 from settings.config import bot
 
 router = Router()
@@ -15,7 +15,7 @@ router = Router()
 async def manage_users_users(callback: CallbackQuery, i18n: I18nContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
-    builder = ManageUsersKeyboardBuilder(i18n)
+    builder = UserManageEntryKeyboardBuilder(i18n)
     keyboard = builder.build()
     await bot.delete_message(
         chat_id=callback.message.chat.id,

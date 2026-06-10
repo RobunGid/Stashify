@@ -38,7 +38,7 @@ class CreateQuizState(StatesGroup):
     total_pages = State()
     resources = State()
     categories = State()
-    resource_id = State()
+    resource_item_id = State()
     category_id = State()
     name = State()
     description = State()
@@ -200,19 +200,21 @@ async def create_quiz_choose(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
-    resource_id = callback_data.resource_id
+    resource_item_id = callback_data.resource_item_id
     state_data = await state.get_data()
-    if not resource_id:
+    if not resource_item_id:
         return
 
-    quiz_resource = next(resource for resource in state_data["resources"] if resource.resource_item_id == resource_id)
+    quiz_resource = next(
+        resource for resource in state_data["resources"] if resource.resource_item_id == resource_item_id
+    )
     quiz = QuizSchema(
         id=UUID(),
-        resource_id=resource_id,
+        resource_item_id=resource_item_id,
         questions=[],
         resource=quiz_resource,
     )
-    await state.update_data(quiz=quiz, questions=[], resource_id=resource_id)
+    await state.update_data(quiz=quiz, questions=[], resource_item_id=resource_item_id)
     await callback.message.answer(
         text=t("manage_quizes.create.send_question", callback.from_user.language_code),
         reply_markup=manage_quizes_back_keyboard(

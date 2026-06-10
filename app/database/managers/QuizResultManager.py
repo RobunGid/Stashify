@@ -38,7 +38,7 @@ class QuizResultManager:
                     selectinload(QuizResultModel.user),
                 )
                 .options(
-                    selectinload(QuizResultModel.quiz).selectinload(QuizModel.resource),
+                    selectinload(QuizResultModel.quiz).selectinload(QuizModel.resource_item),
                 )
             )
 

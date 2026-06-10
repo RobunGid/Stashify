@@ -37,7 +37,7 @@ class DeleteQuizState(StatesGroup):
     total_pages = State()
     resources = State()
     categories = State()
-    resource_id = State()
+    resource_item_id = State()
     category_id = State()
     confirm = State()
 
@@ -197,19 +197,21 @@ async def delete_quiz_choose(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
-    resource_id = callback_data.resource_id
-    if not resource_id:
+    resource_item_id = callback_data.resource_item_id
+    if not resource_item_id:
         return
     state_data = await state.get_data()
 
-    quiz_resource = next(resource for resource in state_data["resources"] if resource.resource_item_id == resource_id)
+    quiz_resource = next(
+        resource for resource in state_data["resources"] if resource.resource_item_id == resource_item_id
+    )
     quiz = QuizSchema(
         id=UUID(),
-        resource_id=resource_id,
+        resource_item_id=resource_item_id,
         questions=[],
         resource=quiz_resource,
     )
-    await state.update_data(quiz=quiz, questions=[], resource_id=resource_id)
+    await state.update_data(quiz=quiz, questions=[], resource_item_id=resource_item_id)
     await callback.message.answer(
         text=t(
             "manage_quizes.delete.choose_to_delete",
@@ -236,14 +238,13 @@ async def delete_quiz_confirm(callback: CallbackQuery, state: FSMContext):
     resources = resource_data["resources"]
     resource = None
     for rsc in resources:
-        if rsc.id == resource_data["resource_id"]:
+        if rsc.id == resource_data["resource_item_id"]:
             resource = rsc
     if not resource:
         return
     try:
-        await QuizManager.delete(resource_id=resource_data["resource_id"])
-    except (IntegrityError, ValueError) as e:
-        print(e)
+        await QuizManager.delete(resource_item_id=resource_data["resource_item_id"])
+    except IntegrityError, ValueError:
         await callback.message.answer(
             text=t(
                 "manage_quizes.delete.fail",

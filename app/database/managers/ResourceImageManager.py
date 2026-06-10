@@ -1,6 +1,6 @@
 from typing import List
+from uuid import UUID
 
-from pydantic import UUID
 from sqlalchemy import select
 
 from database.models.resource_image import ResourceImageModel

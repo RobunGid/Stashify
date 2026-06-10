@@ -22,10 +22,10 @@ class ResourceManager:
     @classmethod
     async def create(cls, resource_data: ResourceSchema):
         async with AsyncSessionLocal() as session:
-            resource = ResourceItemModel(
+            resource_item = ResourceItemModel(
                 **resource_data.model_dump(exclude={"category", "quiz"}),
             )
-            session.add(resource)
+            session.add(resource_item)
             await session.commit()
 
     @classmethod
@@ -34,10 +34,10 @@ class ResourceManager:
             statement = select(ResourceItemModel).where(
                 ResourceItemModel.resource_item_id == resource_item_id,
             )
-            resource = (await session.execute(statement)).scalars().first()
-            if not resource:
+            resource_item = (await session.execute(statement)).scalars().first()
+            if not resource_item:
                 raise ValueError("No such resource")
-            await session.delete(resource)
+            await session.delete(resource_item)
             await session.commit()
 
     @classmethod

@@ -39,7 +39,7 @@ class DeleteResourceState(StatesGroup):
     total_pages = State()
     resources = State()
     categories = State()
-    resource_id = State()
+    resource_item_id = State()
     confirm = State()
 
 
@@ -198,12 +198,12 @@ async def delete_resource_select(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
-    resource_id = callback_data.resource_id
+    resource_item_id = callback_data.resource_item_id
     state_data = await state.get_data()
     resource: ResourceSchema = next(
-        (resource for resource in state_data["resources"] if resource.resource_item_id == resource_id),
+        (resource for resource in state_data["resources"] if resource.resource_item_id == resource_item_id),
     )
-    await state.update_data(resource_id=resource_id)
+    await state.update_data(resource_item_id=resource_item_id)
     await callback.message.answer(
         text=t(
             "manage_resources.delete.choose_to_delete",
@@ -231,11 +231,11 @@ async def delete_resource_name_confirm(callback: CallbackQuery, state: FSMContex
         (
             resource
             for resource in resource_data["resources"]
-            if resource.resource_item_id == resource_data["resource_id"]
+            if resource.resource_item_id == resource_data["resource_item_id"]
         ),
     )
     try:
-        await ResourceManager.delete(resource_item_id=resource_data["resource_id"])
+        await ResourceManager.delete(resource_item_id=resource_data["resource_item_id"])
     except IntegrityError, ValueError:
         await callback.message.answer(
             text=t(

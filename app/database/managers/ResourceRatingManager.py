@@ -1,6 +1,6 @@
 from typing import overload
+from uuid import UUID
 
-from pydantic import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -75,12 +75,12 @@ class ResourceRatingManager:
                 statement.filter(ResourceRatingModel.resource_item_id == resource_item_id)
                 .filter(ResourceRatingModel.user_id == user_id)
                 .options(
-                    selectinload(ResourceRatingModel.resource).selectinload(
+                    selectinload(ResourceRatingModel.resource_item).selectinload(
                         ResourceItemModel.quiz,
                     ),
                 )
                 .options(
-                    selectinload(ResourceRatingModel.resource).selectinload(
+                    selectinload(ResourceRatingModel.resource_item).selectinload(
                         ResourceItemModel.category,
                     ),
                 )

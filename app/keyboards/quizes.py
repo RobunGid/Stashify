@@ -16,29 +16,27 @@ class EditQuizActionCallbackFactory(CallbackData, prefix="edit_quiz_actn"):  # t
 
 @dataclass
 class QuizManageEntryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
-    resource_item_id: UUID
-
     def _build_entry_buttons(self) -> list[dict]:
         return [
             {
-                "text": self.i18n.get("manage_quizes_keyboard.add_question"),
+                "text": self.i18n.get("manage-quizes-keyboard-add-question"),
                 "callback_data": EditQuizActionCallbackFactory(
                     action="add",
-                    resource_item_id=self.resource_item_id,
+                    resource_item_id=None,
                 ),
             },
             {
-                "text": self.i18n.get("manage_quizes_keyboard.edit_question"),
+                "text": self.i18n.get("manage-quizes-keyboard-edit-question"),
                 "callback_data": EditQuizActionCallbackFactory(
                     action="edit",
-                    resource_item_id=self.resource_item_id,
+                    resource_item_id=None,
                 ),
             },
             {
-                "text": self.i18n.get("manage_quizes_keyboard.delete_question"),
+                "text": self.i18n.get("manage-quizes-keyboard-delete-question"),
                 "callback_data": EditQuizActionCallbackFactory(
                     action="delete",
-                    resource_item_id=self.resource_item_id,
+                    resource_item_id=None,
                 ),
             },
         ]

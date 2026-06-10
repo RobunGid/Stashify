@@ -56,4 +56,4 @@ app-test:
 
 .PHONY: db-ui-logs
 db-ui-logs:
-	${LOGS} ${DATABASE_UI_CONTAINER} -f
+	${LOGS} ${DB_UI_CONTAINER} -f

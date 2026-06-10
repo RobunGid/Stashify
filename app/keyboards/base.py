@@ -19,6 +19,7 @@ class BackKeyboardBuilderMixin:
             text=self.i18n.get("common-back"),
             callback_data=self._back_callback(),
         )
+        builder.adjust(1)
 
     @abstractmethod
     def _back_callback(self) -> str | CallbackData | None:
@@ -280,7 +281,8 @@ class BaseManageEntryKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMix
         builder = InlineKeyboardBuilder()
         btns = self._build_entry_buttons()
         for btn in btns:
-            builder.row(**btn)
+            builder.button(**btn)
+            builder.adjust(1)
 
         self._append_back_button(builder)
 
@@ -300,7 +302,7 @@ class BaseQuizFinalKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin
         builder = InlineKeyboardBuilder()
         btns = self._build_retry_buttons()
         for btn in btns:
-            builder.row(**btn)
+            builder.button(**btn)
 
         self._append_back_button(builder)
         builder.adjust(1, 1)

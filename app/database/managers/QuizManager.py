@@ -1,4 +1,5 @@
-from pydantic import UUID
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -40,7 +41,7 @@ class QuizManager:
                     selectinload(QuizModel.questions),
                 )
                 .options(
-                    selectinload(QuizModel.resource),
+                    selectinload(QuizModel.resource_item),
                 )
             )
             statement = statement.filter(QuizModel.resource_item_id == resource_item_id)

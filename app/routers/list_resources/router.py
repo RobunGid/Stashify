@@ -11,6 +11,7 @@ from constants import (
     LIST_RESOURCES_CATEGORIES_ON_PAGE,
     LIST_RESOURCES_RESOURCES_ON_PAGE,
 )
+from formaters.resource_item import ResourceItemFormatter
 
 from database.managers import (
     CategoryManager,
@@ -208,12 +209,12 @@ async def list_resource_resource_select(
         or not callback.from_user.language_code
         or not callback.message
         or not callback.data
-        or not callback_data.resource_id
+        or not callback_data.resource_item_id
     ):
         return
 
-    resource = await ResourceManager.get_one(resource_id=callback_data.resource_id)
-    if not resource:
+    resource_item = await ResourceManager.get_one(resource_item_id=callback_data.resource_item_id)
+    if not resource_item:
         return
 
     state_data = await state.get_data()
@@ -222,25 +223,25 @@ async def list_resource_resource_select(
     resources = await ResourceManager.get_many(category_id=category_id)
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
-    images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
-    is_favorite = any(resource.resource_item_id == favorite.resource_id for favorite in favorites)
+    images = await ResourceImageManager.get_many(resource_item_id=callback_data.resource_item_id)
+    is_favorite = any(resource_item.resource_item_id == favorite.resource_item_id for favorite in favorites)
 
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_item_id,
+        resource_item_id=resource_item.resource_item_id,
     )
     resource_rating_number = resource_rating.rating if resource_rating else None
 
-    await state.update_data(resources=resources, resource=resource)
+    await state.update_data(resources=resources, resource_item=resource_item)
 
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
         items=resources,
-        current_item=resource,
+        current_item=resource_item,
         is_favorite=is_favorite,
         rating=resource_rating_number,
         quiz_percent=0,
-        has_quiz=bool(resource.quiz),
+        has_quiz=bool(resource_item.quiz),
     )
     keyboard = keyboard_builder.build()
 
@@ -254,7 +255,7 @@ async def list_resource_resource_select(
         )
 
     await callback.message.answer(
-        text=i18n.get("list-resource-item", resource=resource),
+        text=ResourceItemFormatter.translate_resource_item(resource_item=resource_item, i18n=i18n),
         reply_markup=keyboard,
     )
 
@@ -273,36 +274,36 @@ async def list_resource_resource_change_page(
         or not callback.from_user.language_code
         or not callback.message
         or not callback.data
-        or not callback_data.resource_id
+        or not callback_data.resource_item_id
     ):
         return
     await bot.delete_message(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
-    resource = await ResourceManager.get_one(resource_id=callback_data.resource_id)
-    if not resource:
+    resource_item = await ResourceManager.get_one(resource_item_id=callback_data.resource_item_id)
+    if not resource_item:
         return
     state_data = await state.get_data()
     resources = state_data["resources"]
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
-    images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
-    is_favorite = any(resource.resource_item_id == favorite.resource_id for favorite in favorites)
+    images = await ResourceImageManager.get_many(resource_item_id=callback_data.resource_item_id)
+    is_favorite = any(resource_item.resource_item_id == favorite.resource_item_id for favorite in favorites)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_item_id,
+        resource_item_id=resource_item.resource_item_id,
     )
     resource_rating_number = resource_rating.rating if resource_rating else None
-    await state.update_data(resources=resources, resource=resource)
+    await state.update_data(resources=resources, resource=resource_item)
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
         items=resources,
-        current_item=resource,
+        current_item=resource_item,
         is_favorite=is_favorite,
         rating=resource_rating_number,
         quiz_percent=0,
-        has_quiz=bool(resource.quiz),
+        has_quiz=bool(resource_item.quiz),
     )
     keyboard = keyboard_builder.build()
     if images:
@@ -315,7 +316,7 @@ async def list_resource_resource_change_page(
         )
     else:
         await callback.message.answer(
-            text=i18n.get("list-resource-item", resource=resource),
+            text=ResourceItemFormatter.translate_resource_item(resource_item=resource_item, i18n=i18n),
             reply_markup=keyboard,
         )
 
@@ -338,33 +339,33 @@ async def list_resource_resource_add_favorite(
         or not callback.from_user.language_code
         or not callback.message
         or not callback.data
-        or not callback_data.resource_id
+        or not callback_data.resource_item_id
     ):
         return
     await bot.delete_message(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
-    resource = await ResourceManager.get_one(resource_id=callback_data.resource_id)
-    if not resource:
+    resource_item = await ResourceManager.get_one(resource_item_id=callback_data.resource_item_id)
+    if not resource_item:
         return
     state_data = await state.get_data()
     resources = state_data["resources"]
     user_id = str(callback.from_user.id)
-    favorite = FavoriteSchema(user_id=user_id, resource_id=resource.resource_item_id)
+    favorite = FavoriteSchema(user_id=user_id, resource_item_id=resource_item.resource_item_id)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_item_id,
+        resource_item_id=resource_item.resource_item_id,
     )
     await FavoriteManager.create(favorite)
-    images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
+    images = await ResourceImageManager.get_many(resource_item_id=callback_data.resource_item_id)
     resource_rating_number = resource_rating.rating if resource_rating else None
     await state.update_data(resources=resources)
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
         items=resources,
-        current_item=resource,
-        has_quiz=bool(resource.quiz),
+        current_item=resource_item,
+        has_quiz=bool(resource_item.quiz),
         is_favorite=True,
         quiz_percent=0,
         rating=resource_rating_number,
@@ -379,7 +380,7 @@ async def list_resource_resource_add_favorite(
             media=list(media_group.build()),
         )
     await callback.message.answer(
-        text=i18n.get("list-resource-item", resource=resource),
+        text=ResourceItemFormatter.translate_resource_item(resource_item=resource_item, i18n=i18n),
         reply_markup=keyboard,
     )
 
@@ -398,33 +399,33 @@ async def list_resource_resource_remove_favorite(
         or not callback.from_user.language_code
         or not callback.message
         or not callback.data
-        or not callback_data.resource_id
+        or not callback_data.resource_item_id
     ):
         return
     await bot.delete_message(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
-    resource = await ResourceManager.get_one(resource_id=callback_data.resource_id)
-    images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
-    if not resource:
+    resource_item = await ResourceManager.get_one(resource_item_id=callback_data.resource_item_id)
+    images = await ResourceImageManager.get_many(resource_item_id=callback_data.resource_item_id)
+    if not resource_item:
         return
     state_data = await state.get_data()
     resources = state_data["resources"]
     user_id = str(callback.from_user.id)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_item_id,
+        resource_item_id=resource_item.resource_item_id,
     )
 
-    await FavoriteManager.delete(user_id=user_id, resource_id=resource.resource_item_id)
+    await FavoriteManager.delete(user_id=user_id, resource_item_id=resource_item.resource_item_id)
     resource_rating_number = resource_rating.rating if resource_rating else None
     await state.update_data(resources=resources)
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
         items=resources,
-        current_item=resource,
-        has_quiz=bool(resource.quiz),
+        current_item=resource_item,
+        has_quiz=bool(resource_item.quiz),
         is_favorite=True,
         quiz_percent=0,
         rating=resource_rating_number,
@@ -439,7 +440,7 @@ async def list_resource_resource_remove_favorite(
             media=list(media_group.build()),
         )
     await callback.message.answer(
-        text=i18n.get("list-resource-item", resource=resource),
+        text=ResourceItemFormatter.translate_resource_item(resource_item=resource_item, i18n=i18n),
         reply_markup=keyboard,
     )
 
@@ -456,7 +457,7 @@ async def list_resource_resource_rate(
         or not callback.from_user.language_code
         or not callback.message
         or not callback.data
-        or not callback_data.resource_id
+        or not callback_data.resource_item_id
         or not callback_data.rating
     ):
         return
@@ -464,25 +465,25 @@ async def list_resource_resource_rate(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
-    resource_id = callback_data.resource_id
-    resource = await ResourceManager.get_one(resource_id=resource_id)
-    if not resource:
+    resource_item_id = callback_data.resource_item_id
+    resource_item = await ResourceManager.get_one(resource_item_id=resource_item_id)
+    if not resource_item:
         return
     state_data = await state.get_data()
     resources = state_data["resources"]
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
-    is_favorite = any(resource.resource_item_id == favorite.resource_id for favorite in favorites)
+    is_favorite = any(resource_item.resource_item_id == favorite.resource_item_id for favorite in favorites)
     rating = callback_data.rating
     existing_resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_item_id,
+        resource_item_id=resource_item.resource_item_id,
     )
     if existing_resource_rating:
-        await ResourceRatingManager.delete(user_id=user_id, resource_id=resource.resource_item_id)
+        await ResourceRatingManager.delete(user_id=user_id, resource_item_id=resource_item.resource_item_id)
     resource_rating = ResourceRatingWithoutUserAndResourceSchema(
         resource_rating_id=UUID(),
-        resource_id=resource_id,
+        resource_item_id=resource_item_id,
         rating=rating,
         user_id=user_id,
     )
@@ -490,8 +491,8 @@ async def list_resource_resource_rate(
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
         items=resources,
-        current_item=resource,
-        has_quiz=bool(resource.quiz),
+        current_item=resource_item,
+        has_quiz=bool(resource_item.quiz),
         is_favorite=is_favorite,
         quiz_percent=0,
         rating=resource_rating_number,
@@ -499,7 +500,7 @@ async def list_resource_resource_rate(
     keyboard = keyboard_builder.build()
     await ResourceRatingManager.create(resource_rating)
     await state.update_data(resources=resources)
-    images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
+    images = await ResourceImageManager.get_many(resource_item_id=callback_data.resource_item_id)
     if images:
         media_group = MediaGroupBuilder()
         for photo in images:
@@ -508,6 +509,6 @@ async def list_resource_resource_rate(
             media=list(media_group.build()),
         )
     await callback.message.answer(
-        text=i18n.get("list-resource-item", resource=resource),
+        text=ResourceItemFormatter.translate_resource_item(resource_item=resource_item, i18n=i18n),
         reply_markup=keyboard,
     )

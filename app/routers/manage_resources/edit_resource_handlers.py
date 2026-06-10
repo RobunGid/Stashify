@@ -36,7 +36,7 @@ class EditResourceState(StatesGroup):
     total_pages = State()
     resources = State()
     categories = State()
-    resource_id = State()
+    resource_item_id = State()
     name = State()
     description = State()
     image = State()
@@ -198,8 +198,8 @@ async def edit_resource_choose(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
-    resource_id = callback_data.resource_id
-    await state.update_data(resource_id=resource_id)
+    resource_item_id = callback_data.resource_item_id
+    await state.update_data(resource_item_id=resource_item_id)
     await callback.message.answer(
         text=t(
             "manage_resources.edit.choose_to_change",
@@ -225,7 +225,7 @@ async def edit_resource_name(callback: CallbackQuery, state: FSMContext):
         (
             resource.name
             for resource in state_data["resources"]
-            if resource.resource_item_id == state_data["resource_id"]
+            if resource.resource_item_id == state_data["resource_item_id"]
         ),
         "Unknown",
     )
@@ -294,7 +294,7 @@ async def edit_resource_description(callback: CallbackQuery, state: FSMContext):
         (
             resource.description
             for resource in state_data["resources"]
-            if resource.resource_item_id == state_data["resource_id"]
+            if resource.resource_item_id == state_data["resource_item_id"]
         ),
         "Unknown",
     )
@@ -363,7 +363,7 @@ async def edit_resource_tags(callback: CallbackQuery, state: FSMContext):
         (
             resource.tags
             for resource in state_data["resources"]
-            if resource.resource_item_id == state_data["resource_id"]
+            if resource.resource_item_id == state_data["resource_item_id"]
         ),
         "Unknown",
     )
@@ -432,7 +432,7 @@ async def edit_resource_image(callback: CallbackQuery, state: FSMContext):
         (
             resource.image
             for resource in state_data["resources"]
-            if resource.resource_item_id == state_data["resource_id"]
+            if resource.resource_item_id == state_data["resource_item_id"]
         ),
         "Unknown",
     )

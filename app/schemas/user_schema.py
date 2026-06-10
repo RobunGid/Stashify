@@ -7,7 +7,7 @@ from database.models.user import Role
 
 
 class PlainUserSchema(BaseModel):
-    user_id: str = Field()
+    user_id: str
     username: Optional[str]
 
     role: Role

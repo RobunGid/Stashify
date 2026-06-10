@@ -1,10 +1,12 @@
-from pydantic import BaseModel, ConfigDict, Field, UUID
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PlainQuizSchema(BaseModel):
     quiz_id: UUID = Field()
 
-    resource_id: UUID
+    resource_item_id: UUID
 
     model_config = ConfigDict(from_attributes=True)
 

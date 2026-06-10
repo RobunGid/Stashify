@@ -1,6 +1,6 @@
 from typing import List, overload
+from uuid import UUID
 
-from pydantic import UUID
 from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 

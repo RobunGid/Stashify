@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from sqlalchemy import (
     CheckConstraint,
     Column,
@@ -17,11 +19,11 @@ from database.orm import Base
 class ResourceRatingModel(Base):
     __tablename__ = "resource_rating"
 
-    resource_rating_id = Column(UUID(as_uuid=True), primary_key=True, default=UUID)
+    resource_rating_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     resource_item_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("resource.resource_item_id"),
+        ForeignKey("resource_item.resource_item_id"),
         nullable=False,
     )
     resource_item = relationship("ResourceItemModel", back_populates="ratings")

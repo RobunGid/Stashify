@@ -26,7 +26,7 @@ class CategoryManager(BaseManager):
     ) -> List[CategorySchema]:
         async with AsyncSessionLocal() as session:
             statement = select(CategoryModel).options(
-                selectinload(CategoryModel.resources)
+                selectinload(CategoryModel.resource_items)
                 .selectinload(ResourceItemModel.quiz)
                 .selectinload(QuizModel.questions),
             )

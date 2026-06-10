@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import uuid4
 
 from sqlalchemy import (
     CheckConstraint,
@@ -18,7 +19,7 @@ from database.orm import Base
 class QuizRatingModel(Base):
     __tablename__ = "quiz_rating"
 
-    quiz_rating_id = Column(UUID(as_uuid=True), primary_key=True, default=UUID)
+    quiz_rating_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     quiz_id = Column(UUID(as_uuid=True), ForeignKey("quiz.quiz_id"), nullable=False)
     quiz = relationship("QuizModel", back_populates="ratings")
@@ -39,6 +40,6 @@ class QuizRatingModel(Base):
 
     @validates("rating")
     def validate_rating(self, _, rating) -> int:
-        if rating <= 0 or rating > 5:
+        if rating < 1 or rating > 5:
             raise ValueError("Rating not in boundaries")
         return rating

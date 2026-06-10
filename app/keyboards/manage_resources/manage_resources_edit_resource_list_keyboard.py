@@ -1,10 +1,9 @@
 from typing import List, Literal, Union
+from uuid import UUID
 
 from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-
-from pydantic import UUID
 
 from i18n.translate import t
 from schemas.resource_schema import ResourceSchema
@@ -15,7 +14,7 @@ class EditResourceChooseResourceCallbackFactory(
     prefix="edit_resource_rsc",  # type: ignore[call-arg]
 ):
     action: Union[Literal["select"], Literal["change_page"]]
-    resource_id: UUID | None
+    resource_item_id: UUID | None
     page: int
 
 
@@ -33,7 +32,7 @@ def manage_resources_edit_resource_list_keyboard(
             text=resource.name,
             callback_data=EditResourceChooseResourceCallbackFactory(
                 action="select",
-                resource_id=resource.resource_item_id,
+                resource_item_id=resource.resource_item_id,
                 page=0,
             ),
         )

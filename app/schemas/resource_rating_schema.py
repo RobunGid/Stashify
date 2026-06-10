@@ -1,12 +1,13 @@
 from datetime import datetime
+from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, UUID
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ResourceRatingWithoutUserAndResourceSchema(BaseModel):
     resource_rating_id: UUID
 
-    resource_id: UUID
+    resource_item_id: UUID
 
     user_id: str
 

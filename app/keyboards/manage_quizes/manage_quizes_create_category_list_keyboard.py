@@ -1,10 +1,9 @@
 from typing import List, Literal, Union
+from uuid import UUID
 
 from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-
-from pydantic import UUID
 
 from i18n.translate import t
 from schemas.category_schema import CategorySchema
