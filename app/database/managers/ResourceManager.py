@@ -31,7 +31,9 @@ class ResourceManager:
     @classmethod
     async def delete(cls, resource_item_id: UUID):
         async with AsyncSessionLocal() as session:
-            statement = select(ResourceItemModel).where(ResourceItemModel.resource_item_id == resource_item_id)
+            statement = select(ResourceItemModel).where(
+                ResourceItemModel.resource_item_id == resource_item_id,
+            )
             resource = (await session.execute(statement)).scalars().first()
             if not resource:
                 raise ValueError("No such resource")

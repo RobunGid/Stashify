@@ -16,7 +16,9 @@ from database.managers import CategoryManager, ResourceImageManager, ResourceMan
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
 from i18n.translate import t
-from keyboards.manage_resources.manage_resources_back_keyboard import manage_resources_back_keyboard
+from keyboards.manage_resources.manage_resources_back_keyboard import (
+    manage_resources_back_keyboard,
+)
 from keyboards.manage_resources.manage_resources_create_keyboard import (
     CreateResourceCallbackFactory,
     manage_resources_create_keyboard,

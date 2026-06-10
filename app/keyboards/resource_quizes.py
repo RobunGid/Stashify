@@ -3,8 +3,15 @@ from typing import Literal, Union
 
 from aiogram.filters.callback_data import CallbackData
 
-from keyboards.base import BaseManageEntryKeyboardBuilder, BaseQuizFinalKeyboardBuilder, BaseQuizQuestionKeyboardBuilder
-from keyboards.resources import ListResourcesChooseResourceCallbackFactory, ListResourcesItemCallbackFactory
+from keyboards.base import (
+    BaseManageEntryKeyboardBuilder,
+    BaseQuizFinalKeyboardBuilder,
+    BaseQuizQuestionKeyboardBuilder,
+)
+from keyboards.resources import (
+    ListResourcesChooseResourceCallbackFactory,
+    ListResourcesItemCallbackFactory,
+)
 from schemas.quiz_question_schema import QuizQuestionBaseSchema
 from schemas.resource_schema import ResourceSchema
 
@@ -19,9 +26,18 @@ class ListResourcesQuizQuestionCallbackFactory(CallbackData, prefix="lst_rsc_qst
 class ResourceQuizManageEntryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
     def _build_entry_buttons(self) -> list[dict]:
         return [
-            {"text": self.i18n.get("manage-quizes-keyboard-create"), "callback_data": "create_quiz"},
-            {"text": self.i18n.get("manage-quizes-keyboard-edit"), "callback_data": "edit_quiz"},
-            {"text": self.i18n.get("manage-quizes-keyboard-delete"), "callback_data": "delete_quiz"},
+            {
+                "text": self.i18n.get("manage-quizes-keyboard-create"),
+                "callback_data": "create_quiz",
+            },
+            {
+                "text": self.i18n.get("manage-quizes-keyboard-edit"),
+                "callback_data": "edit_quiz",
+            },
+            {
+                "text": self.i18n.get("manage-quizes-keyboard-delete"),
+                "callback_data": "delete_quiz",
+            },
         ]
 
     def _back_callback(self) -> str:
@@ -51,7 +67,9 @@ class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceSche
 
 
 @dataclass
-class ResourceQuizQuestionKeyboardBuilder(BaseQuizQuestionKeyboardBuilder[ResourceSchema, QuizQuestionBaseSchema]):
+class ResourceQuizQuestionKeyboardBuilder(
+    BaseQuizQuestionKeyboardBuilder[ResourceSchema, QuizQuestionBaseSchema],
+):
     def _build_quiz_callback(self, option_number: int, question_number: int) -> CallbackData:
         return ListResourcesQuizQuestionCallbackFactory(
             action="answer",

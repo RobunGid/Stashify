@@ -1,4 +1,12 @@
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import (
+    CheckConstraint,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.sql import func
@@ -11,7 +19,11 @@ class ResourceRatingModel(Base):
 
     resource_rating_id = Column(UUID(as_uuid=True), primary_key=True, default=UUID)
 
-    resource_item_id = Column(UUID(as_uuid=True), ForeignKey("resource.resource_item_id"), nullable=False)
+    resource_item_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("resource.resource_item_id"),
+        nullable=False,
+    )
     resource_item = relationship("ResourceItemModel", back_populates="ratings")
 
     user_id = Column(String, ForeignKey("user.user_id"), nullable=False)

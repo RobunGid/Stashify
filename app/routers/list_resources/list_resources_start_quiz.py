@@ -7,12 +7,17 @@ from aiogram.types import CallbackQuery
 from aiogram_i18n import I18nContext
 
 from database.managers import QuizManager, QuizResultManager
-from keyboards.list_resources.list_resources_quiz_final_keyboard import list_resources_quiz_final_keyboard
+from keyboards.list_resources.list_resources_quiz_final_keyboard import (
+    list_resources_quiz_final_keyboard,
+)
 from keyboards.list_resources.list_resources_quiz_question_keyboard import (
     list_resources_quiz_question_keyboard,
     ListResourcesQuizQuestionCallbackFactory,
 )
-from keyboards.resources import ListResourcesItemCallbackFactory, ResourceQuizConfirmKeyboardBuilder
+from keyboards.resources import (
+    ListResourcesItemCallbackFactory,
+    ResourceQuizConfirmKeyboardBuilder,
+)
 from schemas.quiz_result_schema import QuizResultWithoutUserAndQuizSchema
 from settings.config import bot
 

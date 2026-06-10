@@ -2,7 +2,10 @@ from aiogram import F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from constants import LIST_RESOURCES_CATEGORIES_ON_PAGE, LIST_RESOURCES_RESOURCES_ON_PAGE
+from constants import (
+    LIST_RESOURCES_CATEGORIES_ON_PAGE,
+    LIST_RESOURCES_RESOURCES_ON_PAGE,
+)
 
 from database.managers import ResourceManager
 from handlers.base_resource_router import BaseResourceRouter

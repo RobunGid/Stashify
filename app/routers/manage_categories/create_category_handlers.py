@@ -11,7 +11,9 @@ from database.managers import CategoryManager
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
 from i18n.translate import t
-from keyboards.manage_categories.manage_categories_back_keyboard import manage_categories_back_keyboard
+from keyboards.manage_categories.manage_categories_back_keyboard import (
+    manage_categories_back_keyboard,
+)
 from schemas.category_schema import CategorySchema
 from settings.config import bot
 

@@ -36,7 +36,11 @@ class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceSchema]):
         }
 
     def _pagination_callback(self, page: int) -> CallbackData:
-        return ListResourcesChooseResourceCallbackFactory(action="change_page", resource_item_id=None, page=page)
+        return ListResourcesChooseResourceCallbackFactory(
+            action="change_page",
+            resource_item_id=None,
+            page=page,
+        )
 
 
 class ListResourcesChooseCategoryCallbackFactory(
@@ -64,7 +68,11 @@ class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
         }
 
     def _pagination_callback(self, page: int) -> CallbackData:
-        return ListResourcesChooseCategoryCallbackFactory(action="change_page", category_id=None, page=page)
+        return ListResourcesChooseCategoryCallbackFactory(
+            action="change_page",
+            category_id=None,
+            page=page,
+        )
 
 
 class ListResourcesItemCallbackFactory(CallbackData, prefix="lst_rsc_itm"):  # type: ignore[call-arg]
@@ -107,7 +115,11 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder):
         )
 
     def _rating_callback(self, item: ResourceSchema, rating: int) -> CallbackData:
-        return ListResourcesItemCallbackFactory(resource_item_id=item.resource_item_id, action="rate", rating=rating)
+        return ListResourcesItemCallbackFactory(
+            resource_item_id=item.resource_item_id,
+            action="rate",
+            rating=rating,
+        )
 
     def _quiz_callback(self, item: ResourceSchema) -> CallbackData:
         return ListResourcesItemCallbackFactory(
@@ -145,9 +157,18 @@ class ResourceQuizConfirmKeyboardBuilder(BaseQuizConfirmKeyboardBuilder[Resource
 class ResourceManageEntryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
     def _build_entry_buttons(self) -> list[dict]:
         return [
-            {"text": self.i18n.get("manage-resources-keyboard-create"), "callback_data": "create_resource"},
-            {"text": self.i18n.get("manage-resources-keyboard-edit"), "callback_data": "edit_resource"},
-            {"text": self.i18n.get("manage-resources-keyboard-delete"), "callback_data": "delete_resource"},
+            {
+                "text": self.i18n.get("manage-resources-keyboard-create"),
+                "callback_data": "create_resource",
+            },
+            {
+                "text": self.i18n.get("manage-resources-keyboard-edit"),
+                "callback_data": "edit_resource",
+            },
+            {
+                "text": self.i18n.get("manage-resources-keyboard-delete"),
+                "callback_data": "delete_resource",
+            },
         ]
 
     def _back_callback(self) -> str:

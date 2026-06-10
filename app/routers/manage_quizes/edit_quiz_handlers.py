@@ -9,11 +9,18 @@ from aiogram.types import CallbackQuery, Message
 from constants import EDIT_QUIZ_CATEGORIES_ON_PAGE, EDIT_QUIZ_RESOURCES_ON_PAGE
 from sqlalchemy.exc import IntegrityError
 
-from database.managers import CategoryManager, QuizManager, QuizQuestionManager, ResourceManager
+from database.managers import (
+    CategoryManager,
+    QuizManager,
+    QuizQuestionManager,
+    ResourceManager,
+)
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
 from i18n.translate import t
-from keyboards.manage_quizes.manage_quizes_back_keyboard import manage_quizes_back_keyboard
+from keyboards.manage_quizes.manage_quizes_back_keyboard import (
+    manage_quizes_back_keyboard,
+)
 from keyboards.manage_quizes.manage_quizes_delete_question_back_keyboard import (
     manage_quizes_delete_question_back_keyboard,
 )

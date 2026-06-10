@@ -11,8 +11,12 @@ from aiogram_i18n import I18nContext
 from constants import FIND_RESOURCE_RESOURCES_ON_PAGE
 
 from database.managers import FavoriteManager, ResourceManager, ResourceRatingManager
-from keyboards.list_resources.list_resources_resource_list_keyboard import ListResourcesChooseResourceCallbackFactory
-from keyboards.search_resource.search_resource_back_keyboard import search_resource_back_keyboard
+from keyboards.list_resources.list_resources_resource_list_keyboard import (
+    ListResourcesChooseResourceCallbackFactory,
+)
+from keyboards.search_resource.search_resource_back_keyboard import (
+    search_resource_back_keyboard,
+)
 from keyboards.search_resource.search_resource_resource_item_keyboard import (
     search_resource_resource_item_keyboard,
     SearchResourceItemCallbackFactory,

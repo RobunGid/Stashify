@@ -5,7 +5,9 @@ from aiogram.types import CallbackQuery
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
 from i18n.translate import t
-from keyboards.manage_categories.manage_categories_keyboard import manage_categories_keyboard
+from keyboards.manage_categories.manage_categories_keyboard import (
+    manage_categories_keyboard,
+)
 from settings.config import bot
 
 from .router import router

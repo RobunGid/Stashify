@@ -5,19 +5,26 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
 
-from constants import DELETE_RESOURCE_CATEGORIES_ON_PAGE, DELETE_RESOURCE_RESOURCES_ON_PAGE
+from constants import (
+    DELETE_RESOURCE_CATEGORIES_ON_PAGE,
+    DELETE_RESOURCE_RESOURCES_ON_PAGE,
+)
 from sqlalchemy.exc import IntegrityError
 
 from database.managers import CategoryManager, ResourceManager
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
 from i18n.translate import t
-from keyboards.manage_resources.manage_resources_back_keyboard import manage_resources_back_keyboard
+from keyboards.manage_resources.manage_resources_back_keyboard import (
+    manage_resources_back_keyboard,
+)
 from keyboards.manage_resources.manage_resources_delete_category_list_keyboard import (
     DeleteResourceChooseCategoryCallbackFactory,
     manage_resources_delete_category_list_keyboard,
 )
-from keyboards.manage_resources.manage_resources_delete_keyboard_confirm import manage_resources_delete_keyboard_confirm
+from keyboards.manage_resources.manage_resources_delete_keyboard_confirm import (
+    manage_resources_delete_keyboard_confirm,
+)
 from keyboards.manage_resources.manage_resources_delete_resource_list_keyboard import (
     DeleteResourceChooseResourceCallbackFactory,
     manage_resources_delete_resource_list_keyboard,

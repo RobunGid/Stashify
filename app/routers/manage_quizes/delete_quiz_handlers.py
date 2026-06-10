@@ -13,12 +13,16 @@ from database.managers import CategoryManager, QuizManager, ResourceManager
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
 from i18n.translate import t
-from keyboards.manage_quizes.manage_quizes_back_keyboard import manage_quizes_back_keyboard
+from keyboards.manage_quizes.manage_quizes_back_keyboard import (
+    manage_quizes_back_keyboard,
+)
 from keyboards.manage_quizes.manage_quizes_delete_category_list_keyboard import (
     DeleteQuizChooseCategoryCallbackFactory,
     manage_quizes_delete_category_list_keyboard,
 )
-from keyboards.manage_quizes.manage_quizes_delete_keyboard_confirm import manage_quizes_delete_keyboard_confirm
+from keyboards.manage_quizes.manage_quizes_delete_keyboard_confirm import (
+    manage_quizes_delete_keyboard_confirm,
+)
 from keyboards.manage_quizes.manage_quizes_delete_resource_list_keyboard import (
     DeleteQuizChooseResourceCallbackFactory,
     manage_quizes_delete_resource_list_keyboard,

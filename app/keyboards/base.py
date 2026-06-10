@@ -73,16 +73,28 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
 
         if pages > 1:
             buttons += [
-                {"text": self.i18n.get("items.start"), "callback_data": self._pagination_callback(1)},
-                {"text": self.i18n.get("items.back"), "callback_data": self._pagination_callback(pages - 1)},
+                {
+                    "text": self.i18n.get("items.start"),
+                    "callback_data": self._pagination_callback(1),
+                },
+                {
+                    "text": self.i18n.get("items.back"),
+                    "callback_data": self._pagination_callback(pages - 1),
+                },
             ]
 
         buttons.append({"text": f"{pages}/{total_pages}", "callback_data": " "})
 
         if pages < total_pages:
             buttons += [
-                {"text": self.i18n.get("items.forward"), "callback_data": self._pagination_callback(pages + 1)},
-                {"text": self.i18n.get("items.end"), "callback_data": self._pagination_callback(total_pages)},
+                {
+                    "text": self.i18n.get("items.forward"),
+                    "callback_data": self._pagination_callback(pages + 1),
+                },
+                {
+                    "text": self.i18n.get("items.end"),
+                    "callback_data": self._pagination_callback(total_pages),
+                },
             ]
 
         return buttons
@@ -141,7 +153,9 @@ class BaseItemKeyboardBuilder(NavigationKeyboardBuilderMixin, BaseKeyboardBuilde
                 },
                 {
                     "text": self.i18n.get("items-back"),
-                    "callback_data": self._navigation_callback(self.items[current_item_id_index - 1]),
+                    "callback_data": self._navigation_callback(
+                        self.items[current_item_id_index - 1],
+                    ),
                 },
             ]
         buttons.append({"text": f"{current_item_id_index + 1}/{total_items}", "callback_data": " "})
@@ -149,7 +163,9 @@ class BaseItemKeyboardBuilder(NavigationKeyboardBuilderMixin, BaseKeyboardBuilde
             buttons += [
                 {
                     "text": self.i18n.get("items-forward"),
-                    "callback_data": self._navigation_callback(self.items[current_item_id_index + 1]),
+                    "callback_data": self._navigation_callback(
+                        self.items[current_item_id_index + 1],
+                    ),
                 },
                 {
                     "text": self.i18n.get("items-end"),
@@ -288,7 +304,12 @@ class BaseQuizFinalKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin
 
 
 @dataclass
-class BaseQuizQuestionKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, ABC, Generic[It, Qs]):
+class BaseQuizQuestionKeyboardBuilder(
+    BaseKeyboardBuilder,
+    BackKeyboardBuilderMixin,
+    ABC,
+    Generic[It, Qs],
+):
     item: It
     question: Qs
     page: int
@@ -302,7 +323,10 @@ class BaseQuizQuestionKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMi
                 option = option[1:]
             builder.button(
                 text=option,
-                callback_data=self._build_quiz_callback(option_number=index, question_number=self.question_number),
+                callback_data=self._build_quiz_callback(
+                    option_number=index,
+                    question_number=self.question_number,
+                ),
             )
             builder.adjust(1)
             self._append_back_button(builder)

@@ -13,8 +13,12 @@ from database.managers import CategoryManager, QuizManager, ResourceManager
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
 from i18n.translate import t
-from keyboards.manage_quizes.manage_quizes_add_question_keyboard import manage_quizes_add_question_keyboard
-from keyboards.manage_quizes.manage_quizes_back_keyboard import manage_quizes_back_keyboard
+from keyboards.manage_quizes.manage_quizes_add_question_keyboard import (
+    manage_quizes_add_question_keyboard,
+)
+from keyboards.manage_quizes.manage_quizes_back_keyboard import (
+    manage_quizes_back_keyboard,
+)
 from keyboards.manage_quizes.manage_quizes_create_category_list_keyboard import (
     CreateQuizChooseCategoryCallbackFactory,
     manage_quizes_create_category_list_keyboard,

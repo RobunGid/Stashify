@@ -12,12 +12,16 @@ from database.managers import CategoryManager, ResourceManager
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
 from i18n.translate import t
-from keyboards.manage_resources.manage_resources_back_keyboard import manage_resources_back_keyboard
+from keyboards.manage_resources.manage_resources_back_keyboard import (
+    manage_resources_back_keyboard,
+)
 from keyboards.manage_resources.manage_resources_edit_category_list_keyboard import (
     EditResourceChooseCategoryCallbackFactory,
     manage_resources_edit_category_list_keyboard,
 )
-from keyboards.manage_resources.manage_resources_edit_keyboard import manage_resources_edit_keyboard
+from keyboards.manage_resources.manage_resources_edit_keyboard import (
+    manage_resources_edit_keyboard,
+)
 from keyboards.manage_resources.manage_resources_edit_resource_list_keyboard import (
     EditResourceChooseResourceCallbackFactory,
     manage_resources_edit_resource_list_keyboard,

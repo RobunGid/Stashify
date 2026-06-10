@@ -7,7 +7,10 @@ from aiogram.types import CallbackQuery
 from aiogram.utils.media_group import MediaGroupBuilder
 
 from aiogram_i18n import I18nContext
-from constants import LIST_RESOURCES_CATEGORIES_ON_PAGE, LIST_RESOURCES_RESOURCES_ON_PAGE
+from constants import (
+    LIST_RESOURCES_CATEGORIES_ON_PAGE,
+    LIST_RESOURCES_RESOURCES_ON_PAGE,
+)
 
 from database.managers import (
     CategoryManager,
@@ -32,7 +35,11 @@ router = Router()
 
 
 @router.callback_query(F.data == "resources")
-async def list_resources_callback_handler(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
+async def list_resources_callback_handler(
+    callback: CallbackQuery,
+    state: FSMContext,
+    i18n: I18nContext,
+):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
     await bot.delete_message(
@@ -371,7 +378,10 @@ async def list_resource_resource_add_favorite(
         await callback.message.answer_media_group(
             media=list(media_group.build()),
         )
-    await callback.message.answer(text=i18n.get("list-resource-item", resource=resource), reply_markup=keyboard)
+    await callback.message.answer(
+        text=i18n.get("list-resource-item", resource=resource),
+        reply_markup=keyboard,
+    )
 
 
 @router.callback_query(
@@ -428,7 +438,10 @@ async def list_resource_resource_remove_favorite(
         await callback.message.answer_media_group(
             media=list(media_group.build()),
         )
-    await callback.message.answer(text=i18n.get("list-resource-item", resource=resource), reply_markup=keyboard)
+    await callback.message.answer(
+        text=i18n.get("list-resource-item", resource=resource),
+        reply_markup=keyboard,
+    )
 
 
 @router.callback_query(ListResourcesItemCallbackFactory.filter(F.action == "rate"))
@@ -494,4 +507,7 @@ async def list_resource_resource_rate(
         await callback.message.answer_media_group(
             media=list(media_group.build()),
         )
-    await callback.message.answer(text=i18n.get("list-resource-item", resource=resource), reply_markup=keyboard)
+    await callback.message.answer(
+        text=i18n.get("list-resource-item", resource=resource),
+        reply_markup=keyboard,
+    )

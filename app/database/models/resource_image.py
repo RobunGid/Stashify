@@ -10,7 +10,11 @@ class ResourceImageModel(Base):
 
     resource_image_id = Column(UUID(as_uuid=True), primary_key=True, default=UUID)
 
-    resource_item_id = Column(UUID(as_uuid=True), ForeignKey("resource.resource_item_id"), nullable=False)
+    resource_item_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("resource.resource_item_id"),
+        nullable=False,
+    )
     resource_item = relationship("ResourceItemModel", back_populates="images")
 
     created_at = Column(DateTime, default=func.now())
