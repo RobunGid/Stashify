@@ -1,4 +1,4 @@
-from pydantic import UUID4
+from pydantic import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -22,9 +22,9 @@ class QuizManager:
             await session.commit()
 
     @classmethod
-    async def delete(cls, resource_id: UUID4) -> None:
+    async def delete(cls, resource_item_id: UUID) -> None:
         async with AsyncSessionLocal() as session:
-            statement = select(QuizModel).where(QuizModel.resource_id == resource_id)
+            statement = select(QuizModel).where(QuizModel.resource_item_id == resource_item_id)
             quiz = (await session.execute(statement)).scalars().first()
             if not quiz:
                 raise ValueError("No such quiz")
@@ -32,7 +32,7 @@ class QuizManager:
             await session.commit()
 
     @classmethod
-    async def get_one(cls, resource_id: UUID4) -> QuizSchema:
+    async def get_one(cls, resource_item_id: UUID) -> QuizSchema:
         async with AsyncSessionLocal() as session:
             statement = (
                 select(QuizModel)
@@ -43,7 +43,7 @@ class QuizManager:
                     selectinload(QuizModel.resource),
                 )
             )
-            statement = statement.filter(QuizModel.resource_id == resource_id)
+            statement = statement.filter(QuizModel.resource_item_id == resource_item_id)
             quiz = (await session.execute(statement)).scalars().first()
 
             return QuizSchema.model_validate(quiz, from_attributes=True)

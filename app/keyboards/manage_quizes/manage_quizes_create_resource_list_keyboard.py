@@ -4,15 +4,15 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from pydantic import UUID4
+from pydantic import UUID
 
 from i18n.translate import t
 from schemas.resource_schema import ResourceSchema
 
 
-class CreateQuizChooseResourceCallbackFactory(CallbackData, prefix="create_quiz_rsc"):
+class CreateQuizChooseResourceCallbackFactory(CallbackData, prefix="create_quiz_rsc"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
-    resource_id: UUID4 | None
+    resource_item_id: UUID | None
     page: int
 
 
@@ -30,7 +30,7 @@ def manage_quizes_create_resource_list_keyboard(
             text=resource.name,
             callback_data=CreateQuizChooseResourceCallbackFactory(
                 action="select",
-                resource_id=resource.resource_id,
+                resource_item_id=resource.resource_item_id,
                 page=0,
             ),
         )
@@ -39,7 +39,7 @@ def manage_quizes_create_resource_list_keyboard(
             text=t("items.start", user_lang),
             callback_data=CreateQuizChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=1,
             ),
         )
@@ -47,7 +47,7 @@ def manage_quizes_create_resource_list_keyboard(
             text=t("items.back", user_lang),
             callback_data=CreateQuizChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=page - 1,
             ),
         )
@@ -56,7 +56,7 @@ def manage_quizes_create_resource_list_keyboard(
             text=t("items.forward", user_lang),
             callback_data=CreateQuizChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=page + 1,
             ),
         )
@@ -64,7 +64,7 @@ def manage_quizes_create_resource_list_keyboard(
             text=t("items.end", user_lang),
             callback_data=CreateQuizChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=total_pages,
             ),
         )
@@ -75,7 +75,7 @@ def manage_quizes_create_resource_list_keyboard(
             text=t("items.forward", user_lang),
             callback_data=CreateQuizChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=page + 1,
             ),
         )
@@ -83,7 +83,7 @@ def manage_quizes_create_resource_list_keyboard(
             text=t("items.end", user_lang),
             callback_data=CreateQuizChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=total_pages,
             ),
         )
@@ -93,7 +93,7 @@ def manage_quizes_create_resource_list_keyboard(
             text=t("items.start", user_lang),
             callback_data=CreateQuizChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=1,
             ),
         )
@@ -101,7 +101,7 @@ def manage_quizes_create_resource_list_keyboard(
             text=t("items.back", user_lang),
             callback_data=CreateQuizChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=page - 1,
             ),
         )

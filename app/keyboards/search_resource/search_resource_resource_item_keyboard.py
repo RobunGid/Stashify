@@ -4,20 +4,20 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from pydantic import UUID4
+from pydantic import UUID
 
 from i18n.translate import t
 from schemas.resource_schema import ResourceSchema
 
 
-class SearchResourceItemCallbackFactory(CallbackData, prefix="srch_rsc_itm"):
+class SearchResourceItemCallbackFactory(CallbackData, prefix="srch_rsc_itm"):  # type: ignore[call-arg]
     action: Union[
         Literal["change_page"],
         Literal["add_favorite"],
         Literal["remove_favorite"],
         Literal["rate"],
     ]
-    resource_id: UUID4 | None
+    resource_id: UUID | None
     rating: int | None
 
 
@@ -126,7 +126,7 @@ def search_resource_resource_item_keyboard(
             text=t("favorite.add", user_lang),
             callback_data=SearchResourceItemCallbackFactory(
                 action="add_favorite",
-                resource_id=resource.resource_id,
+                resource_id=resource.resource_item_id,
                 rating=None,
             ),
         )
@@ -135,7 +135,7 @@ def search_resource_resource_item_keyboard(
             text=t("favorite.remove", user_lang),
             callback_data=SearchResourceItemCallbackFactory(
                 action="remove_favorite",
-                resource_id=resource.resource_id,
+                resource_id=resource.resource_item_id,
                 rating=None,
             ),
         )
@@ -148,7 +148,7 @@ def search_resource_resource_item_keyboard(
             text=symbol,
             callback_data=SearchResourceItemCallbackFactory(
                 action="rate",
-                resource_id=resource.resource_id,
+                resource_id=resource.resource_item_id,
                 rating=i,
             ),
         )

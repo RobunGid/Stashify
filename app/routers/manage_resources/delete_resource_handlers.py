@@ -22,6 +22,7 @@ from keyboards.manage_resources.manage_resources_delete_resource_list_keyboard i
     DeleteResourceChooseResourceCallbackFactory,
     manage_resources_delete_resource_list_keyboard,
 )
+from schemas.resource_schema import ResourceSchema
 from settings.config import bot
 
 from .router import router
@@ -192,9 +193,8 @@ async def delete_resource_select(
     )
     resource_id = callback_data.resource_id
     state_data = await state.get_data()
-    resource = next(
-        (resource for resource in state_data["resources"] if resource.resource_id == resource_id),
-        {"name": "Unknown"},
+    resource: ResourceSchema = next(
+        (resource for resource in state_data["resources"] if resource.resource_item_id == resource_id),
     )
     await state.update_data(resource_id=resource_id)
     await callback.message.answer(
@@ -220,18 +220,21 @@ async def delete_resource_name_confirm(callback: CallbackQuery, state: FSMContex
         message_id=callback.message.message_id,
     )
     resource_data = await state.get_data()
-    resource = next(
-        (resource for resource in resource_data["resources"] if resource.resource_id == resource_data["resource_id"]),
-        {},
+    resource: ResourceSchema = next(
+        (
+            resource
+            for resource in resource_data["resources"]
+            if resource.resource_item_id == resource_data["resource_id"]
+        ),
     )
     try:
-        await ResourceManager.delete(resource_id=resource_data["resource_id"])
+        await ResourceManager.delete(resource_item_id=resource_data["resource_id"])
     except IntegrityError, ValueError:
         await callback.message.answer(
             text=t(
                 "manage_resources.delete.fail",
                 callback.from_user.language_code,
-            ).format(name=resource["name"]),
+            ).format(name=resource.name),
             reply_markup=manage_resources_back_keyboard(
                 callback.from_user.language_code,
             ),
@@ -241,7 +244,7 @@ async def delete_resource_name_confirm(callback: CallbackQuery, state: FSMContex
             text=t(
                 "manage_resources.delete.success",
                 callback.from_user.language_code,
-            ).format(name=resource["name"]),
+            ).format(name=resource.name),
             reply_markup=manage_resources_back_keyboard(
                 callback.from_user.language_code,
             ),

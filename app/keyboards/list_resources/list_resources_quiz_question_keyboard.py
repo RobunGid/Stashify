@@ -3,14 +3,14 @@ from typing import Literal, Union
 from aiogram.filters.callback_data import CallbackData
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from pydantic import UUID4
+from pydantic import UUID
 
 from i18n.translate import t
 from keyboards.list_resources.list_resources_resource_list_keyboard import ListResourcesChooseResourceCallbackFactory
 from schemas.quiz_question_schema import QuizQuestionBaseSchema
 
 
-class ListResourcesQuizQuestionCallbackFactory(CallbackData, prefix="lst_rsc_qstn"):
+class ListResourcesQuizQuestionCallbackFactory(CallbackData, prefix="lst_rsc_qstn"):  # type: ignore[call-arg]
     action: Union[Literal["answer"], None]
     option_number: int
     question_number: int
@@ -20,7 +20,7 @@ def list_resources_quiz_question_keyboard(
     question: QuizQuestionBaseSchema,
     question_number: int,
     page: int,
-    resource_id: UUID4,
+    resource_item_id: UUID,
     user_lang: str = "en",
 ):
     builder = InlineKeyboardBuilder()
@@ -42,7 +42,7 @@ def list_resources_quiz_question_keyboard(
         callback_data=ListResourcesChooseResourceCallbackFactory(
             action="change_page",
             page=page,
-            resource_id=resource_id,
+            resource_item_id=resource_item_id,
         ),
     )
     builder.adjust(1)

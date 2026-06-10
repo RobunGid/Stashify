@@ -1,6 +1,7 @@
 from typing import Generic, Protocol, Type, TypeVar
+from uuid import UUID
 
-from pydantic import BaseModel, UUID4
+from pydantic import BaseModel
 from sqlalchemy import select, update
 from sqlalchemy.orm import Mapped
 
@@ -20,7 +21,7 @@ class BaseManager(Generic[T, S]):
     schema: Type[BaseModel] | None = None
 
     @classmethod
-    async def get_one(cls, item_id: UUID4):
+    async def get_one(cls, item_id: UUID):
         if cls.model is None:
             raise AttributeError("No model provided")
         if cls.schema is None:
@@ -47,7 +48,7 @@ class BaseManager(Generic[T, S]):
             await session.commit()
 
     @classmethod
-    async def update(cls, item_id: UUID4, new_data: BaseModel) -> None:
+    async def update(cls, item_id: UUID, new_data: BaseModel) -> None:
         async with AsyncSessionLocal() as session:
             if cls.model is None:
                 raise AttributeError("No model provided")
@@ -62,7 +63,7 @@ class BaseManager(Generic[T, S]):
             await session.commit()
 
     @classmethod
-    async def delete(cls, item_id: UUID4) -> None:
+    async def delete(cls, item_id: UUID) -> None:
         async with AsyncSessionLocal() as session:
             if cls.model is None:
                 raise AttributeError("No model provided")

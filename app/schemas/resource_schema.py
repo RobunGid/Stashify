@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, UUID4
+from pydantic import BaseModel, ConfigDict, Field, UUID
 
 
 class ResourceSchemaWithoutCategory(BaseModel):
-    resource_id: UUID4
+    resource_item_id: UUID
 
     name: str
     description: str
@@ -12,7 +12,7 @@ class ResourceSchemaWithoutCategory(BaseModel):
     tags: str
     verified: bool = Field(default=False)
 
-    category_id: UUID4
+    category_id: UUID
     quiz: "QuizSchemaWithoutResource | None" = Field(default=None)
 
     created_at: datetime = Field(default_factory=datetime.now)

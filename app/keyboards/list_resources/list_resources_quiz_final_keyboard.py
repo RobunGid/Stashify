@@ -1,6 +1,6 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from pydantic import UUID4
+from pydantic import UUID
 
 from i18n import t
 from keyboards.list_resources.list_resources_resource_item_keyboard import ListResourcesItemCallbackFactory
@@ -8,7 +8,7 @@ from keyboards.list_resources.list_resources_resource_list_keyboard import ListR
 
 
 def list_resources_quiz_final_keyboard(
-    resource_id: UUID4,
+    resource_item_id: UUID,
     page: int,
     user_lang: str = "en",
 ):
@@ -18,7 +18,7 @@ def list_resources_quiz_final_keyboard(
         text=t("start_quiz.retry", user_lang),
         callback_data=ListResourcesItemCallbackFactory(
             action="start_quiz",
-            resource_id=resource_id,
+            resource_item_id=resource_item_id,
             rating=0,
         ),
     )
@@ -27,7 +27,7 @@ def list_resources_quiz_final_keyboard(
         callback_data=ListResourcesChooseResourceCallbackFactory(
             action="change_page",
             page=page,
-            resource_id=resource_id,
+            resource_item_id=resource_item_id,
         ),
     )
     builder.adjust(1, 1)

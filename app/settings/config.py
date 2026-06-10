@@ -29,6 +29,15 @@ class Config(BaseSettings):
             f"/{self.postgres_db}"
         )
 
+    @property
+    def sync_database_url(self) -> str:
+        return (
+            f"postgresql://"
+            f"{self.postgres_user}:{self.postgres_password}"
+            f"@localhost:{self.postgres_port}"
+            f"/{self.postgres_db}"
+        )
+
     model_config = {
         "env_file": ".env",
         "extra": "ignore",

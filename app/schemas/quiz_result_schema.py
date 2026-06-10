@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field, UUID4
+from pydantic import BaseModel, Field, UUID
 
 
 class QuizResultWithoutUserAndQuizSchema(BaseModel):
-    quiz_result_id: UUID4
+    quiz_result_id: UUID
 
-    quiz_id: UUID4
+    quiz_id: UUID
 
     user_id: str
 

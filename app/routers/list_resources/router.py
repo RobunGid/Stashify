@@ -1,5 +1,5 @@
 from math import ceil
-from uuid import uuid4
+from uuid import UUID
 
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
@@ -216,11 +216,11 @@ async def list_resource_resource_select(
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
     images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
-    is_favorite = any(resource.resource_id == favorite.resource_id for favorite in favorites)
+    is_favorite = any(resource.resource_item_id == favorite.resource_id for favorite in favorites)
 
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_id,
+        resource_id=resource.resource_item_id,
     )
     resource_rating_number = resource_rating.rating if resource_rating else None
 
@@ -281,10 +281,10 @@ async def list_resource_resource_change_page(
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
     images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
-    is_favorite = any(resource.resource_id == favorite.resource_id for favorite in favorites)
+    is_favorite = any(resource.resource_item_id == favorite.resource_id for favorite in favorites)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_id,
+        resource_id=resource.resource_item_id,
     )
     resource_rating_number = resource_rating.rating if resource_rating else None
     await state.update_data(resources=resources, resource=resource)
@@ -344,10 +344,10 @@ async def list_resource_resource_add_favorite(
     state_data = await state.get_data()
     resources = state_data["resources"]
     user_id = str(callback.from_user.id)
-    favorite = FavoriteSchema(user_id=user_id, resource_id=resource.resource_id)
+    favorite = FavoriteSchema(user_id=user_id, resource_id=resource.resource_item_id)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_id,
+        resource_id=resource.resource_item_id,
     )
     await FavoriteManager.create(favorite)
     images = await ResourceImageManager.get_many(resource_id=callback_data.resource_id)
@@ -404,10 +404,10 @@ async def list_resource_resource_remove_favorite(
     user_id = str(callback.from_user.id)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_id,
+        resource_id=resource.resource_item_id,
     )
 
-    await FavoriteManager.delete(user_id=user_id, resource_id=resource.resource_id)
+    await FavoriteManager.delete(user_id=user_id, resource_id=resource.resource_item_id)
     resource_rating_number = resource_rating.rating if resource_rating else None
     await state.update_data(resources=resources)
     keyboard_builder = ResourceItemKeyboardBuilder(
@@ -459,16 +459,16 @@ async def list_resource_resource_rate(
     resources = state_data["resources"]
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
-    is_favorite = any(resource.resource_id == favorite.resource_id for favorite in favorites)
+    is_favorite = any(resource.resource_item_id == favorite.resource_id for favorite in favorites)
     rating = callback_data.rating
     existing_resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_id,
+        resource_id=resource.resource_item_id,
     )
     if existing_resource_rating:
-        await ResourceRatingManager.delete(user_id=user_id, resource_id=resource.resource_id)
+        await ResourceRatingManager.delete(user_id=user_id, resource_id=resource.resource_item_id)
     resource_rating = ResourceRatingWithoutUserAndResourceSchema(
-        resource_rating_id=uuid4(),
+        resource_rating_id=UUID(),
         resource_id=resource_id,
         rating=rating,
         user_id=user_id,

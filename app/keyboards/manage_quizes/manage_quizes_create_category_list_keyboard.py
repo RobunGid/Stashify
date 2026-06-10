@@ -4,15 +4,15 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from pydantic import UUID4
+from pydantic import UUID
 
 from i18n.translate import t
 from schemas.category_schema import CategorySchema
 
 
-class CreateQuizChooseCategoryCallbackFactory(CallbackData, prefix="create_quiz_ctg"):
+class CreateQuizChooseCategoryCallbackFactory(CallbackData, prefix="create_quiz_ctg"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
-    category_id: UUID4 | None
+    category_id: UUID | None
     page: int
 
 

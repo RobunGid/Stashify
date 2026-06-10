@@ -1,6 +1,6 @@
 from math import ceil
 from typing import List
-from uuid import uuid4
+from uuid import UUID
 
 from aiogram import F
 from aiogram.fsm.context import FSMContext
@@ -209,7 +209,7 @@ async def new_resource_tags_choose(message: Message, state: FSMContext):
     state_data = await state.get_data()
     resource_data = ResourceSchema(
         category_id=state_data["category_id"],
-        id=uuid4(),
+        id=UUID(),
         name=state_data["name"],
         description=state_data["description"],
         links=state_data["links"],
@@ -223,7 +223,7 @@ async def new_resource_tags_choose(message: Message, state: FSMContext):
         await ResourceManager.create(resource_data)
         for resource_image in state_data["images"]:
             image = ResourceImageWithoutResourceSchema(
-                id=uuid4(),
+                id=UUID(),
                 resource_id=resource_data.id,
                 image=resource_image,
             )

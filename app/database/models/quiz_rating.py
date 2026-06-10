@@ -1,5 +1,4 @@
 from datetime import datetime
-from uuid import uuid4
 
 from sqlalchemy import (
     CheckConstraint,
@@ -19,7 +18,7 @@ from database.orm import Base
 class QuizRatingModel(Base):
     __tablename__ = "quiz_rating"
 
-    quiz_rating_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    quiz_rating_id = Column(UUID(as_uuid=True), primary_key=True, default=UUID)
 
     quiz_id = Column(UUID(as_uuid=True), ForeignKey("quiz.quiz_id"), nullable=False)
     quiz = relationship("QuizModel", back_populates="ratings")

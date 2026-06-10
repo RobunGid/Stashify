@@ -1,6 +1,6 @@
 from typing import List, Optional
+from uuid import UUID
 
-from pydantic import UUID4
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import selectinload
 
@@ -29,9 +29,9 @@ class ResourceManager:
             await session.commit()
 
     @classmethod
-    async def delete(cls, resource_id: UUID4):
+    async def delete(cls, resource_item_id: UUID):
         async with AsyncSessionLocal() as session:
-            statement = select(ResourceItemModel).where(ResourceItemModel.resource_item_id == resource_id)
+            statement = select(ResourceItemModel).where(ResourceItemModel.resource_item_id == resource_item_id)
             resource = (await session.execute(statement)).scalars().first()
             if not resource:
                 raise ValueError("No such resource")
@@ -43,17 +43,17 @@ class ResourceManager:
         async with AsyncSessionLocal() as session:
             statement = (
                 update(ResourceItemModel)
-                .where(ResourceItemModel.resource_item_id == resource_data.resource_id)
+                .where(ResourceItemModel.resource_item_id == resource_data.resource_item_id)
                 .values(**resource_data.model_dump())
             )
             await session.execute(statement)
             await session.commit()
 
     @classmethod
-    async def get_one(cls, resource_id: UUID4) -> ResourceSchema | None:
+    async def get_one(cls, resource_item_id: UUID) -> ResourceSchema | None:
         async with AsyncSessionLocal() as session:
             statement = select(ResourceItemModel).where(
-                ResourceItemModel.resource_item_id == resource_id,
+                ResourceItemModel.resource_item_id == resource_item_id,
             )
 
             resource = (await session.execute(statement)).scalars().first()
@@ -66,7 +66,7 @@ class ResourceManager:
     @classmethod
     async def get_many(
         cls,
-        category_id: Optional[UUID4] = None,
+        category_id: Optional[UUID] = None,
         has_quiz: Optional[bool] = None,
         text: Optional[str] = None,
         favorites_user_id: Optional[str] = None,
@@ -104,7 +104,7 @@ class ResourceManager:
             if favorites_user_id:
                 statement = statement.join(
                     FavoriteModel,
-                    FavoriteModel.resource_id == ResourceItemModel.resource_item_id,
+                    FavoriteModel.resource_item_id == ResourceItemModel.resource_item_id,
                 ).where(FavoriteModel.user_id == favorites_user_id)
 
             resources = (await session.execute(statement)).unique().scalars().all()

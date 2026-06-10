@@ -1,5 +1,5 @@
 from math import ceil
-from uuid import uuid4
+from uuid import UUID
 
 from aiogram import F
 from aiogram.fsm.context import FSMContext
@@ -198,9 +198,9 @@ async def delete_quiz_choose(
         return
     state_data = await state.get_data()
 
-    quiz_resource = next(resource for resource in state_data["resources"] if resource.resource_id == resource_id)
+    quiz_resource = next(resource for resource in state_data["resources"] if resource.resource_item_id == resource_id)
     quiz = QuizSchema(
-        id=uuid4(),
+        id=UUID(),
         resource_id=resource_id,
         questions=[],
         resource=quiz_resource,

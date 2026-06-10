@@ -1,6 +1,6 @@
 from typing import List, overload
 
-from pydantic import UUID4
+from pydantic import UUID
 from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 
@@ -25,7 +25,7 @@ class QuizQuestionManager:
     @classmethod
     async def delete(
         cls,
-        resource_id: str,
+        resource_item_id: str,
         quiz_question_number: int,
         quiz_question_id: None,
     ) -> None: ...
@@ -34,7 +34,7 @@ class QuizQuestionManager:
     @classmethod
     async def delete(
         cls,
-        resource_id: UUID4,
+        resource_item_id: UUID,
         quiz_question_number: int,
         quiz_question_id: None,
     ) -> None: ...
@@ -43,7 +43,7 @@ class QuizQuestionManager:
     @classmethod
     async def delete(
         cls,
-        resource_id: str,
+        resource_item_id: str,
         quiz_question_number: None,
         quiz_question_id: int,
     ) -> None: ...
@@ -52,7 +52,7 @@ class QuizQuestionManager:
     @classmethod
     async def delete(
         cls,
-        resource_id: UUID4,
+        resource_item_id: UUID,
         quiz_question_number: None,
         quiz_question_id: int,
     ) -> None: ...
@@ -60,7 +60,7 @@ class QuizQuestionManager:
     @classmethod
     async def delete(
         cls,
-        resource_id,
+        resource_item_id,
         quiz_question_number=None,
         quiz_question_id=None,
     ) -> None:
@@ -68,7 +68,7 @@ class QuizQuestionManager:
             statement = (
                 select(QuizQuestionModel)
                 .join(QuizModel, QuizModel.quiz_id == QuizQuestionModel.quiz_id)
-                .where(QuizModel.resource_id == resource_id)
+                .where(QuizModel.resource_item_id == resource_item_id)
             )
             if quiz_question_number is not None:
                 quiz_questions = (await session.execute(statement)).scalars().all()
@@ -82,13 +82,13 @@ class QuizQuestionManager:
     @classmethod
     async def get_many(
         cls,
-        resource_id: UUID4,
+        resource_item_id: UUID,
     ) -> List[QuizQuestionWithoutResourceSchema]:
         async with AsyncSessionLocal() as session:
             statement = select(QuizQuestionModel).options(
                 selectinload(QuizQuestionModel.quiz),
             )
-            statement = statement.filter(QuizModel.resource_id == resource_id)
+            statement = statement.filter(QuizModel.resource_item_id == resource_item_id)
             quiz_questions = (await session.execute(statement)).scalars().all()
 
             return [

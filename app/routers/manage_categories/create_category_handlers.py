@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import UUID
 
 from aiogram import F
 from aiogram.fsm.context import FSMContext
@@ -45,7 +45,7 @@ async def create_category_callback_handler(callback: CallbackQuery, state: FSMCo
 async def create_category_final(message: Message):
     if not message.from_user:
         return
-    category_data = CategorySchema(id=uuid4(), name=message.html_text)
+    category_data = CategorySchema(id=UUID(), name=message.html_text)
     try:
         await CategoryManager.create(category_data)
     except IntegrityError:

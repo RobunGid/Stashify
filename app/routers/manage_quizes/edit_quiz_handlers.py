@@ -1,5 +1,5 @@
 from math import ceil
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from aiogram import F
 from aiogram.fsm.context import FSMContext
@@ -346,7 +346,7 @@ async def add_question_confirm(message: Message, state: FSMContext):
     right_options = [index for index, option in enumerate(question_options) if option.startswith("!")]
 
     question = QuizQuestionBaseSchema(
-        id=uuid4(),
+        id=UUID(),
         quiz_id=quiz_id,
         image=message.photo[0].file_id if message.photo else None,
         options=question_options,

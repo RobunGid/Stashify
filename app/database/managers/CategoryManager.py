@@ -36,7 +36,7 @@ class CategoryManager(BaseManager):
                     .select_from(QuizModel)
                     .outerjoin(
                         ResourceItemModel,
-                        ResourceItemModel.resource_item_id == QuizModel.resource_id,
+                        ResourceItemModel.resource_item_id == QuizModel.resource_item_id,
                     )
                     .join(
                         CategoryModel,
@@ -66,7 +66,7 @@ class CategoryManager(BaseManager):
                     )
                     .outerjoin(
                         FavoriteModel,
-                        FavoriteModel.resource_id == ResourceItemModel.resource_item_id,
+                        FavoriteModel.resource_item_id == ResourceItemModel.resource_item_id,
                     )
                     .where(
                         FavoriteModel.user_id == favorites_user_id,

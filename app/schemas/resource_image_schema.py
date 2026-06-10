@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, UUID4
+from pydantic import BaseModel, ConfigDict, Field, UUID
 
 
 class ResourceImageWithoutResourceSchema(BaseModel):
-    resource_image_id: UUID4
+    resource_image_id: UUID
 
-    resource_id: UUID4
+    resource_id: UUID
     image: str
 
     created_at: datetime = Field(default_factory=datetime.now)

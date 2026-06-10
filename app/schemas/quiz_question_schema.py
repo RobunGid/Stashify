@@ -1,11 +1,11 @@
-from pydantic import BaseModel, ConfigDict, UUID4
+from pydantic import BaseModel, ConfigDict, UUID
 
 
 class QuizQuestionBaseSchema(BaseModel):
-    quiz_question_id: UUID4
+    quiz_question_id: UUID
     text: str
 
-    quiz_id: UUID4
+    quiz_id: UUID
 
     options: list[str]
     right_options: list[int]

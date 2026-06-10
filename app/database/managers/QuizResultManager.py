@@ -1,6 +1,5 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 
-from pydantic import UUID4
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -25,7 +24,7 @@ class QuizResultManager:
             await session.commit()
 
     @classmethod
-    async def get_one(cls, resource_id: UUID4, user_id: str):
+    async def get_one(cls, resource_item_id: UUID, user_id: str):
         async with AsyncSessionLocal() as session:
             statement = (
                 select(QuizResultModel)
@@ -41,7 +40,7 @@ class QuizResultManager:
             )
 
             statement = statement.filter(QuizResultModel.user_id == user_id).filter(
-                QuizModel.resource_id == resource_id,
+                QuizModel.resource_item_id == resource_item_id,
             )
             quiz_result = (await session.execute(statement)).scalars().first()
             if quiz_result:
@@ -53,12 +52,12 @@ class QuizResultManager:
                 return None
 
     @classmethod
-    async def delete(cls, resource_id: UUID4, user_id: str) -> None:
+    async def delete(cls, resource_item_id: UUID, user_id: str) -> None:
         async with AsyncSessionLocal() as session:
             statement = (
                 select(QuizResultModel)
                 .filter(QuizResultModel.user_id == user_id)
-                .filter(QuizModel.resource_id == resource_id)
+                .filter(QuizModel.resource_item_id == resource_item_id)
             )
             quiz_result = (await session.execute(statement)).scalars().first()
             if not quiz_result:

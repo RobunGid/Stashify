@@ -4,7 +4,7 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from pydantic import UUID4
+from pydantic import UUID
 
 from i18n.translate import t
 from schemas.resource_schema import ResourceSchema
@@ -12,10 +12,10 @@ from schemas.resource_schema import ResourceSchema
 
 class EditResourceChooseResourceCallbackFactory(
     CallbackData,
-    prefix="edit_resource_rsc",
+    prefix="edit_resource_rsc",  # type: ignore[call-arg]
 ):
     action: Union[Literal["select"], Literal["change_page"]]
-    resource_id: UUID4 | None
+    resource_id: UUID | None
     page: int
 
 
@@ -33,7 +33,7 @@ def manage_resources_edit_resource_list_keyboard(
             text=resource.name,
             callback_data=EditResourceChooseResourceCallbackFactory(
                 action="select",
-                resource_id=resource.resource_id,
+                resource_id=resource.resource_item_id,
                 page=0,
             ),
         )
@@ -42,7 +42,7 @@ def manage_resources_edit_resource_list_keyboard(
             text=t("items.start", user_lang),
             callback_data=EditResourceChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=1,
             ),
         )
@@ -50,7 +50,7 @@ def manage_resources_edit_resource_list_keyboard(
             text=t("items.back", user_lang),
             callback_data=EditResourceChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=page - 1,
             ),
         )
@@ -59,7 +59,7 @@ def manage_resources_edit_resource_list_keyboard(
             text=t("items.forward", user_lang),
             callback_data=EditResourceChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=page + 1,
             ),
         )
@@ -67,7 +67,7 @@ def manage_resources_edit_resource_list_keyboard(
             text=t("items.end", user_lang),
             callback_data=EditResourceChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=total_pages,
             ),
         )
@@ -78,7 +78,7 @@ def manage_resources_edit_resource_list_keyboard(
             text=t("items.forward", user_lang),
             callback_data=EditResourceChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=page + 1,
             ),
         )
@@ -86,7 +86,7 @@ def manage_resources_edit_resource_list_keyboard(
             text=t("items.end", user_lang),
             callback_data=EditResourceChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=total_pages,
             ),
         )
@@ -96,7 +96,7 @@ def manage_resources_edit_resource_list_keyboard(
             text=t("items.start", user_lang),
             callback_data=EditResourceChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=1,
             ),
         )
@@ -104,7 +104,7 @@ def manage_resources_edit_resource_list_keyboard(
             text=t("items.back", user_lang),
             callback_data=EditResourceChooseResourceCallbackFactory(
                 action="change_page",
-                resource_id=None,
+                resource_item_id=None,
                 page=page - 1,
             ),
         )

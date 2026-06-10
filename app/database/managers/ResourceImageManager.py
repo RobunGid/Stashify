@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import UUID4
+from pydantic import UUID
 from sqlalchemy import select
 
 from database.models.resource_image import ResourceImageModel
@@ -20,7 +20,7 @@ class ResourceImageManager:
             await session.commit()
 
     @classmethod
-    async def delete(cls, resource_image_id: UUID4):
+    async def delete(cls, resource_image_id: UUID):
         async with AsyncSessionLocal() as session:
             statement = select(ResourceImageModel).where(
                 ResourceImageModel.resource_image_id == resource_image_id,
@@ -30,7 +30,7 @@ class ResourceImageManager:
             await session.commit()
 
     @classmethod
-    async def get_one(cls, resource_image_id: UUID4) -> ResourceImageModel | None:
+    async def get_one(cls, resource_image_id: UUID) -> ResourceImageModel | None:
         async with AsyncSessionLocal() as session:
             statement = select(ResourceImageModel).where(
                 ResourceImageModel.resource_image_id == resource_image_id,
@@ -45,10 +45,10 @@ class ResourceImageManager:
             )
 
     @classmethod
-    async def get_many(cls, resource_id: UUID4) -> List[ResourceImageModel] | None:
+    async def get_many(cls, resource_item_id: UUID) -> List[ResourceImageModel] | None:
         async with AsyncSessionLocal() as session:
             statement = select(ResourceImageModel).where(
-                ResourceImageModel.resource_id == resource_id,
+                ResourceImageModel.resource_item_id == resource_item_id,
             )
             resource_images = (await session.execute(statement)).scalars().all()
 

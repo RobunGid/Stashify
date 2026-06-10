@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -10,11 +8,11 @@ from database.orm import Base
 class QuizModel(Base):
     __tablename__ = "quiz"
 
-    quiz_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    quiz_id = Column(UUID(as_uuid=True), primary_key=True, default=UUID)
 
-    resource_id = Column(
+    resource_item_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("resource.resource_id"),
+        ForeignKey("resource.resource_item_id"),
         unique=True,
         nullable=False,
     )

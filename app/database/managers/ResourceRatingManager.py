@@ -1,6 +1,6 @@
 from typing import overload
 
-from pydantic import UUID4
+from pydantic import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -30,8 +30,8 @@ class ResourceRatingManager:
     async def delete(
         cls,
         user_id: None,
-        resource_id: None,
-        resource_rating_id: UUID4,
+        resource_item_id: None,
+        resource_rating_id: UUID,
     ): ...
 
     @overload
@@ -39,12 +39,12 @@ class ResourceRatingManager:
     async def delete(
         cls,
         user_id: str,
-        resource_id: UUID4,
+        resource_item_id: UUID,
         resource_rating_id: None = None,
     ): ...
 
     @classmethod
-    async def delete(cls, user_id=None, resource_id=None, resource_rating_id=None):
+    async def delete(cls, user_id=None, resource_item_id=None, resource_rating_id=None):
         async with AsyncSessionLocal() as session:
             if resource_rating_id:
                 statement = select(ResourceRatingModel).where(
@@ -53,11 +53,11 @@ class ResourceRatingManager:
                 favorite = (await session.execute(statement)).scalars().first()
                 await session.delete(favorite)
                 await session.commit()
-            if user_id and resource_id:
+            if user_id and resource_item_id:
                 statement = (
                     select(ResourceRatingModel)
                     .where(ResourceRatingModel.user_id == user_id)
-                    .where(ResourceRatingModel.resource_id == resource_id)
+                    .where(ResourceRatingModel.resource_item_id == resource_item_id)
                 )
                 favorite = (await session.execute(statement)).scalars().first()
                 await session.delete(favorite)
@@ -66,13 +66,13 @@ class ResourceRatingManager:
     @classmethod
     async def get_one(
         cls,
-        resource_id: UUID4,
+        resource_item_id: UUID,
         user_id: str,
     ) -> ResourceRatingSchema | None:
         async with AsyncSessionLocal() as session:
             statement = select(ResourceRatingModel)
             statement = (
-                statement.filter(ResourceRatingModel.resource_id == resource_id)
+                statement.filter(ResourceRatingModel.resource_item_id == resource_item_id)
                 .filter(ResourceRatingModel.user_id == user_id)
                 .options(
                     selectinload(ResourceRatingModel.resource).selectinload(

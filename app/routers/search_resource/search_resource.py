@@ -1,5 +1,5 @@
 from math import ceil
-from uuid import uuid4
+from uuid import UUID
 
 from aiogram import F
 from aiogram.fsm.context import FSMContext
@@ -138,11 +138,11 @@ async def search_resource_select(
     resources = state_data["resources"]
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
-    is_favorite = any(resource.resource_id == favorite.resource_id for favorite in favorites)
+    is_favorite = any(resource.resource_item_id == favorite.resource_id for favorite in favorites)
     formatted_text = format_resource_text(resource)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_id,
+        resource_id=resource.resource_item_id,
     )
     media_group = MediaGroupBuilder(caption=formatted_text)
     for photo in resource.images:
@@ -187,10 +187,10 @@ async def search_resource_resource_change_page(
     formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
-    is_favorite = any(resource.resource_id == favorite.resource_id for favorite in favorites)
+    is_favorite = any(resource.resource_item_id == favorite.resource_id for favorite in favorites)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_id,
+        resource_id=resource.resource_item_id,
     )
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
@@ -233,10 +233,10 @@ async def list_resource_resource_add_favorite(
     resources = state_data["resources"]
     formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
-    favorite = FavoriteSchema(user_id=user_id, resource_id=resource.resource_id)
+    favorite = FavoriteSchema(user_id=user_id, resource_id=resource.resource_item_id)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_id,
+        resource_id=resource.resource_item_id,
     )
     await FavoriteManager.create(favorite)
     await state.update_data(resources=resources)
@@ -282,10 +282,10 @@ async def list_resource_resource_remove_favorite(
     user_id = str(callback.from_user.id)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_id,
+        resource_id=resource.resource_item_id,
     )
 
-    await FavoriteManager.delete(user_id=user_id, resource_id=resource.resource_id)
+    await FavoriteManager.delete(user_id=user_id, resource_id=resource.resource_item_id)
     await state.update_data(resources=resources)
     await callback.message.answer_photo(
         photo=resource.image,
@@ -328,16 +328,16 @@ async def list_resource_resource_rate(
     formatted_text = format_resource_text(resource)
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
-    is_favorite = any(resource.resource_id == favorite.resource_id for favorite in favorites)
+    is_favorite = any(resource.resource_item_id == favorite.resource_id for favorite in favorites)
     rating = callback_data.rating
     existing_resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
-        resource_id=resource.resource_id,
+        resource_id=resource.resource_item_id,
     )
     if existing_resource_rating:
-        await ResourceRatingManager.delete(user_id=user_id, resource_id=resource.resource_id)
+        await ResourceRatingManager.delete(user_id=user_id, resource_id=resource.resource_item_id)
     resource_rating = ResourceRatingWithoutUserAndResourceSchema(
-        id=uuid4(),
+        id=UUID(),
         resource_id=resource_id,
         rating=rating,
         user_id=user_id,

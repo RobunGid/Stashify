@@ -1,6 +1,6 @@
 from typing import List, overload
+from uuid import UUID
 
-from pydantic import UUID4
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -18,7 +18,7 @@ class FavoriteManager:
             favorite = FavoriteModel(
                 id=favorite_data.favorite_id,
                 user_id=favorite_data.user_id,
-                resource_id=favorite_data.resource_id,
+                resource_item_id=favorite_data.resource_item_id,
                 added_at=favorite_data.added_at,
             )
             session.add(favorite)
@@ -61,8 +61,8 @@ class FavoriteManager:
     async def delete(
         cls,
         user_id: None,
-        resource_id: None,
-        favorite_id: UUID4,
+        resource_item_id: None,
+        favorite_id: UUID,
     ) -> None: ...
 
     @overload
@@ -70,23 +70,23 @@ class FavoriteManager:
     async def delete(
         cls,
         user_id: str,
-        resource_id: UUID4,
+        resource_item_id: UUID,
         favorite_id: None = None,
     ) -> None: ...
 
     @classmethod
-    async def delete(cls, user_id=None, resource_id=None, favorite_id=None):
+    async def delete(cls, user_id=None, resource_item_id=None, favorite_id=None):
         async with AsyncSessionLocal() as session:
             if favorite_id:
                 statement = select(FavoriteModel).where(FavoriteModel.favorite_id == favorite_id)
                 favorite = (await session.execute(statement)).scalars().first()
                 await session.delete(favorite)
                 await session.commit()
-            if user_id and resource_id:
+            if user_id and resource_item_id:
                 statement = (
                     select(FavoriteModel)
                     .where(FavoriteModel.user_id == user_id)
-                    .where(FavoriteModel.resource_id == resource_id)
+                    .where(FavoriteModel.resource_item_id == resource_item_id)
                 )
                 favorite = (await session.execute(statement)).scalars().first()
                 await session.delete(favorite)

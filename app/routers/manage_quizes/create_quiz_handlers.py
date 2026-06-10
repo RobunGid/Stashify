@@ -1,5 +1,5 @@
 from math import ceil
-from uuid import uuid4
+from uuid import UUID
 
 from aiogram import F
 from aiogram.fsm.context import FSMContext
@@ -201,9 +201,9 @@ async def create_quiz_choose(
     if not resource_id:
         return
 
-    quiz_resource = next(resource for resource in state_data["resources"] if resource.resource_id == resource_id)
+    quiz_resource = next(resource for resource in state_data["resources"] if resource.resource_item_id == resource_id)
     quiz = QuizSchema(
-        id=uuid4(),
+        id=UUID(),
         resource_id=resource_id,
         questions=[],
         resource=quiz_resource,
@@ -231,7 +231,7 @@ async def create_quiz_add_question(message: Message, state: FSMContext):
     right_options = [index for index, option in enumerate(question_options) if option.startswith("!")]
 
     question = QuizQuestionSchema(
-        id=uuid4(),
+        id=UUID(),
         image=message.photo[0].file_id if message.photo else None,
         quiz=state_data["quiz"],
         options=question_options,
