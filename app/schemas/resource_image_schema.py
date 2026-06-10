@@ -18,7 +18,7 @@ class ResourceImageWithoutResourceSchema(BaseModel):
 
 
 class ResourceImageSchema(ResourceImageWithoutResourceSchema):
-    resource: ResourceSchema
+    resource: ResourceItemSchema
 
 
-from schemas.resource_schema import ResourceSchema  # noqa
+from schemas.resource_schema import ResourceItemSchema  # noqa

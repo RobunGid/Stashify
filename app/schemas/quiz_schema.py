@@ -16,8 +16,8 @@ class QuizSchemaWithoutResource(PlainQuizSchema):
 
 
 class QuizSchema(QuizSchemaWithoutResource):
-    resource: ResourceSchema
+    resource: ResourceItemSchema
 
 
 from schemas.quiz_question_schema import QuizQuestionBaseSchema  # noqa
-from schemas.resource_schema import ResourceSchema  # noqa
+from schemas.resource_schema import ResourceItemSchema  # noqa

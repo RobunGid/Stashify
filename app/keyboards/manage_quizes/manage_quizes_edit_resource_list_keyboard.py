@@ -5,12 +5,12 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from i18n.translate import t
 from keyboards.quizes import EditQuizChooseResourceCallbackFactory
-from schemas.resource_schema import ResourceSchema
+from schemas.resource_schema import ResourceItemSchema
 
 
 def manage_quizes_edit_resource_list_keyboard(
     user_lang: str | None,
-    resources: List[ResourceSchema],
+    resources: List[ResourceItemSchema],
     page: int,
     total_pages: int,
 ):

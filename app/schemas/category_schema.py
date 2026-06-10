@@ -10,7 +10,7 @@ class CategorySchemaWithoutResources(BaseModel):
 
 
 class CategorySchema(CategorySchemaWithoutResources):
-    resources: list[ResourceSchemaWithoutCategory] = Field(default_factory=list)
+    resources: list[BaseResourceItemSchema] = Field(default_factory=list)
 
 
-from schemas.resource_schema import ResourceSchemaWithoutCategory  # noqa
+from schemas.resource_schema import BaseResourceItemSchema  # noqa

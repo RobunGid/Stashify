@@ -54,7 +54,6 @@ async def list_resource_start_quiz(
     await callback.message.answer(
         text=i18n.get(
             "list-resources-start-quiz-question",
-        ).format(
             question_count=len(resource_item.quiz.questions),
             resource_name=resource_item.name,
         ),

@@ -6,7 +6,7 @@ from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from i18n.translate import t
-from schemas.resource_schema import ResourceSchema
+from schemas.resource_schema import ResourceItemSchema
 
 
 class SearchResourceResourceListCallbackFactory(CallbackData, prefix="search_resource"):  # type: ignore[call-arg]
@@ -17,7 +17,7 @@ class SearchResourceResourceListCallbackFactory(CallbackData, prefix="search_res
 
 def search_resource_resource_list_keyboard(
     user_lang: str | None,
-    resources: List[ResourceSchema],
+    resources: List[ResourceItemSchema],
     page: int,
     total_pages: int,
 ):

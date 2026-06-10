@@ -12,10 +12,10 @@ class FavoriteSchema(BaseModel):
     user: Optional[UserSchema] = None
 
     resource_item_id: UUID
-    resource: Optional[ResourceSchema] = Field(default=None)
+    resource: Optional[ResourceItemSchema] = Field(default=None)
 
     added_at: datetime = Field(default_factory=datetime.now)
 
 
-from schemas.resource_schema import ResourceSchema  # noqa
+from schemas.resource_schema import ResourceItemSchema  # noqa
 from schemas.user_schema import UserSchema  # noqa

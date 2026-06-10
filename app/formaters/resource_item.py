@@ -3,13 +3,13 @@ from dataclasses import dataclass
 from aiogram_i18n import I18nContext
 from formaters.base import BaseFormatter
 
-from schemas.resource_schema import ResourceSchema
+from schemas.resource_schema import ResourceItemSchema
 
 
 @dataclass
 class ResourceItemFormatter(BaseFormatter):
     @staticmethod
-    def translate_resource_item(resource_item: ResourceSchema, i18n: I18nContext):
+    def translate_resource_item(resource_item: ResourceItemSchema, i18n: I18nContext):
         created_at = resource_item.created_at
 
         return i18n.get(

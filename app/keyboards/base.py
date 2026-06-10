@@ -36,7 +36,7 @@ class BaseKeyboardBuilder(ABC):
 
 
 @dataclass
-class BaseManageBackKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, ABC):
+class BaseBackKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, ABC):
     def build(self) -> InlineKeyboardMarkup:
         builder = InlineKeyboardBuilder()
         self._append_back_button(builder)
@@ -243,36 +243,27 @@ class BaseItemKeyboardBuilder(NavigationKeyboardBuilderMixin, BaseKeyboardBuilde
 
 
 @dataclass
-class BaseQuizConfirmKeyboardBuilder(
-    NavigationKeyboardBuilderMixin,
+class BaseConfirmKeyboardBuilder(
+    BackKeyboardBuilderMixin,
     BaseKeyboardBuilder,
     ABC,
-    Generic[It],
 ):
-    current_item: It
-
     def build(self) -> InlineKeyboardMarkup:
         builder = InlineKeyboardBuilder()
         btns = self._build_quiz_confirm_buttons()
         for btn in btns:
             builder.button(**btn)
+        self._append_back_button(builder)
         return builder.as_markup()
 
-    def _build_quiz_confirm_buttons(self) -> list[dict]:
-        return [
-            {
-                "text": self.i18n.get("ist-resources-start_quiz-confirm"),
-                "callback_data": self._quiz_confirm_callback(self.current_item),
-            },
-            {
-                "text": self.i18n.get("common-back"),
-                "callback_data": self._navigation_callback(self.current_item),
-            },
-        ]
-
     @abstractmethod
-    def _quiz_confirm_callback(self, item: It) -> CallbackData:
-        """Return callback_data for confirm starting quiz"""
+    def _build_quiz_confirm_buttons(self) -> list[dict]:
+        """Return data for confirm buttons"""
+
+
+@dataclass
+class BaseQuizConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder, ABC, Generic[It]):
+    current_item: It
 
 
 @dataclass

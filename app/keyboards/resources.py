@@ -1,3 +1,4 @@
+from abc import ABC
 from dataclasses import dataclass
 from typing import Literal, Union
 from uuid import UUID
@@ -5,13 +6,15 @@ from uuid import UUID
 from aiogram.filters.callback_data import CallbackData
 
 from keyboards.base import (
+    BaseBackKeyboardBuilder,
+    BaseConfirmKeyboardBuilder,
     BaseItemKeyboardBuilder,
     BaseListKeyboardBuilder,
     BaseManageEntryKeyboardBuilder,
     BaseQuizConfirmKeyboardBuilder,
 )
 from schemas.category_schema import CategorySchema
-from schemas.resource_schema import ResourceSchema
+from schemas.resource_schema import ResourceItemSchema
 
 
 class ListResourcesChooseResourceCallbackFactory(CallbackData, prefix="lst_rsc_rsc"):  # type: ignore[call-arg]
@@ -21,11 +24,11 @@ class ListResourcesChooseResourceCallbackFactory(CallbackData, prefix="lst_rsc_r
 
 
 @dataclass
-class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceSchema]):
+class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSchema]):
     def _back_callback(self) -> str:
         return "resources"
 
-    def _item_button(self, item: ResourceSchema) -> dict:
+    def _item_button(self, item: ResourceItemSchema) -> dict:
         return {
             "text": item.name,
             "callback_data": ListResourcesChooseResourceCallbackFactory(
@@ -90,65 +93,76 @@ class ListResourcesItemCallbackFactory(CallbackData, prefix="lst_rsc_itm"):  # t
 
 @dataclass
 class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder):
-    def _get_item_id(self, item: ResourceSchema) -> UUID:
+    def _get_item_id(self, item: ResourceItemSchema) -> UUID:
         return item.resource_item_id
 
-    def _navigation_callback(self, item: ResourceSchema) -> CallbackData:
+    def _navigation_callback(self, item: ResourceItemSchema) -> CallbackData:
         return ListResourcesItemCallbackFactory(
             resource_item_id=item.resource_item_id,
             action="change_page",
             rating=None,
         )
 
-    def _remove_favorite_callback(self, item: ResourceSchema) -> CallbackData:
+    def _remove_favorite_callback(self, item: ResourceItemSchema) -> CallbackData:
         return ListResourcesItemCallbackFactory(
             resource_item_id=item.resource_item_id,
             action="remove_favorite",
             rating=None,
         )
 
-    def _add_favorite_callback(self, item: ResourceSchema) -> CallbackData:
+    def _add_favorite_callback(self, item: ResourceItemSchema) -> CallbackData:
         return ListResourcesItemCallbackFactory(
             resource_item_id=item.resource_item_id,
             action="add_favorite",
             rating=None,
         )
 
-    def _rating_callback(self, item: ResourceSchema, rating: int) -> CallbackData:
+    def _rating_callback(self, item: ResourceItemSchema, rating: int) -> CallbackData:
         return ListResourcesItemCallbackFactory(
             resource_item_id=item.resource_item_id,
             action="rate",
             rating=rating,
         )
 
-    def _quiz_callback(self, item: ResourceSchema) -> CallbackData:
-        return ListResourcesItemCallbackFactory(
-            resource_item_id=item.resource_item_id,
-            action="start_quiz",
-            rating=None,
-        )
-
-    def _quiz_confirm_callback(self, item: ResourceSchema) -> CallbackData:
-        return ListResourcesItemCallbackFactory(
-            resource_item_id=item.resource_item_id,
-            action="start_quiz_cnfrm",
-            rating=None,
-        )
+    def _build_quiz_buttons(self) -> list[dict]:
+        return [
+            {
+                "callback_data": ListResourcesItemCallbackFactory(
+                    resource_item_id=self.current_item.resource_item_id,
+                    action="start_quiz_cnfrm",
+                    rating=None,
+                ),
+            },
+        ]
 
 
 @dataclass
-class ResourceQuizConfirmKeyboardBuilder(BaseQuizConfirmKeyboardBuilder[ResourceSchema]):
-    def _navigation_callback(self, item: ResourceSchema) -> CallbackData:
+class ResourceQuizConfirmKeyboardBuilder(BaseQuizConfirmKeyboardBuilder[ResourceItemSchema]):
+    def _navigation_callback(self, item: ResourceItemSchema) -> CallbackData:
         return ListResourcesItemCallbackFactory(
             resource_item_id=item.resource_item_id,
             action="change_page",
             rating=None,
         )
 
-    def _quiz_confirm_callback(self, item: ResourceSchema) -> CallbackData:
+    def _build_quiz_confirm_buttons(
+        self,
+    ) -> list[dict]:
+        return [
+            {
+                "callback_data": ListResourcesItemCallbackFactory(
+                    action="start_quiz_cnfrm",
+                    resource_item_id=self.current_item.resource_item_id,
+                    rating=None,
+                ),
+                "text": self.i18n.get("ist-resources-start_quiz-confirm"),
+            },
+        ]
+
+    def _back_callback(self) -> CallbackData:
         return ListResourcesItemCallbackFactory(
-            action="start_quiz_cnfrm",
-            resource_item_id=item.resource_item_id,
+            action="change_page",
+            resource_item_id=self.current_item.resource_item_id,
             rating=None,
         )
 
@@ -173,3 +187,88 @@ class ResourceManageEntryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
 
     def _back_callback(self) -> str:
         return "menu"
+
+
+class ResourceManageBackKeyboardBuilder(BaseBackKeyboardBuilder):
+    def _back_callback(self) -> str | CallbackData | None:
+        return "manage_resources"
+
+
+class CreateResourceCallbackFactory(CallbackData, prefix="create_resource"):  # type: ignore[call-arg]
+    action: Union[Literal["select"], Literal["change_page"]]
+    category_id: UUID | None
+    page: int
+
+
+class CreateResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema], ABC):
+    def _pagination_callback(self, page: int) -> CallbackData:
+        return CreateResourceCallbackFactory(
+            action="change_page",
+            category_id=None,
+            page=page,
+        )
+
+    def _back_callback(self) -> str:
+        return "manage_resources"
+
+    def _item_button(self, item: CategorySchema) -> dict:
+        return {
+            "text": item.name,
+            "callback_data": CreateResourceCallbackFactory(
+                action="select",
+                category_id=item.category_id,
+                page=0,
+            ),
+        }
+
+
+@dataclass
+class ManageResourcesBackKeyboardBuilder(BaseBackKeyboardBuilder):
+    def _back_callback(self) -> str | CallbackData | None:
+        return "manage_resources"
+
+
+class DeleteResourceChooseCategoryCallbackFactory(
+    CallbackData,
+    prefix="delete_resource_ctg",  # type: ignore[call-arg]
+):
+    action: Union[Literal["select"], Literal["change_page"]]
+    category_id: UUID | None
+    page: int
+
+
+class DeleteResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema], ABC):
+    def _pagination_callback(self, page: int) -> CallbackData:
+        return DeleteResourceChooseCategoryCallbackFactory(
+            action="change_page",
+            category_id=None,
+            page=page,
+        )
+
+    def _back_callback(self) -> str:
+        return "manage_resources"
+
+    def _item_button(self, item: CategorySchema) -> dict:
+        return {
+            "text": item.name,
+            "callback_data": DeleteResourceChooseCategoryCallbackFactory(
+                action="select",
+                category_id=item.category_id,
+                page=0,
+            ),
+        }
+
+
+class DeleteResourceConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
+    def _build_quiz_confirm_buttons(self) -> list[dict]:
+        return [
+            {
+                "text": self.i18n(
+                    "manage-resources-delete-confirm",
+                ),
+                "callback_data": "delete-resource-confirm",
+            },
+        ]
+
+    def _back_callback(self) -> str:
+        return "manage_resources"

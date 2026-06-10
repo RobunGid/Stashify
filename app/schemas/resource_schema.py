@@ -4,7 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class ResourceSchemaWithoutCategory(BaseModel):
+class BaseResourceItemSchema(BaseModel):
     resource_item_id: UUID
 
     name: str
@@ -20,7 +20,7 @@ class ResourceSchemaWithoutCategory(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class ResourceSchema(ResourceSchemaWithoutCategory):
+class ResourceItemSchema(BaseResourceItemSchema):
     category: "CategorySchemaWithoutResources"
     ratings: list["ResourceRatingWithoutUserAndResourceSchema"] = Field(
         default_factory=list,

@@ -6,7 +6,7 @@ from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from i18n.translate import t
-from schemas.resource_schema import ResourceSchema
+from schemas.resource_schema import ResourceItemSchema
 
 
 class DeleteResourceChooseResourceCallbackFactory(
@@ -20,7 +20,7 @@ class DeleteResourceChooseResourceCallbackFactory(
 
 def manage_resources_delete_resource_list_keyboard(
     user_lang: str | None,
-    resources: List[ResourceSchema],
+    resources: List[ResourceItemSchema],
     page: int,
     total_pages: int,
 ):

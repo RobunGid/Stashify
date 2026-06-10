@@ -6,7 +6,7 @@ from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from i18n.translate import t
-from schemas.resource_schema import ResourceSchema
+from schemas.resource_schema import ResourceItemSchema
 
 
 class CreateQuizChooseResourceCallbackFactory(CallbackData, prefix="create_quiz_rsc"):  # type: ignore[call-arg]
@@ -17,7 +17,7 @@ class CreateQuizChooseResourceCallbackFactory(CallbackData, prefix="create_quiz_
 
 def manage_quizes_create_resource_list_keyboard(
     user_lang: str | None,
-    resources: List[ResourceSchema],
+    resources: List[ResourceItemSchema],
     page: int,
     total_pages: int,
 ):

@@ -4,9 +4,9 @@ from uuid import UUID
 
 from aiogram.filters.callback_data import CallbackData
 
-from keyboards.base import BaseListKeyboardBuilder, BaseManageBackKeyboardBuilder, BaseManageEntryKeyboardBuilder
+from keyboards.base import BaseBackKeyboardBuilder, BaseListKeyboardBuilder, BaseManageEntryKeyboardBuilder
 from schemas.category_schema import CategorySchema
-from schemas.resource_schema import ResourceSchema
+from schemas.resource_schema import ResourceItemSchema
 
 
 class EditQuizActionCallbackFactory(CallbackData, prefix="edit_quiz_actn"):  # type: ignore[call-arg]
@@ -51,7 +51,7 @@ class EditQuizChooseResourceCallbackFactory(CallbackData, prefix="edit_quiz_rsc"
     page: int
 
 
-class ManageQuizesEditResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceSchema]):
+class ManageQuizesEditResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSchema]):
     def _back_callback(self) -> str | CallbackData | None:
         return EditQuizChooseResourceCallbackFactory(
             action="change_page",
@@ -62,7 +62,7 @@ class ManageQuizesEditResourceListKeyboardBuilder(BaseListKeyboardBuilder[Resour
     def _pagination_callback(self, page: int) -> CallbackData:
         return EditQuizChooseResourceCallbackFactory(action="change_page", resource_item_id=None, page=page)
 
-    def _item_button(self, item: ResourceSchema) -> dict:
+    def _item_button(self, item: ResourceItemSchema) -> dict:
         return {
             "text": item.name,
             "callback_data": EditQuizChooseResourceCallbackFactory(
@@ -90,7 +90,7 @@ class ManageQuizesEditCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Catego
     def _pagination_callback(self, page: int) -> CallbackData:
         return EditQuizChooseCategoryCallbackFactory(action="change_page", category_id=None, page=page)
 
-    def _item_button(self, item: ResourceSchema) -> dict:
+    def _item_button(self, item: ResourceItemSchema) -> dict:
         return {
             "text": item.name,
             "callback_data": EditQuizChooseCategoryCallbackFactory(
@@ -102,6 +102,6 @@ class ManageQuizesEditCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Catego
 
 
 @dataclass
-class ManageQuizesBackKeyboardBuilder(BaseManageBackKeyboardBuilder):
+class ManageQuizesBackKeyboardBuilder(BaseBackKeyboardBuilder):
     def _back_callback(self) -> str | CallbackData | None:
         return "manage_quizes"

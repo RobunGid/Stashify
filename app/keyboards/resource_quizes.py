@@ -13,7 +13,7 @@ from keyboards.resources import (
     ListResourcesItemCallbackFactory,
 )
 from schemas.quiz_question_schema import QuizQuestionBaseSchema
-from schemas.resource_schema import ResourceSchema
+from schemas.resource_schema import ResourceItemSchema
 
 
 class ListResourcesQuizQuestionCallbackFactory(CallbackData, prefix="lst_rsc_qstn"):  # type: ignore[call-arg]
@@ -45,7 +45,7 @@ class ResourceQuizManageEntryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
 
 
 @dataclass
-class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceSchema]):
+class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceItemSchema]):
     def _build_retry_buttons(self) -> list[dict]:
         return [
             {
@@ -68,7 +68,7 @@ class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceSche
 
 @dataclass
 class ResourceQuizQuestionKeyboardBuilder(
-    BaseQuizQuestionKeyboardBuilder[ResourceSchema, QuizQuestionBaseSchema],
+    BaseQuizQuestionKeyboardBuilder[ResourceItemSchema, QuizQuestionBaseSchema],
 ):
     def _build_quiz_callback(self, option_number: int, question_number: int) -> CallbackData:
         return ListResourcesQuizQuestionCallbackFactory(

@@ -12,10 +12,8 @@ from constants import FIND_RESOURCE_RESOURCES_ON_PAGE
 from formaters.resource_item import ResourceItemFormatter
 
 from database.managers import FavoriteManager, ResourceManager, ResourceRatingManager
+from keyboards.menu import MenuBackKeyboardBuilder
 from keyboards.resources import ListResourcesChooseResourceCallbackFactory
-from keyboards.search_resource.search_resource_back_keyboard import (
-    search_resource_back_keyboard,
-)
 from keyboards.search_resource.search_resource_resource_item_keyboard import (
     search_resource_resource_item_keyboard,
     SearchResourceItemCallbackFactory,
@@ -46,12 +44,10 @@ async def search_resource_start(callback: CallbackQuery, state: FSMContext, i18n
         message_id=callback.message.message_id,
     )
 
-    await callback.message.answer(
-        text=i18n.get("search_resource.enter_text"),
-        reply_markup=search_resource_back_keyboard(
-            user_lang=callback.from_user.language_code,
-        ),
-    )
+    keyboard_builder = MenuBackKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
+    await callback.message.answer(text=i18n.get("search_resource.enter_text"), reply_markup=keyboard)
     await state.set_state(SearchResourceState.text)
 
 

@@ -8,7 +8,7 @@ from database.models.favorite import FavoriteModel
 from database.models.quiz import QuizModel
 from database.models.resource_item import ResourceItemModel
 from database.orm import AsyncSessionLocal
-from schemas.resource_schema import ResourceSchema
+from schemas.resource_schema import BaseResourceItemSchema, ResourceItemSchema
 
 
 class ResourceManager:
@@ -20,7 +20,7 @@ class ResourceManager:
     ]
 
     @classmethod
-    async def create(cls, resource_data: ResourceSchema):
+    async def create(cls, resource_data: BaseResourceItemSchema):
         async with AsyncSessionLocal() as session:
             resource_item = ResourceItemModel(
                 **resource_data.model_dump(exclude={"category", "quiz"}),
@@ -41,7 +41,7 @@ class ResourceManager:
             await session.commit()
 
     @classmethod
-    async def update(cls, resource_data: ResourceSchema):
+    async def update(cls, resource_data: ResourceItemSchema):
         async with AsyncSessionLocal() as session:
             statement = (
                 update(ResourceItemModel)
@@ -52,7 +52,7 @@ class ResourceManager:
             await session.commit()
 
     @classmethod
-    async def get_one(cls, resource_item_id: UUID) -> ResourceSchema | None:
+    async def get_one(cls, resource_item_id: UUID) -> ResourceItemSchema | None:
         async with AsyncSessionLocal() as session:
             statement = select(ResourceItemModel).where(
                 ResourceItemModel.resource_item_id == resource_item_id,
@@ -63,7 +63,7 @@ class ResourceManager:
             if resource is None:
                 return None
 
-            return ResourceSchema.model_validate(resource, from_attributes=True)
+            return ResourceItemSchema.model_validate(resource, from_attributes=True)
 
     @classmethod
     async def get_many(
@@ -72,7 +72,7 @@ class ResourceManager:
         has_quiz: Optional[bool] = None,
         text: Optional[str] = None,
         favorites_user_id: Optional[str] = None,
-    ) -> List[ResourceSchema]:
+    ) -> List[ResourceItemSchema]:
         async with AsyncSessionLocal() as session:
             statement = (
                 select(ResourceItemModel)
@@ -111,4 +111,4 @@ class ResourceManager:
 
             resources = (await session.execute(statement)).unique().scalars().all()
 
-            return [ResourceSchema.model_validate(resource, from_attributes=True) for resource in resources]
+            return [ResourceItemSchema.model_validate(resource, from_attributes=True) for resource in resources]

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from keyboards.base import BaseKeyboardBuilder
+from keyboards.base import BaseBackKeyboardBuilder, BaseKeyboardBuilder
 
 
 @dataclass
@@ -94,3 +94,9 @@ class ManagerMenuKeyboardBuilder(BaseMenuKeyboardBuilder):
                 ),
             ],
         ]
+
+
+@dataclass
+class MenuBackKeyboardBuilder(BaseBackKeyboardBuilder):
+    def _back_callback(self) -> str:
+        return "menu"

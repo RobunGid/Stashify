@@ -18,8 +18,8 @@ class ResourceRatingWithoutUserAndResourceSchema(BaseModel):
 
 class ResourceRatingSchema(ResourceRatingWithoutUserAndResourceSchema):
     user: PlainUserSchema
-    resource: ResourceSchema
+    resource: ResourceItemSchema
 
 
-from schemas.resource_schema import ResourceSchema  # noqa
+from schemas.resource_schema import ResourceItemSchema  # noqa
 from schemas.user_schema import PlainUserSchema  # noqa

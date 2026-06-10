@@ -5,8 +5,8 @@ from uuid import UUID
 from aiogram.filters.callback_data import CallbackData
 
 from keyboards.base import (
+    BaseBackKeyboardBuilder,
     BaseListKeyboardBuilder,
-    BaseManageBackKeyboardBuilder,
     BaseManageEntryKeyboardBuilder,
 )
 from schemas.category_schema import CategorySchema
@@ -100,6 +100,6 @@ class ManageCategoriesEditKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema
 
 
 @dataclass
-class ManageCategoriesBackKeyboardBuilder(BaseManageBackKeyboardBuilder):
+class ManageCategoriesBackKeyboardBuilder(BaseBackKeyboardBuilder):
     def _back_callback(self) -> str | CallbackData | None:
         return "manage_categories"
