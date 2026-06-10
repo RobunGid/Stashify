@@ -4,7 +4,7 @@ from pydantic import UUID4
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from database.models.resource import ResourceModel
+from database.models.resource_item import ResourceItemModel
 from database.models.resource_rating import ResourceRatingModel
 from database.models.user import UserModel
 from database.orm import AsyncSessionLocal
@@ -76,12 +76,12 @@ class ResourceRatingManager:
                 .filter(ResourceRatingModel.user_id == user_id)
                 .options(
                     selectinload(ResourceRatingModel.resource).selectinload(
-                        ResourceModel.quiz,
+                        ResourceItemModel.quiz,
                     ),
                 )
                 .options(
                     selectinload(ResourceRatingModel.resource).selectinload(
-                        ResourceModel.category,
+                        ResourceItemModel.category,
                     ),
                 )
                 .options(

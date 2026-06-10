@@ -1,4 +1,4 @@
-from . import category, favorite, quiz, quiz_question, quiz_rating, quiz_result, resource, resource_rating, user
+from . import category, favorite, quiz, quiz_question, quiz_rating, quiz_result, resource_item, resource_rating, user
 
 __all__ = [
     "category",
@@ -6,7 +6,7 @@ __all__ = [
     "quiz_question",
     "quiz_result",
     "quiz_rating",
-    "resource",
+    "resource_item",
     "resource_rating",
     "resource_image",
     "user",

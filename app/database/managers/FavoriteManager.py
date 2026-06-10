@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from database.models.favorite import FavoriteModel
-from database.models.resource import ResourceModel
+from database.models.resource_item import ResourceItemModel
 from database.models.user import UserModel
 from database.orm import AsyncSessionLocal
 from schemas.favorite_schema import FavoriteSchema
@@ -41,12 +41,12 @@ class FavoriteManager:
                 )
                 .options(
                     selectinload(FavoriteModel.resource).selectinload(
-                        ResourceModel.category,
+                        ResourceItemModel.category,
                     ),
                 )
                 .options(
                     selectinload(FavoriteModel.resource).selectinload(
-                        ResourceModel.quiz,
+                        ResourceItemModel.quiz,
                     ),
                 )
             )

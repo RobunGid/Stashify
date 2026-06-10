@@ -6,23 +6,23 @@ from sqlalchemy.orm import selectinload
 
 from database.models.favorite import FavoriteModel
 from database.models.quiz import QuizModel
-from database.models.resource import ResourceModel
+from database.models.resource_item import ResourceItemModel
 from database.orm import AsyncSessionLocal
 from schemas.resource_schema import ResourceSchema
 
 
 class ResourceManager:
     FIND_COLUMNS = [
-        ResourceModel.links,
-        ResourceModel.description,
-        ResourceModel.tags,
-        ResourceModel.name,
+        ResourceItemModel.links,
+        ResourceItemModel.description,
+        ResourceItemModel.tags,
+        ResourceItemModel.name,
     ]
 
     @classmethod
     async def create(cls, resource_data: ResourceSchema):
         async with AsyncSessionLocal() as session:
-            resource = ResourceModel(
+            resource = ResourceItemModel(
                 **resource_data.model_dump(exclude={"category", "quiz"}),
             )
             session.add(resource)
@@ -31,7 +31,7 @@ class ResourceManager:
     @classmethod
     async def delete(cls, resource_id: UUID4):
         async with AsyncSessionLocal() as session:
-            statement = select(ResourceModel).where(ResourceModel.resource_id == resource_id)
+            statement = select(ResourceItemModel).where(ResourceItemModel.resource_item_id == resource_id)
             resource = (await session.execute(statement)).scalars().first()
             if not resource:
                 raise ValueError("No such resource")
@@ -42,8 +42,8 @@ class ResourceManager:
     async def update(cls, resource_data: ResourceSchema):
         async with AsyncSessionLocal() as session:
             statement = (
-                update(ResourceModel)
-                .where(ResourceModel.resource_id == resource_data.resource_id)
+                update(ResourceItemModel)
+                .where(ResourceItemModel.resource_item_id == resource_data.resource_id)
                 .values(**resource_data.model_dump())
             )
             await session.execute(statement)
@@ -52,8 +52,8 @@ class ResourceManager:
     @classmethod
     async def get_one(cls, resource_id: UUID4) -> ResourceSchema | None:
         async with AsyncSessionLocal() as session:
-            statement = select(ResourceModel).where(
-                ResourceModel.resource_id == resource_id,
+            statement = select(ResourceItemModel).where(
+                ResourceItemModel.resource_item_id == resource_id,
             )
 
             resource = (await session.execute(statement)).scalars().first()
@@ -73,26 +73,26 @@ class ResourceManager:
     ) -> List[ResourceSchema]:
         async with AsyncSessionLocal() as session:
             statement = (
-                select(ResourceModel)
+                select(ResourceItemModel)
                 .options(
-                    selectinload(ResourceModel.category),
+                    selectinload(ResourceItemModel.category),
                 )
                 .options(
-                    selectinload(ResourceModel.quiz).selectinload(QuizModel.questions),
+                    selectinload(ResourceItemModel.quiz).selectinload(QuizModel.questions),
                 )
                 .options(
-                    selectinload(ResourceModel.ratings),
+                    selectinload(ResourceItemModel.ratings),
                 )
             )
 
             if has_quiz is not None:
                 if has_quiz:
-                    statement = statement.filter(ResourceModel.quiz.is_(None))
+                    statement = statement.filter(ResourceItemModel.quiz.is_(None))
                 else:
-                    statement = statement.filter(ResourceModel.quiz.is_(None))
+                    statement = statement.filter(ResourceItemModel.quiz.is_(None))
 
             if category_id:
-                statement = statement.where(ResourceModel.category_id == category_id)
+                statement = statement.where(ResourceItemModel.category_id == category_id)
 
             if text:
                 statement = statement.filter(
@@ -104,7 +104,7 @@ class ResourceManager:
             if favorites_user_id:
                 statement = statement.join(
                     FavoriteModel,
-                    FavoriteModel.resource_id == ResourceModel.resource_id,
+                    FavoriteModel.resource_id == ResourceItemModel.resource_item_id,
                 ).where(FavoriteModel.user_id == favorites_user_id)
 
             resources = (await session.execute(statement)).unique().scalars().all()
