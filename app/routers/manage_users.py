@@ -5,7 +5,7 @@ from aiogram_i18n import I18nContext
 
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
-from keyboards.manage_users import ManageUsersKeyboardBuilder
+from keyboards.users import ManageUsersKeyboardBuilder
 from settings.config import bot
 
 router = Router()

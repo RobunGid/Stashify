@@ -31,6 +31,10 @@ class BackKeyboardBuilderMixin:
 class BaseKeyboardBuilder(ABC):
     i18n: I18nContext
 
+    @abstractmethod
+    def build(self) -> InlineKeyboardMarkup:
+        pass
+
 
 It = TypeVar("It")
 
@@ -241,3 +245,20 @@ class BaseQuizConfirmKeyboardBuilder(
     @abstractmethod
     def _quiz_confirm_callback(self, item: It) -> CallbackData:
         """Return callback_data for confirm starting quiz"""
+
+
+@dataclass
+class BaseManageEntryKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, ABC):
+    def build(self) -> InlineKeyboardMarkup:
+        builder = InlineKeyboardBuilder()
+        btns = self._build_entry_buttons()
+        for btn in btns:
+            builder.row(**btn)
+
+        self._append_back_button(builder)
+
+        return builder.as_markup()
+
+    @abstractmethod
+    def _build_entry_buttons(self) -> list[dict]:
+        pass

@@ -4,7 +4,12 @@ from uuid import UUID
 
 from aiogram.filters.callback_data import CallbackData
 
-from keyboards.base import BaseItemKeyboardBuilder, BaseListKeyboardBuilder, BaseQuizConfirmKeyboardBuilder
+from keyboards.base import (
+    BaseItemKeyboardBuilder,
+    BaseListKeyboardBuilder,
+    BaseManageEntryKeyboardBuilder,
+    BaseQuizConfirmKeyboardBuilder,
+)
 from schemas.category_schema import CategorySchema
 from schemas.resource_schema import ResourceSchema
 
@@ -134,3 +139,16 @@ class ResourceQuizConfirmKeyboardBuilder(BaseQuizConfirmKeyboardBuilder[Resource
             resource_item_id=item.resource_item_id,
             rating=None,
         )
+
+
+@dataclass
+class ResourceManageEntryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
+    def _build_entry_buttons(self) -> list[dict]:
+        return [
+            {"text": self.i18n.get("manage-resources-keyboard-create"), "callback_data": "create_resource"},
+            {"text": self.i18n.get("manage-resources-keyboard-edit"), "callback_data": "edit_resource"},
+            {"text": self.i18n.get("manage-resources-keyboard-delete"), "callback_data": "delete_resource"},
+        ]
+
+    def _back_callback(self) -> str:
+        return "menu"
