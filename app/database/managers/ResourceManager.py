@@ -41,7 +41,7 @@ class ResourceManager:
             await session.commit()
 
     @classmethod
-    async def update(cls, resource_data: ResourceItemSchema):
+    async def update(cls, resource_data: BaseResourceItemSchema):
         async with AsyncSessionLocal() as session:
             statement = (
                 update(ResourceItemModel)

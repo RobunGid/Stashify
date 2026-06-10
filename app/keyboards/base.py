@@ -27,6 +27,12 @@ class BackKeyboardBuilderMixin:
 
 
 @dataclass
+class BackToMenuKeyboardBuilderMixin(BackKeyboardBuilderMixin):
+    def _back_callback(self) -> str:
+        return "menu"
+
+
+@dataclass
 class BaseKeyboardBuilder(ABC):
     i18n: I18nContext
 
@@ -336,4 +342,19 @@ class BaseQuizQuestionKeyboardBuilder(
 
     @abstractmethod
     def _build_quiz_callback(self, option_number: int, question_number: int) -> str | CallbackData:
+        pass
+
+
+@dataclass
+class BaseEditKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, ABC):
+    def build(self) -> InlineKeyboardMarkup:
+        builder = InlineKeyboardBuilder()
+        btns = self._build_edit_buttons()
+        for btn in btns:
+            builder.button(**btn)
+        self._append_back_button(builder)
+        return builder.as_markup()
+
+    @abstractmethod
+    def _build_edit_buttons(self) -> list[dict]:
         pass

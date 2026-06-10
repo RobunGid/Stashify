@@ -6,8 +6,10 @@ from uuid import UUID
 from aiogram.filters.callback_data import CallbackData
 
 from keyboards.base import (
+    BackToMenuKeyboardBuilderMixin,
     BaseBackKeyboardBuilder,
     BaseConfirmKeyboardBuilder,
+    BaseEditKeyboardBuilder,
     BaseItemKeyboardBuilder,
     BaseListKeyboardBuilder,
     BaseManageEntryKeyboardBuilder,
@@ -303,3 +305,79 @@ class DeleteResourceConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
 
     def _back_callback(self) -> str:
         return "manage_resources"
+
+
+class EditResourceChooseCategoryCallbackFactory(
+    CallbackData,
+    prefix="edit_resource_ctg",  # type: ignore[call-arg]
+):
+    action: Union[Literal["select"], Literal["change_page"]]
+    category_id: UUID | None
+    page: int
+
+
+class EditResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
+    def _pagination_callback(self, page: int) -> CallbackData:
+        return EditResourceChooseCategoryCallbackFactory(
+            action="change_page",
+            category_id=None,
+            page=page,
+        )
+
+    def _back_callback(self) -> str:
+        return "manage_resources"
+
+    def _item_button(self, item: ResourceItemSchema) -> dict:
+        return {
+            "text": item.name,
+            "callback_data": EditResourceChooseCategoryCallbackFactory(
+                action="select",
+                category_id=item.category_id,
+                page=0,
+            ),
+        }
+
+
+class EditResourceChooseResourceCallbackFactory(
+    CallbackData,
+    prefix="edit_resource_rsc",  # type: ignore[call-arg]
+):
+    action: Union[Literal["select"], Literal["change_page"]]
+    resource_item_id: UUID | None
+    page: int
+
+
+class EditResourceResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSchema]):
+    def _pagination_callback(self, page: int) -> CallbackData:
+        return EditResourceChooseResourceCallbackFactory(
+            action="change_page",
+            resource_item_id=None,
+            page=page,
+        )
+
+    def _back_callback(self) -> str:
+        return "manage_resources"
+
+    def _item_button(self, item: ResourceItemSchema) -> dict:
+        return {
+            "text": item.name,
+            "callback_data": EditResourceChooseResourceCallbackFactory(
+                action="select",
+                resource_item_id=item.resource_item_id,
+                page=0,
+            ),
+        }
+
+
+@dataclass
+class EditResourceChooseFieldKeyboardBuilder(BaseEditKeyboardBuilder, BackToMenuKeyboardBuilderMixin):
+    def _build_edit_buttons(self) -> list[dict]:
+        return [
+            {"text": self.i18n.get("manage_resources.edit.name.choose"), "callback_data": "edit_resource_name"},
+            {
+                "text": self.i18n.get("manage_resources.edit.description.choose"),
+                "callback_data": "edit_resource_description",
+            },
+            {"text": self.i18n.get("manage_resources.edit.image.choose"), "callback_data": "edit_resource_image"},
+            {"text": self.i18n.get("manage_resources.edit.tags.choose"), "callback_data": "edit_resource_tags"},
+        ]

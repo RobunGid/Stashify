@@ -5,28 +5,21 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message, PhotoSize
 
+from aiogram_i18n import I18nContext
 from constants import EDIT_RESOURCE_CATEGORIES_ON_PAGE, EDIT_RESOURCE_RESOURCES_ON_PAGE
 from sqlalchemy.exc import IntegrityError
 
 from database.managers import CategoryManager, ResourceManager
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
-from i18n.translate import t
-from keyboards.manage_resources.manage_resources_back_keyboard import (
-    manage_resources_back_keyboard,
-)
-from keyboards.manage_resources.manage_resources_edit_category_list_keyboard import (
+from keyboards.resources import (
+    EditResourceCategoryListKeyboardBuilder,
     EditResourceChooseCategoryCallbackFactory,
-    manage_resources_edit_category_list_keyboard,
-)
-from keyboards.manage_resources.manage_resources_edit_keyboard import (
-    manage_resources_edit_keyboard,
-)
-from keyboards.manage_resources.manage_resources_edit_resource_list_keyboard import (
+    EditResourceChooseFieldKeyboardBuilder,
     EditResourceChooseResourceCallbackFactory,
-    manage_resources_edit_resource_list_keyboard,
+    EditResourceResourceListKeyboardBuilder,
+    ManageResourcesBackKeyboardBuilder,
 )
-from schemas.resource_schema import UpdateResourceSchemaWithoutCategory
 from settings.config import bot
 
 from .router import router
@@ -47,7 +40,7 @@ class EditResourceState(StatesGroup):
     F.data == "edit_resource",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def edit_resource_callback_handler(callback: CallbackQuery, state: FSMContext):
+async def edit_resource_callback_handler(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
     await bot.delete_message(
@@ -59,17 +52,19 @@ async def edit_resource_callback_handler(callback: CallbackQuery, state: FSMCont
     total_pages = ceil(len(categories) / EDIT_RESOURCE_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
 
+    keyboard_builder = EditResourceCategoryListKeyboardBuilder(
+        i18n=i18n,
+        items=categories,
+        current_page=1,
+        total_pages=total_pages,
+    )
+    keyboard = keyboard_builder.build()
+
     await callback.message.answer(
-        text=t(
-            "manage_resources.edit.choose_category",
-            callback.from_user.language_code,
+        text=i18n.get(
+            "manage-resources-edit-choose-category",
         ),
-        reply_markup=manage_resources_edit_category_list_keyboard(
-            categories=categories[0:5],
-            user_lang=callback.from_user.language_code,
-            total_pages=total_pages,
-            page=1,
-        ),
+        reply_markup=keyboard,
     )
 
 
@@ -80,7 +75,8 @@ async def edit_resource_callback_handler(callback: CallbackQuery, state: FSMCont
 async def edit_resource_category_page(
     callback: CallbackQuery,
     state: FSMContext,
-    callback_data: EditResourceChooseResourceCallbackFactory,
+    callback_data: EditResourceChooseCategoryCallbackFactory,
+    i18n: I18nContext,
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
@@ -98,17 +94,19 @@ async def edit_resource_category_page(
     ]
     total_pages = state_data["total_pages"]
 
+    keyboard_builder = EditResourceCategoryListKeyboardBuilder(
+        i18n=i18n,
+        items=categories,
+        current_page=current_page,
+        total_pages=total_pages,
+    )
+    keyboard = keyboard_builder.build()
+
     await callback.message.answer(
-        text=t(
-            "manage_resources.edit.choose_category",
-            callback.from_user.language_code,
+        text=i18n.get(
+            "manage-resources-edit-choose-category",
         ),
-        reply_markup=manage_resources_edit_category_list_keyboard(
-            categories=categories,
-            user_lang=callback.from_user.language_code,
-            total_pages=total_pages,
-            page=int(current_page),
-        ),
+        reply_markup=keyboard,
     )
 
 
@@ -120,6 +118,7 @@ async def edit_resource_category_choose(
     callback: CallbackQuery,
     callback_data: EditResourceChooseCategoryCallbackFactory,
     state: FSMContext,
+    i18n: I18nContext,
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
@@ -132,18 +131,20 @@ async def edit_resource_category_choose(
     await state.update_data(resources=resources)
     total_pages = ceil(len(resources) / EDIT_RESOURCE_RESOURCES_ON_PAGE)
 
+    keyboard_builder = EditResourceResourceListKeyboardBuilder(
+        i18n=i18n,
+        items=resources,
+        current_page=1,
+        total_pages=total_pages,
+    )
+    keyboard = keyboard_builder.build()
+
     await state.update_data(category_id=category_id)
     await callback.message.answer(
-        text=t(
-            "manage_resources.edit.choose_to_change",
-            callback.from_user.language_code,
+        text=i18n.get(
+            "manage-resources-edit-choose-to-change",
         ),
-        reply_markup=manage_resources_edit_resource_list_keyboard(
-            resources=resources,
-            user_lang=callback.from_user.language_code,
-            total_pages=total_pages,
-            page=1,
-        ),
+        reply_markup=keyboard,
     )
 
 
@@ -155,6 +156,7 @@ async def edit_resource_page(
     callback: CallbackQuery,
     state: FSMContext,
     callback_data: EditResourceChooseResourceCallbackFactory,
+    i18n: I18nContext,
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
@@ -172,14 +174,19 @@ async def edit_resource_page(
     ]
     total_pages = resources_data["total_pages"]
 
+    keyboard_builder = EditResourceResourceListKeyboardBuilder(
+        i18n=i18n,
+        items=resources,
+        current_page=current_page,
+        total_pages=total_pages,
+    )
+    keyboard = keyboard_builder.build()
+
     await callback.message.answer(
-        text=t("manage_resources.edit.choose", callback.from_user.language_code),
-        reply_markup=manage_resources_edit_resource_list_keyboard(
-            resources=resources,
-            user_lang=callback.from_user.language_code,
-            total_pages=total_pages,
-            page=int(current_page),
+        text=i18n.get(
+            "manage-resources-edit-choose",
         ),
+        reply_markup=keyboard,
     )
 
 
@@ -191,6 +198,7 @@ async def edit_resource_choose(
     callback: CallbackQuery,
     callback_data: EditResourceChooseResourceCallbackFactory,
     state: FSMContext,
+    i18n: I18nContext,
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
@@ -200,12 +208,15 @@ async def edit_resource_choose(
     )
     resource_item_id = callback_data.resource_item_id
     await state.update_data(resource_item_id=resource_item_id)
+
+    keyboard_builder = EditResourceChooseFieldKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
     await callback.message.answer(
-        text=t(
-            "manage_resources.edit.choose_to_change",
-            callback.from_user.language_code,
+        text=i18n.get(
+            "manage-resources-edit-choose-to-change",
         ),
-        reply_markup=manage_resources_edit_keyboard(callback.from_user.language_code),
+        reply_markup=keyboard,
     )
 
 
@@ -213,7 +224,7 @@ async def edit_resource_choose(
     F.data == "edit_resource_name",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def edit_resource_name(callback: CallbackQuery, state: FSMContext):
+async def edit_resource_name(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
     await bot.delete_message(
@@ -230,12 +241,12 @@ async def edit_resource_name(callback: CallbackQuery, state: FSMContext):
         "Unknown",
     )
 
+    keyboard_builder = EditResourceChooseFieldKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
     await callback.message.answer(
-        text=t(
-            "manage_resources.edit.name.text",
-            callback.from_user.language_code,
-        ).format(name=resource_name),
-        reply_markup=manage_resources_back_keyboard(callback.from_user.language_code),
+        text=i18n.get("manage-resources-edit-name-text", name=resource_name),
+        reply_markup=keyboard,
     )
     await state.set_state(EditResourceState.name)
 
@@ -245,36 +256,28 @@ async def edit_resource_name(callback: CallbackQuery, state: FSMContext):
     UserRoleFilter([Role.admin, Role.manager]),
     F.text,
 )
-async def edit_resource_name_success(message: Message, state: FSMContext):
+async def edit_resource_name_success(message: Message, state: FSMContext, i18n: I18nContext):
     if not message.from_user or not message.from_user.language_code:
         return
-    resource_data = await state.get_data()
+
+    resource_item_data = await state.get_data()
+
+    keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
     try:
-        new_resource_data = UpdateResourceSchemaWithoutCategory(
-            id=resource_data.id,
-            name=message.html_text,
-        )
-        await ResourceManager.update(resource_data=new_resource_data)
+        resource_item_data["name"] = message.html_text
+        await ResourceManager.update(**resource_item_data)
     except IntegrityError, ValueError:
         await message.answer(
-            text=t(
-                "manage_resources.edit.name.fail",
-                message.from_user.language_code,
-            ).format(name=message.html_text),
-            reply_markup=manage_resources_back_keyboard(
-                message.from_user.language_code,
-            ),
+            text=i18n.get("manage-resources-edit-name-fail", name=message.html_text),
+            reply_markup=keyboard,
         )
         await state.set_state(EditResourceState.name)
     else:
         await message.answer(
-            text=t(
-                "manage_resources.edit.name.success",
-                message.from_user.language_code,
-            ).format(name=message.html_text),
-            reply_markup=manage_resources_back_keyboard(
-                message.from_user.language_code,
-            ),
+            text=i18n.get("manage-resources-edit-name-success", name=message.html_text),
+            reply_markup=keyboard,
         )
 
 
@@ -282,7 +285,7 @@ async def edit_resource_name_success(message: Message, state: FSMContext):
     F.data == "edit_resource_description",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def edit_resource_description(callback: CallbackQuery, state: FSMContext):
+async def edit_resource_description(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
     await bot.delete_message(
@@ -299,12 +302,12 @@ async def edit_resource_description(callback: CallbackQuery, state: FSMContext):
         "Unknown",
     )
 
+    keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
     await callback.message.answer(
-        text=t(
-            "manage_resources.edit.description.text",
-            callback.from_user.language_code,
-        ).format(description=resource_description),
-        reply_markup=manage_resources_back_keyboard(callback.from_user.language_code),
+        text=i18n.get("manage_resources.edit.description.text", description=resource_description),
+        reply_markup=keyboard,
     )
     await state.set_state(EditResourceState.description)
 
@@ -314,36 +317,27 @@ async def edit_resource_description(callback: CallbackQuery, state: FSMContext):
     UserRoleFilter([Role.admin, Role.manager]),
     F.text,
 )
-async def edit_resource_description_success(message: Message, state: FSMContext):
+async def edit_resource_description_success(message: Message, state: FSMContext, i18n: I18nContext):
     if not message.from_user or not message.from_user.language_code:
         return
     resource_data = await state.get_data()
+
+    keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
     try:
-        new_resource_data = UpdateResourceSchemaWithoutCategory(
-            id=resource_data.id,
-            description=message.html_text,
-        )
-        await ResourceManager.update(resource_data=new_resource_data)
+        resource_data["description"] = message.html_text
+        await ResourceManager.update(**resource_data)
     except IntegrityError, ValueError:
         await message.answer(
-            text=t(
-                "manage_resources.edit.description.fail",
-                message.from_user.language_code,
-            ).format(description=message.html_text),
-            reply_markup=manage_resources_back_keyboard(
-                message.from_user.language_code,
-            ),
+            text=i18n.get("manage-resources-edit-description-fail", description=message.html_text),
+            reply_markup=keyboard,
         )
         await state.set_state(EditResourceState.description)
     else:
         await message.answer(
-            text=t(
-                "manage_resources.edit.description.success",
-                message.from_user.language_code,
-            ).format(description=message.html_text),
-            reply_markup=manage_resources_back_keyboard(
-                message.from_user.language_code,
-            ),
+            text=i18n.get("manage-resources-edit-description-success", description=message.html_text),
+            reply_markup=keyboard,
         )
 
 
@@ -351,7 +345,7 @@ async def edit_resource_description_success(message: Message, state: FSMContext)
     F.data == "edit_resource_tags",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def edit_resource_tags(callback: CallbackQuery, state: FSMContext):
+async def edit_resource_tags(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
     await bot.delete_message(
@@ -368,12 +362,15 @@ async def edit_resource_tags(callback: CallbackQuery, state: FSMContext):
         "Unknown",
     )
 
+    keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
     await callback.message.answer(
-        text=t(
-            "manage_resources.edit.tags.text",
-            callback.from_user.language_code,
-        ).format(tags=resource_tags),
-        reply_markup=manage_resources_back_keyboard(callback.from_user.language_code),
+        text=i18n.get(
+            "manage-resources-edit-tags-text",
+            tags=resource_tags,
+        ),
+        reply_markup=keyboard,
     )
     await state.set_state(EditResourceState.tags)
 
@@ -383,36 +380,33 @@ async def edit_resource_tags(callback: CallbackQuery, state: FSMContext):
     UserRoleFilter([Role.admin, Role.manager]),
     F.text,
 )
-async def edit_resource_tags_success(message: Message, state: FSMContext):
+async def edit_resource_tags_success(message: Message, state: FSMContext, i18n: I18nContext):
     if not message.from_user or not message.from_user.language_code:
         return
     resource_data = await state.get_data()
+    resource_data["tags"] = message.html_text
+
+    keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
     try:
-        new_resource_data = UpdateResourceSchemaWithoutCategory(
-            id=resource_data.id,
-            tags=message.html_text,
-        )
-        await ResourceManager.update(resource_data=new_resource_data)
+        await ResourceManager.update(**resource_data)
     except IntegrityError, ValueError:
         await message.answer(
-            text=t(
+            text=i18n.get(
                 "manage_resources.edit.tags.fail",
-                message.from_user.language_code,
-            ).format(tags=message.html_text),
-            reply_markup=manage_resources_back_keyboard(
-                message.from_user.language_code,
+                tags=message.html_text,
             ),
+            reply_markup=keyboard,
         )
         await state.set_state(EditResourceState.tags)
     else:
         await message.answer(
-            text=t(
+            text=i18n.get(
                 "manage_resources.edit.tags.success",
-                message.from_user.language_code,
-            ).format(tags=message.html_text),
-            reply_markup=manage_resources_back_keyboard(
-                message.from_user.language_code,
+                tags=message.html_text,
             ),
+            reply_markup=keyboard,
         )
 
 
@@ -420,7 +414,7 @@ async def edit_resource_tags_success(message: Message, state: FSMContext):
     F.data == "edit_resource_image",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def edit_resource_image(callback: CallbackQuery, state: FSMContext):
+async def edit_resource_image(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
     await bot.delete_message(
@@ -437,10 +431,13 @@ async def edit_resource_image(callback: CallbackQuery, state: FSMContext):
         "Unknown",
     )
 
+    keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
     await callback.message.answer_photo(
         photo=resource_image,
-        caption=t("manage_resources.edit.image.text", callback.from_user.language_code),
-        reply_markup=manage_resources_back_keyboard(callback.from_user.language_code),
+        caption=i18n.get("manage-resources-edit-image-text"),
+        reply_markup=keyboard,
     )
     await state.set_state(EditResourceState.image)
 
@@ -454,36 +451,32 @@ async def edit_resource_image_success(
     message: Message,
     state: FSMContext,
     resource_image: PhotoSize,
+    i18n: I18nContext,
 ):
     if not message.from_user or not message.from_user.language_code:
         return
     resource_data = await state.get_data()
+    resource_data["image"] = resource_image.file_id
+
+    keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
     try:
-        new_resource_data = UpdateResourceSchemaWithoutCategory(
-            id=resource_data.id,
-            image=resource_image.file_id,
-        )
-        await ResourceManager.update(resource_data=new_resource_data)
+        await ResourceManager.update(**resource_data)
     except IntegrityError, ValueError:
         await message.answer_photo(
             photo=resource_image.file_id,
-            caption=t(
-                "manage_resources.edit.image.fail",
-                message.from_user.language_code,
+            caption=i18n.get(
+                "manage-resources-edit-image-fail",
             ),
-            reply_markup=manage_resources_back_keyboard(
-                message.from_user.language_code,
-            ),
+            reply_markup=keyboard,
         )
         await state.set_state(EditResourceState.image)
     else:
         await message.answer_photo(
             photo=resource_image.file_id,
-            caption=t(
-                "manage_resources.edit.image.success",
-                message.from_user.language_code,
+            caption=i18n.get(
+                "manage-resources-edit-image-success",
             ),
-            reply_markup=manage_resources_back_keyboard(
-                message.from_user.language_code,
-            ),
+            reply_markup=keyboard,
         )
