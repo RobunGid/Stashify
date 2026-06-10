@@ -34,6 +34,14 @@ class BaseKeyboardBuilder(ABC):
         pass
 
 
+@dataclass
+class BaseManageBackKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, ABC):
+    def build(self) -> InlineKeyboardMarkup:
+        builder = InlineKeyboardBuilder()
+        self._append_back_button(builder)
+        return builder.as_markup()
+
+
 class QuizWithOptions(Protocol):
     options: list[str]
 

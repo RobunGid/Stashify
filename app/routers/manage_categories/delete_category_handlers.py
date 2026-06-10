@@ -5,19 +5,17 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
 
+from aiogram_i18n import I18nContext
 from constants import DELETE_CATEGORIES_ON_PAGE
 from sqlalchemy.exc import IntegrityError
 
 from database.managers import CategoryManager
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
-from i18n.translate import t
-from keyboards.manage_categories.manage_categories_back_keyboard import (
-    manage_categories_back_keyboard,
-)
-from keyboards.manage_categories.manage_categories_delete_keyboard import (
+from keyboards.categories import (
     DeleteCategoryIdCallbackFactory,
-    manage_categories_delete_keyboard,
+    ManageCategoriesBackKeyboardBuilder,
+    ManageCategoriesDeleteKeyboardBuilder,
 )
 from keyboards.manage_categories.manage_categories_edit_keyboard import (
     EditCategoryIdCallbackFactory,
@@ -34,7 +32,7 @@ class DeleteCategoryState(StatesGroup):
 
 
 @router.callback_query(F.data == "delete_category", UserRoleFilter([Role.admin]))
-async def delete_category_callback_handler(callback: CallbackQuery, state: FSMContext):
+async def delete_category_callback_handler(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
     await bot.delete_message(
@@ -46,14 +44,19 @@ async def delete_category_callback_handler(callback: CallbackQuery, state: FSMCo
     total_pages = ceil(len(categories) / DELETE_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
 
+    keyboard_builder = ManageCategoriesDeleteKeyboardBuilder(
+        i18n=i18n,
+        total_pages=total_pages,
+        current_page=1,
+        items=categories,
+    )
+    keyboard = keyboard_builder.build()
+
     await callback.message.answer(
-        text=t("manage_categories.delete.choose", callback.from_user.language_code),
-        reply_markup=manage_categories_delete_keyboard(
-            categories=categories[0:5],
-            user_lang=callback.from_user.language_code,
-            total_pages=total_pages,
-            page=1,
+        text=i18n.get(
+            "manage-categories-delete-choose",
         ),
+        reply_markup=keyboard,
     )
     await state.set_state("category_id")
 
@@ -66,6 +69,7 @@ async def delete_category_page(
     callback: CallbackQuery,
     state: FSMContext,
     callback_data: EditCategoryIdCallbackFactory,
+    i18n: I18nContext,
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
@@ -83,15 +87,15 @@ async def delete_category_page(
     ]
     total_pages = categories_data["total_pages"]
 
-    await callback.message.answer(
-        text=t("manage_categories.delete.choose", callback.from_user.language_code),
-        reply_markup=manage_categories_delete_keyboard(
-            categories=categories,
-            user_lang=callback.from_user.language_code,
-            total_pages=total_pages,
-            page=int(current_page),
-        ),
+    keyboard_builder = ManageCategoriesDeleteKeyboardBuilder(
+        i18n=i18n,
+        total_pages=total_pages,
+        current_page=current_page,
+        items=categories,
     )
+    keyboard = keyboard_builder.build()
+
+    await callback.message.answer(text=i18n.get("manage-categories-delete-choose"), reply_markup=keyboard)
 
 
 @router.callback_query(
@@ -102,6 +106,7 @@ async def delete_category_choose(
     callback: CallbackQuery,
     callback_data: DeleteCategoryIdCallbackFactory,
     state: FSMContext,
+    i18n: I18nContext,
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
@@ -114,27 +119,19 @@ async def delete_category_choose(
         (category for category in categories_data["categories"] if category.category_id == callback_data.category_id),
         None,
     )
+    keyboard_builder = ManageCategoriesBackKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
     try:
         if not callback_data.category_id:
             raise ValueError
         await CategoryManager.delete(callback_data.category_id)
     except IntegrityError, ValueError:
         await callback.message.answer(
-            text=t(
-                "manage_categories.delete.fail",
-                callback.from_user.language_code,
-            ).format(category_name=category.name if category else "unknown"),
-            reply_markup=manage_categories_back_keyboard(
-                callback.from_user.language_code,
-            ),
+            text=i18n.get("manage_categories.delete.fail", category_name=category.name if category else "Unknown"),
+            reply_markup=keyboard,
         )
     else:
         await callback.message.answer(
-            text=t(
-                "manage_categories.delete.success",
-                callback.from_user.language_code,
-            ).format(category_name=category.name if category else "unknown"),
-            reply_markup=manage_categories_back_keyboard(
-                callback.from_user.language_code,
-            ),
+            text=i18n.get("manage_categories.delete.success", category_name=category.name if category else "Unknown"),
+            reply_markup=keyboard,
         )
