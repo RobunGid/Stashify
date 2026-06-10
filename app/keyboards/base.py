@@ -4,7 +4,7 @@ from typing import Generic, TypeVar
 from uuid import UUID
 
 from aiogram.filters.callback_data import CallbackData
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from aiogram_i18n import I18nContext
@@ -15,15 +15,13 @@ class BackKeyboardBuilderMixin:
     i18n: I18nContext
 
     def _append_back_button(self, builder: InlineKeyboardBuilder):
-        builder.row(
-            InlineKeyboardButton(
-                text=self.i18n.get("common-back"),
-                callback_data=self._back_callback(),
-            ),
+        builder.button(
+            text=self.i18n.get("common-back"),
+            callback_data=self._back_callback(),
         )
 
     @abstractmethod
-    def _back_callback(self) -> str:
+    def _back_callback(self) -> str | CallbackData | None:
         """callback_data for 'Back' button"""
 
 
@@ -261,4 +259,24 @@ class BaseManageEntryKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMix
 
     @abstractmethod
     def _build_entry_buttons(self) -> list[dict]:
+        pass
+
+
+@dataclass
+class BaseQuizFinalKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, ABC, Generic[It]):
+    item: It
+    page: int
+
+    def build(self) -> InlineKeyboardMarkup:
+        builder = InlineKeyboardBuilder()
+        btns = self._build_retry_buttons()
+        for btn in btns:
+            builder.row(**btn)
+
+        self._append_back_button(builder)
+        builder.adjust(1, 1)
+        return builder.as_markup()
+
+    @abstractmethod
+    def _build_retry_buttons(self) -> list[dict]:
         pass
