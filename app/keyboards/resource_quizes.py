@@ -1,10 +1,18 @@
 from dataclasses import dataclass
+from typing import Literal, Union
 
 from aiogram.filters.callback_data import CallbackData
 
-from keyboards.base import BaseManageEntryKeyboardBuilder, BaseQuizFinalKeyboardBuilder
+from keyboards.base import BaseManageEntryKeyboardBuilder, BaseQuizFinalKeyboardBuilder, BaseQuizQuestionKeyboardBuilder
 from keyboards.resources import ListResourcesChooseResourceCallbackFactory, ListResourcesItemCallbackFactory
+from schemas.quiz_question_schema import QuizQuestionBaseSchema
 from schemas.resource_schema import ResourceSchema
+
+
+class ListResourcesQuizQuestionCallbackFactory(CallbackData, prefix="lst_rsc_qstn"):  # type: ignore[call-arg]
+    action: Union[Literal["answer"], None]
+    option_number: int
+    question_number: int
 
 
 @dataclass
@@ -39,4 +47,14 @@ class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceSche
             action="change_page",
             page=self.page,
             resource_item_id=self.item.resource_item_id,
+        )
+
+
+@dataclass
+class ResourceQuizQuestionKeyboardBuilder(BaseQuizQuestionKeyboardBuilder[ResourceSchema, QuizQuestionBaseSchema]):
+    def _build_quiz_callback(self, option_number: int, question_number: int) -> CallbackData:
+        return ListResourcesQuizQuestionCallbackFactory(
+            action="answer",
+            option_number=option_number,
+            question_number=question_number,
         )

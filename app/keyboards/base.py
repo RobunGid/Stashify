@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import Generic, Protocol, TypeVar
 from uuid import UUID
 
 from aiogram.filters.callback_data import CallbackData
@@ -34,7 +34,12 @@ class BaseKeyboardBuilder(ABC):
         pass
 
 
+class QuizWithOptions(Protocol):
+    options: list[str]
+
+
 It = TypeVar("It")
+Qs = TypeVar("Qs", bound=QuizWithOptions)
 
 
 @dataclass
@@ -279,4 +284,31 @@ class BaseQuizFinalKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin
 
     @abstractmethod
     def _build_retry_buttons(self) -> list[dict]:
+        pass
+
+
+@dataclass
+class BaseQuizQuestionKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, ABC, Generic[It, Qs]):
+    item: It
+    question: Qs
+    page: int
+    question_number: int
+
+    def build(self) -> InlineKeyboardMarkup:
+        builder = InlineKeyboardBuilder()
+
+        for index, option in enumerate(self.question.options):
+            if option.startswith("!"):
+                option = option[1:]
+            builder.button(
+                text=option,
+                callback_data=self._build_quiz_callback(option_number=index, question_number=self.question_number),
+            )
+            builder.adjust(1)
+            self._append_back_button(builder)
+
+        return builder.as_markup()
+
+    @abstractmethod
+    def _build_quiz_callback(self, option_number: int, question_number: int) -> str | CallbackData:
         pass
