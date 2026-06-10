@@ -131,7 +131,12 @@ class NavigationKeyboardBuilderMixin(ABC, Generic[It]):
 
 
 @dataclass
-class BaseItemKeyboardBuilder(NavigationKeyboardBuilderMixin, BaseKeyboardBuilder, Generic[It]):
+class BaseItemKeyboardBuilder(
+    NavigationKeyboardBuilderMixin,
+    BaseKeyboardBuilder,
+    BackKeyboardBuilderMixin,
+    Generic[It],
+):
     items: list[It]
     current_item: It
 
@@ -146,7 +151,7 @@ class BaseItemKeyboardBuilder(NavigationKeyboardBuilderMixin, BaseKeyboardBuilde
         nav_buttons = self._build_navigation_buttons()
         for btns in nav_buttons:
             builder.button(**btns)
-
+        self._append_back_button(builder)
         return builder.as_markup()
 
     def _build_navigation_buttons(self) -> list[dict]:
@@ -213,19 +218,9 @@ class BaseItemKeyboardBuilder(NavigationKeyboardBuilderMixin, BaseKeyboardBuilde
             for i in range(1, 6)
         ]
 
+    @abstractmethod
     def _build_quiz_buttons(self) -> list[dict]:
-        if not self.has_quiz:
-            return []
-        if self.quiz_percent:
-            text = self.i18n.get("start-quiz-completed").format(percent=self.quiz_percent)
-        else:
-            text = self.i18n.get("start-quiz-firstly")
-        return [
-            {
-                "text": text,
-                "callback_data": self._quiz_callback(self.current_item),
-            },
-        ]
+        """Return buttons for start quiz"""
 
     @abstractmethod
     def _get_item_id(self, item: It) -> str | UUID | int:
@@ -242,10 +237,6 @@ class BaseItemKeyboardBuilder(NavigationKeyboardBuilderMixin, BaseKeyboardBuilde
     @abstractmethod
     def _rating_callback(self, item: It, rating: int) -> CallbackData:
         """Return callback_data for rate item"""
-
-    @abstractmethod
-    def _quiz_callback(self, item: It) -> CallbackData:
-        """Return callback_data for start quiz"""
 
 
 @dataclass

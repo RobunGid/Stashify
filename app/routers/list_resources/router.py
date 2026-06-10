@@ -213,6 +213,11 @@ async def list_resource_resource_select(
     ):
         return
 
+    await bot.delete_message(
+        chat_id=callback.message.chat.id,
+        message_id=callback.message.message_id,
+    )
+
     resource_item = await ResourceManager.get_one(resource_item_id=callback_data.resource_item_id)
     if not resource_item:
         return

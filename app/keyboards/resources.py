@@ -94,7 +94,7 @@ class ListResourcesItemCallbackFactory(CallbackData, prefix="lst_rsc_itm"):  # t
 
 
 @dataclass
-class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder):
+class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemSchema]):
     def _get_item_id(self, item: ResourceItemSchema) -> UUID:
         return item.resource_item_id
 
@@ -127,15 +127,39 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder):
         )
 
     def _build_quiz_buttons(self) -> list[dict]:
+        if not self.has_quiz:
+            return []
+        if self.quiz_percent:
+            text = self.i18n.get("start-quiz-completed", percent=self.quiz_percent)
+        else:
+            text = self.i18n.get("start-quiz-firstly")
         return [
             {
+                "text": text,
                 "callback_data": ListResourcesItemCallbackFactory(
-                    resource_item_id=self.current_item.resource_item_id,
-                    action="start_quiz_cnfrm",
+                    action="start_quiz",
                     rating=None,
+                    resource_item_id=self.current_item.resource_item_id,
                 ),
             },
         ]
+
+    def _build_quiz_confirm_buttons(self) -> dict:
+        return {
+            "callback_data": ListResourcesItemCallbackFactory(
+                resource_item_id=self.current_item.resource_item_id,
+                action="start_quiz_cnfrm",
+                rating=None,
+            ),
+            "text": self.i18n.get("list-resources-start-quiz-confirm"),
+        }
+
+    def _back_callback(self) -> CallbackData:
+        return ListResourcesChooseCategoryCallbackFactory(
+            action="select",
+            category_id=self.current_item.category_id,
+            page=0,
+        )
 
 
 @dataclass
