@@ -28,6 +28,7 @@ from keyboards.quizes import (
     DeleteQuizCategoryListKeyboardBuilder,
     DeleteQuizChooseCategoryCallbackFactory,
     DeleteQuizChooseResourceCallbackFactory,
+    DeleteQuizConfirmKeyboardBuilder,
     DeleteQuizResourceListKeyboardBuilder,
     EditQuizActionCallbackFactory,
     EditQuizCategoryListKeyboardBuilder,
@@ -307,6 +308,16 @@ async def create_quiz_add_question(message: Message, state: FSMContext, i18n: I1
     await state.update_data(questions=[*state_data["questions"], question])
     await state.set_state(CreateQuizState.questions)
 
+    keyboard_builder = QuizConfirmFinishKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
+    await message.answer(
+        text=i18n.get(
+            "manage-quizes-create-add-question",
+        ),
+        reply_markup=keyboard,
+    )
+
 
 @router.callback_query(
     F.data == "manage_quizes.stop",
@@ -531,7 +542,7 @@ async def delete_quiz_choose(
     )
     await state.update_data(quiz=quiz, questions=[], resource_item_id=resource_item_id)
 
-    keyboard_builder = QuizConfirmFinishKeyboardBuilder(i18n=i18n)
+    keyboard_builder = DeleteQuizConfirmKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
     await callback.message.answer(
