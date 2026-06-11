@@ -2,6 +2,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
+from application.schemas.base_schema import BaseSchema
+
 
 class QuizQuestionBaseSchema(BaseModel):
     quiz_question_id: UUID
@@ -17,7 +19,7 @@ class QuizQuestionBaseSchema(BaseModel):
 
 
 class QuizQuestionSchema(QuizQuestionBaseSchema):
-    quiz: BaseQuizSchema
+    quiz: BaseQuizItemSchema
 
 
-from application.schemas.quiz_schema import BaseQuizSchema  # noqa
+from application.schemas.quiz_item_schema import BaseQuizItemSchema  # noqa

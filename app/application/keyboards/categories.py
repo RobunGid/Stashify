@@ -10,6 +10,7 @@ from application.keyboards.base import (
     BaseManageEntryKeyboardBuilder,
 )
 from application.schemas.category_item_schema import CategoryItemSchema
+from domain.entities.category_item import CategoryItemEntity
 
 
 @dataclass
@@ -40,7 +41,7 @@ class DeleteCategoryIdCallbackFactory(CallbackData, prefix="delete_category_id")
     page: int
 
 
-class DeleteCategoryKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
+class DeleteCategoryKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
     def _back_callback(self) -> str | CallbackData | None:
         return DeleteCategoryIdCallbackFactory(
             action="change_page",
@@ -60,7 +61,7 @@ class DeleteCategoryKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema])
             "text": item.name,
             "callback_data": DeleteCategoryIdCallbackFactory(
                 action="select",
-                category_id=item.category_id,
+                category_id=item.category_item - id,
                 page=0,
             ),
         }
@@ -73,7 +74,7 @@ class EditCategoryIdCallbackFactory(CallbackData, prefix="edit_category_id"):  #
 
 
 @dataclass
-class EditCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
+class EditCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
     def _back_callback(self) -> str | CallbackData | None:
         return EditCategoryIdCallbackFactory(
             action="change_page",
@@ -93,7 +94,7 @@ class EditCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema
             "text": item.name,
             "callback_data": EditCategoryIdCallbackFactory(
                 action="select",
-                category_id=item.category_id,
+                category_id=item.category_item - id,
                 page=0,
             ),
         }

@@ -1,25 +1,24 @@
-from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from application.schemas.base_schema import BaseSchema
+from pydantic import ConfigDict
 
 
-class ResourceRatingWithoutUserAndResourceSchema(BaseModel):
+class ResourceRatingWithoutUserAndResourceSchema(BaseSchema):
     resource_rating_id: UUID
 
     resource_item_id: UUID
 
     user_id: str
 
-    created_at: datetime
     rating: int
     model_config = ConfigDict(from_attributes=True)
 
 
 class ResourceRatingSchema(ResourceRatingWithoutUserAndResourceSchema):
-    user: PlainUserSchema
+    user: PlainUserAccountSchema
     resource: ResourceItemSchema
 
 
 from application.schemas.resource_schema import ResourceItemSchema  # noqa
-from application.schemas.user_schema import PlainUserSchema  # noqa
+from application.schemas.user_account_schema import PlainUserAccountSchema  # noqa

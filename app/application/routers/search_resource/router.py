@@ -11,7 +11,7 @@ from application.keyboards.search_resource import SearchResourceListKeyboardBuil
 from constants import FIND_RESOURCE_RESOURCES_ON_PAGE
 
 from database.managers import ResourceManager
-from settings.config import bot
+from settings.aiogram import bot
 
 router = Router()
 

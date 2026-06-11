@@ -1,15 +1,21 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from application.schemas.base_schema import BaseSchema
+from domain.entities.category_item import CategoryItemEntity
 
 
-class CategoryItemSchemaWithoutResources(BaseModel):
-    category_id: UUID
+class BaseCategoryItemSchema(BaseSchema[CategoryItemEntity]):
+    category_item_id: UUID = Field(default_factory=uuid4)
 
     name: str
 
+    def to_entity(self) -> CategoryItemEntity:
+        return CategoryItemEntity(category_item_id=self.category_item_id, name=self.name)
 
-class CategoryItemSchema(CategoryItemSchemaWithoutResources):
+
+class CategoryItemSchema(BaseCategoryItemSchema):
     resources: list[BaseResourceItemSchema] = Field(default_factory=list)
 
 

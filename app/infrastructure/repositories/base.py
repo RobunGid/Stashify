@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Generic, TypeVar
 from uuid import UUID
 
-from domain.entities.base import BaseEntity
+from domain.entities.base import BaseEntity, GetManyResult
 from domain.filters.base import BaseFilters
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,14 +12,13 @@ UpdEnt = TypeVar("UpdEnt", bound=BaseEntity)
 Fils = TypeVar("Fils", bound=BaseFilters)
 
 
-@dataclass
 class BaseRepository(ABC, Generic[Ent, UpdEnt, Fils]):
     @abstractmethod
     async def get_one(self, item_id: UUID) -> Ent | None:
         pass
 
     @abstractmethod
-    async def get_many(self, filters: Fils) -> list[Ent]:
+    async def get_many(self, filters: Fils) -> GetManyResult[Ent]:
         pass
 
     @abstractmethod
@@ -31,7 +30,7 @@ class BaseRepository(ABC, Generic[Ent, UpdEnt, Fils]):
         pass
 
     @abstractmethod
-    async def update(self, item_id: UUID, user_account: UpdEnt) -> None:
+    async def update(self, item_id: UUID, item: UpdEnt) -> None:
         pass
 
 

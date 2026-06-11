@@ -4,9 +4,9 @@ from aiogram.types import CallbackQuery
 from aiogram_i18n import I18nContext
 from application.filters.user_role_filter import UserRoleFilter
 from application.keyboards.users import UserManageEntryKeyboardBuilder
-from infrastructure.models.user import Role
+from infrastructure.models.user_account import Role
 
-from settings.config import bot
+from settings.aiogram import bot
 
 router = Router()
 

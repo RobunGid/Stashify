@@ -154,7 +154,7 @@ class DeleteQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItem
             "text": item.name,
             "callback_data": DeleteQuizChooseCategoryCallbackFactory(
                 action="select",
-                category_id=item.category_id,
+                category_id=item.category_item - id,
                 page=0,
             ),
         }
@@ -178,7 +178,7 @@ class CreateQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItem
             "text": item.name,
             "callback_data": CreateQuizChooseCategoryCallbackFactory(
                 action="select",
-                category_id=item.category_id,
+                category_id=item.category_item - id,
                 page=0,
             ),
         }

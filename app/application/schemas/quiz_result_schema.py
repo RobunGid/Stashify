@@ -3,6 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from application.schemas.base_schema import BaseSchema
+
 
 class QuizResultWithoutUserAndQuizSchema(BaseModel):
     quiz_result_id: UUID
@@ -16,9 +18,9 @@ class QuizResultWithoutUserAndQuizSchema(BaseModel):
 
 
 class QuizResultSchema(QuizResultWithoutUserAndQuizSchema):
-    user: PlainUserSchema
-    quiz: BaseQuizSchema
+    user: PlainUserAccountSchema
+    quiz: BaseQuizItemSchema
 
 
-from application.schemas.quiz_schema import BaseQuizSchema  # noqa
-from application.schemas.user_schema import PlainUserSchema  # noqa
+from application.schemas.quiz_item_schema import BaseQuizItemSchema  # noqa
+from application.schemas.user_account_schema import PlainUserAccountSchema  # noqa

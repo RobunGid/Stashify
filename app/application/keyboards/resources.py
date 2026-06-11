@@ -67,7 +67,7 @@ class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
             "text": item.name,
             "callback_data": ListResourcesChooseCategoryCallbackFactory(
                 action="select",
-                category_id=item.category_id,
+                category_id=item.category_item - id,
                 page=0,
             ),
         }
@@ -244,7 +244,7 @@ class CreateResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Category
             "text": item.name,
             "callback_data": CreateResourceCallbackFactory(
                 action="select",
-                category_id=item.category_id,
+                category_id=item.category_item - id,
                 page=0,
             ),
         }
@@ -282,7 +282,7 @@ class DeleteResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Category
             "text": item.name,
             "callback_data": DeleteResourceChooseCategoryCallbackFactory(
                 action="select",
-                category_id=item.category_id,
+                category_id=item.category_item - id,
                 page=0,
             ),
         }

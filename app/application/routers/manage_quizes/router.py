@@ -28,7 +28,7 @@ from application.keyboards.quizes import (
     QuizManageEntryKeyboardBuilder,
 )
 from application.schemas.quiz_question_schema import QuizQuestionBaseSchema, QuizQuestionSchema
-from application.schemas.quiz_schema import QuizSchema
+from application.schemas.quiz_item_schema import QuizSchema
 from constants import (
     CREATE_QUIZ_CATEGORIES_ON_PAGE,
     CREATE_QUIZ_RESOURCES_ON_PAGE,
@@ -37,11 +37,11 @@ from constants import (
     EDIT_QUIZ_CATEGORIES_ON_PAGE,
     EDIT_QUIZ_RESOURCES_ON_PAGE,
 )
-from infrastructure.models.user import Role
+from infrastructure.models.user_account import Role
 from sqlalchemy.exc import IntegrityError
 
 from database.managers import CategoryManager, QuizManager, QuizQuestionManager, ResourceManager
-from settings.config import bot
+from settings.aiogram import bot
 
 router = Router()
 

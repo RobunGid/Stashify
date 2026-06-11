@@ -36,11 +36,11 @@ from constants import (
     EDIT_RESOURCE_CATEGORIES_ON_PAGE,
     EDIT_RESOURCE_RESOURCES_ON_PAGE,
 )
-from infrastructure.models.user import Role
+from infrastructure.models.user_account import Role
 from sqlalchemy.exc import IntegrityError
 
 from database.managers import CategoryManager, ResourceImageManager, ResourceManager
-from settings.config import bot
+from settings.aiogram import bot
 
 router = Router()
 

@@ -1,8 +1,10 @@
 from datetime import datetime
 from uuid import UUID
 
-from application.schemas.quiz_schema import QuizSchema
+from application.schemas.quiz_item_schema import QuizSchema
 from pydantic import BaseModel
+
+from application.schemas.base_schema import BaseSchema
 
 
 class QuizRatingWithoutUserSchema(BaseModel):
@@ -18,7 +20,7 @@ class QuizRatingWithoutUserSchema(BaseModel):
 
 
 class QuizRatingSchema(BaseModel):
-    user: UserSchema
+    user: UserAccountSchema
 
 
-from application.schemas.user_schema import UserSchema  # noqa
+from application.schemas.user_account_schema import UserAccountSchema  # noqa

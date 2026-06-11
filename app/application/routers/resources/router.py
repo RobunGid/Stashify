@@ -39,7 +39,7 @@ from database.managers import (
     ResourceManager,
     ResourceRatingManager,
 )
-from settings.config import bot
+from settings.aiogram import bot
 
 router = Router()
 
