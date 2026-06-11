@@ -1,11 +1,11 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 from uuid import UUID
 
 from domain.entities.base import BaseEntity
 from domain.filters.base import BaseFilters
-from sqlalchemy.ext.asyncio import AsyncSession
+from infrastructure.repositories.base import BaseRepository
 
 Ent = TypeVar("Ent", bound=BaseEntity)
 UpdEnt = TypeVar("UpdEnt", bound=BaseEntity)
@@ -13,28 +13,20 @@ Fils = TypeVar("Fils", bound=BaseFilters)
 
 
 @dataclass
-class BaseRepository(ABC, Generic[Ent, UpdEnt, Fils]):
-    @abstractmethod
+class BaseService(ABC, Generic[Ent, UpdEnt, Fils]):
+    repository: BaseRepository[Ent, UpdEnt, Fils]
+
     async def get_one(self, item_id: UUID) -> Ent | None:
-        pass
+        return await self.repository.get_one(item_id)
 
-    @abstractmethod
     async def get_many(self, filters: Fils) -> list[Ent]:
-        pass
+        return await self.repository.get_many(filters)
 
-    @abstractmethod
     async def create(self, item: Ent) -> None:
-        pass
+        return await self.repository.create(item)
 
-    @abstractmethod
     async def delete(self, item_id: UUID) -> None:
-        pass
+        return await self.repository.delete(item_id)
 
-    @abstractmethod
-    async def update(self, item_id: UUID, user_account: UpdEnt) -> None:
-        pass
-
-
-@dataclass
-class SQLAlchemyRepositoryMixin(ABC):
-    session: AsyncSession
+    async def update(self, item_id: UUID, item: UpdEnt) -> None:
+        return await self.repository.update(item_id, item)

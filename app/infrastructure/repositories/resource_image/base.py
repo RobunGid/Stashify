@@ -9,21 +9,21 @@ from infrastructure.repositories.base import BaseRepository
 @dataclass
 class BaseResourceImageRepository(BaseRepository, ABC):
     @abstractmethod
-    def get_one(self, resource_image_id: UUID) -> ResourceImageEntity:
+    async def get_one(self, resource_image_id: UUID) -> ResourceImageEntity | None:
         pass
 
     @abstractmethod
-    def get_many(self, resource_image_id: UUID) -> list[ResourceImageEntity]:
+    async def get_many(self, resource_image_id: UUID) -> list[ResourceImageEntity]:
         pass
 
     @abstractmethod
-    def create(self, resource_image: ResourceImageEntity) -> None:
+    async def create(self, resource_image: ResourceImageEntity) -> None:
         pass
 
     @abstractmethod
-    def delete(self, resource_image_id: UUID) -> None:
+    async def delete(self, resource_image_id: UUID) -> None:
         pass
 
     @abstractmethod
-    def update(self, resource_image_id: UUID, resource_image: ResourceImageUpdateEntity) -> None:
+    async def update(self, resource_image_id: UUID, resource_image: ResourceImageUpdateEntity) -> None:
         pass

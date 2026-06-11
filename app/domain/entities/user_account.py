@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from domain.entities.base import BaseEntity
-from domain.entities.enums import Role
+from domain.enums import Role
 
 
 class UserAccountEntity(BaseEntity):
