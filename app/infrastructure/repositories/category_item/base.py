@@ -3,10 +3,11 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from domain.entities.category_item import CategoryItemEntity, CategoryItemUpdateEntity
+from infrastructure.repositories.base import BaseRepository
 
 
 @dataclass
-class BaseCategoryItemRepository(ABC):
+class BaseCategoryItemRepository(BaseRepository, ABC):
     @abstractmethod
     def get_one(self, category_item_id: UUID) -> CategoryItemEntity:
         pass

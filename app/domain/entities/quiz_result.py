@@ -14,7 +14,7 @@ class QuizResultEntity(BaseEntity):
 
 
 @dataclass
-class QuizUpdateEntity(BaseEntity):
+class QuizResultUpdateEntity(BaseEntity):
     quiz_item_id: UUID | None
     user_account_id: str | None
     percent: int | None

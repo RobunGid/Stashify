@@ -3,10 +3,11 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from domain.entities.resource_rating import ResourceRatingEntity, ResourceRatingUpdateEntity
+from infrastructure.repositories.base import BaseRepository
 
 
 @dataclass
-class BaseResourceRatingRepository(ABC):
+class BaseResourceRatingRepository(BaseRepository, ABC):
     @abstractmethod
     def get_one(self, resource_rating_id: UUID) -> ResourceRatingEntity:
         pass

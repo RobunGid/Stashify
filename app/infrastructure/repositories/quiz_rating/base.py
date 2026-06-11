@@ -3,10 +3,11 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from domain.entities.quiz_rating import QuizRatingEntity, QuizRatingUpdateEntity
+from infrastructure.repositories.base import BaseRepository
 
 
 @dataclass
-class BaseQuizRatingRepository(ABC):
+class BaseQuizRatingRepository(BaseRepository, ABC):
     @abstractmethod
     def get_one(self, quiz_rating_id: UUID) -> QuizRatingEntity:
         pass

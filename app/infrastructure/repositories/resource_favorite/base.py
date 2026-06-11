@@ -3,10 +3,11 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from domain.entities.resource_favorite import ResourceFavoriteEntity, ResourceFavoriteUpdateEntity
+from infrastructure.repositories.base import BaseRepository
 
 
 @dataclass
-class BaseResourceFavoriteRepository(ABC):
+class BaseResourceFavoriteRepository(BaseRepository, ABC):
     @abstractmethod
     def get_one(self, resource_favorite_id: UUID) -> ResourceFavoriteEntity:
         pass

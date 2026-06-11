@@ -3,10 +3,11 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from domain.entities.resource_image import ResourceImageEntity, ResourceImageUpdateEntity
+from infrastructure.repositories.base import BaseRepository
 
 
 @dataclass
-class BaseResourceImageRepository(ABC):
+class BaseResourceImageRepository(BaseRepository, ABC):
     @abstractmethod
     def get_one(self, resource_image_id: UUID) -> ResourceImageEntity:
         pass
