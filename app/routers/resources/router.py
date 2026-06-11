@@ -36,8 +36,8 @@ from keyboards.resources import (
     ResourceListKeyboardBuilder,
     ResourceQuizConfirmKeyboardBuilder,
 )
-from schemas.favorite_schema import FavoriteSchema
 from schemas.quiz_result_schema import QuizResultWithoutUserAndQuizSchema
+from schemas.resource_favorite_schema import ResourceFavoriteSchema
 from schemas.resource_rating_schema import ResourceRatingWithoutUserAndResourceSchema
 from settings.config import bot
 
@@ -363,7 +363,7 @@ async def list_resource_resource_add_favorite(
     state_data = await state.get_data()
     resources = state_data["resources"]
     user_id = str(callback.from_user.id)
-    favorite = FavoriteSchema(user_id=user_id, resource_item_id=resource_item.resource_item_id)
+    favorite = ResourceFavoriteSchema(user_id=user_id, resource_item_id=resource_item.resource_item_id)
     resource_rating = await ResourceRatingManager.get_one(
         user_id=user_id,
         resource_item_id=resource_item.resource_item_id,

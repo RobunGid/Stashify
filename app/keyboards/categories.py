@@ -9,7 +9,7 @@ from keyboards.base import (
     BaseListKeyboardBuilder,
     BaseManageEntryKeyboardBuilder,
 )
-from schemas.category_schema import CategorySchema
+from schemas.category_item_schema import CategoryItemSchema
 
 
 @dataclass
@@ -40,7 +40,7 @@ class DeleteCategoryIdCallbackFactory(CallbackData, prefix="delete_category_id")
     page: int
 
 
-class DeleteCategoryKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
+class DeleteCategoryKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
     def _back_callback(self) -> str | CallbackData | None:
         return DeleteCategoryIdCallbackFactory(
             action="change_page",
@@ -55,7 +55,7 @@ class DeleteCategoryKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
             page=page,
         )
 
-    def _item_button(self, item: CategorySchema) -> dict:
+    def _item_button(self, item: CategoryItemSchema) -> dict:
         return {
             "text": item.name,
             "callback_data": DeleteCategoryIdCallbackFactory(
@@ -73,7 +73,7 @@ class EditCategoryIdCallbackFactory(CallbackData, prefix="edit_category_id"):  #
 
 
 @dataclass
-class EditCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
+class EditCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
     def _back_callback(self) -> str | CallbackData | None:
         return EditCategoryIdCallbackFactory(
             action="change_page",
@@ -88,7 +88,7 @@ class EditCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
             page=page,
         )
 
-    def _item_button(self, item: CategorySchema) -> dict:
+    def _item_button(self, item: CategoryItemSchema) -> dict:
         return {
             "text": item.name,
             "callback_data": EditCategoryIdCallbackFactory(

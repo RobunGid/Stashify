@@ -7,7 +7,7 @@ class QuizQuestionBaseSchema(BaseModel):
     quiz_question_id: UUID
     text: str
 
-    quiz_id: UUID
+    quiz_item_id: UUID
 
     options: list[str]
     right_options: list[int]
@@ -17,11 +17,7 @@ class QuizQuestionBaseSchema(BaseModel):
 
 
 class QuizQuestionSchema(QuizQuestionBaseSchema):
-    quiz: QuizSchema
+    quiz: BaseQuizSchema
 
 
-class QuizQuestionWithoutResourceSchema(QuizQuestionBaseSchema):
-    quiz: PlainQuizSchema
-
-
-from schemas.quiz_schema import PlainQuizSchema, QuizSchema  # noqa
+from schemas.quiz_schema import BaseQuizSchema  # noqa

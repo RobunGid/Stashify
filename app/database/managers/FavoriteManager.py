@@ -8,12 +8,12 @@ from database.models.favorite import FavoriteModel
 from database.models.resource_item import ResourceItemModel
 from database.models.user import UserModel
 from database.orm import AsyncSessionLocal
-from schemas.favorite_schema import FavoriteSchema
+from schemas.resource_favorite_schema import ResourceFavoriteSchema
 
 
 class FavoriteManager:
     @classmethod
-    async def create(cls, favorite_data: FavoriteSchema):
+    async def create(cls, favorite_data: ResourceFavoriteSchema):
         async with AsyncSessionLocal() as session:
             favorite = FavoriteModel(
                 id=favorite_data.favorite_id,
@@ -25,7 +25,7 @@ class FavoriteManager:
             await session.commit()
 
     @classmethod
-    async def get_many(cls, user_id: str) -> List[FavoriteSchema]:
+    async def get_many(cls, user_id: str) -> List[ResourceFavoriteSchema]:
         async with AsyncSessionLocal() as session:
             statement = (
                 select(FavoriteModel)
@@ -54,7 +54,7 @@ class FavoriteManager:
 
             favorites = (await session.execute(statement)).scalars().all()
 
-            return [FavoriteSchema.model_validate(favorite, from_attributes=True) for favorite in favorites]
+            return [ResourceFavoriteSchema.model_validate(favorite, from_attributes=True) for favorite in favorites]
 
     @overload
     @classmethod

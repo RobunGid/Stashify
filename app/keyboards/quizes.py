@@ -10,7 +10,7 @@ from keyboards.base import (
     BaseListKeyboardBuilder,
     BaseManageEntryKeyboardBuilder,
 )
-from schemas.category_schema import CategorySchema
+from schemas.category_item_schema import CategoryItemSchema
 from schemas.resource_schema import ResourceItemSchema
 
 
@@ -84,7 +84,7 @@ class EditQuizChooseCategoryCallbackFactory(CallbackData, prefix="edit_quiz_ctg"
     page: int
 
 
-class EditQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
+class EditQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
     def _back_callback(self) -> str | CallbackData | None:
         return EditQuizChooseCategoryCallbackFactory(
             action="change_page",
@@ -142,14 +142,14 @@ class DeleteQuizChooseCategoryCallbackFactory(CallbackData, prefix="delete_quiz_
     page: int
 
 
-class DeleteQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
+class DeleteQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
     def _back_callback(self) -> str:
         return "manage_quizes"
 
     def _pagination_callback(self, page: int) -> CallbackData:
         return DeleteQuizChooseCategoryCallbackFactory(action="change_page", category_id=None, page=page)
 
-    def _item_button(self, item: CategorySchema) -> dict:
+    def _item_button(self, item: CategoryItemSchema) -> dict:
         return {
             "text": item.name,
             "callback_data": DeleteQuizChooseCategoryCallbackFactory(
@@ -166,14 +166,14 @@ class CreateQuizChooseCategoryCallbackFactory(CallbackData, prefix="create_quiz_
     page: int
 
 
-class CreateQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
+class CreateQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
     def _back_callback(self) -> str:
         return "manage_quizes"
 
     def _pagination_callback(self, page: int) -> CallbackData:
         return CreateQuizChooseCategoryCallbackFactory(action="change_page", category_id=None, page=page)
 
-    def _item_button(self, item: CategorySchema) -> dict:
+    def _item_button(self, item: CategoryItemSchema) -> dict:
         return {
             "text": item.name,
             "callback_data": CreateQuizChooseCategoryCallbackFactory(

@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 
 class ResourceRatingWithoutUserAndResourceSchema(BaseModel):
@@ -11,7 +11,7 @@ class ResourceRatingWithoutUserAndResourceSchema(BaseModel):
 
     user_id: str
 
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime
     rating: int
     model_config = ConfigDict(from_attributes=True)
 

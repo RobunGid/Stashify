@@ -1,16 +1,10 @@
 from datetime import datetime
-from enum import Enum as PyEnum
 
+from domain.entities.enums import Role
 from sqlalchemy import Column, DateTime, Enum, String
 from sqlalchemy.orm import relationship
 
 from database.orm import Base
-
-
-class Role(PyEnum):
-    user = "user"
-    manager = "manager"
-    admin = "admin"
 
 
 class UserModel(Base):

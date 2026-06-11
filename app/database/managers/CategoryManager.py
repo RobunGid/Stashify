@@ -8,14 +8,14 @@ from database.models.favorite import FavoriteModel
 from database.models.quiz import QuizModel
 from database.models.resource_item import ResourceItemModel
 from database.orm import AsyncSessionLocal
-from schemas.category_schema import CategorySchema
+from schemas.category_item_schema import CategoryItemSchema
 
 from .BaseManager import BaseManager
 
 
 class CategoryManager(BaseManager):
     model = CategoryModel
-    schema = CategorySchema
+    schema = CategoryItemSchema
 
     @classmethod
     async def get_many(
@@ -23,7 +23,7 @@ class CategoryManager(BaseManager):
         has_quizes: bool = False,
         has_resources: bool = False,
         favorites_user_id: Optional[str] = None,
-    ) -> List[CategorySchema]:
+    ) -> List[CategoryItemSchema]:
         async with AsyncSessionLocal() as session:
             statement = select(CategoryModel).options(
                 selectinload(CategoryModel.resource_items)
@@ -75,4 +75,4 @@ class CategoryManager(BaseManager):
                 statement = statement.where(CategoryModel.category_id.in_(subquery))
 
             categories = (await session.execute(statement)).scalars().all()
-            return [CategorySchema.model_validate(category, from_attributes=True) for category in categories]
+            return [CategoryItemSchema.model_validate(category, from_attributes=True) for category in categories]

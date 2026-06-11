@@ -5,7 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
-class FavoriteSchema(BaseModel):
+class ResourceFavoriteSchema(BaseModel):
     favorite_id: UUID = Field(default_factory=UUID)
 
     user_id: str
@@ -14,7 +14,7 @@ class FavoriteSchema(BaseModel):
     resource_item_id: UUID
     resource: Optional[ResourceItemSchema] = Field(default=None)
 
-    added_at: datetime = Field(default_factory=datetime.now)
+    added_at: datetime
 
 
 from schemas.resource_schema import ResourceItemSchema  # noqa

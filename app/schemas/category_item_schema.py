@@ -3,13 +3,13 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
-class CategorySchemaWithoutResources(BaseModel):
+class CategoryItemSchemaWithoutResources(BaseModel):
     category_id: UUID
 
     name: str
 
 
-class CategorySchema(CategorySchemaWithoutResources):
+class CategoryItemSchema(CategoryItemSchemaWithoutResources):
     resources: list[BaseResourceItemSchema] = Field(default_factory=list)
 
 

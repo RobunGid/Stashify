@@ -11,24 +11,24 @@ class BaseResourceItemSchema(BaseModel):
     description: str
     links: str
     tags: str
-    verified: bool = Field(default=False)
+    verified: bool
 
     category_id: UUID
     quiz: "QuizSchemaWithoutResource | None" = Field(default=None)
 
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
 
 class ResourceItemSchema(BaseResourceItemSchema):
-    category: "CategorySchemaWithoutResources"
+    category: "CategoryItemSchemaWithoutResources"
     ratings: list["ResourceRatingWithoutUserAndResourceSchema"] = Field(
         default_factory=list,
     )
     images: list["ResourceImageWithoutResourceSchema"] = Field(default_factory=list)
 
 
-from schemas.category_schema import CategorySchemaWithoutResources  # noqa
+from schemas.category_item_schema import CategoryItemSchemaWithoutResources  # noqa
 from schemas.quiz_schema import QuizSchemaWithoutResource  # noqa
 from schemas.resource_image_schema import ResourceImageWithoutResourceSchema  # noqa
 from schemas.resource_rating_schema import (  # noqa

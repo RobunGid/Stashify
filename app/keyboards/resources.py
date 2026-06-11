@@ -15,7 +15,7 @@ from keyboards.base import (
     BaseManageEntryKeyboardBuilder,
     BaseQuizConfirmKeyboardBuilder,
 )
-from schemas.category_schema import CategorySchema
+from schemas.category_item_schema import CategoryItemSchema
 from schemas.resource_schema import ResourceItemSchema
 
 
@@ -58,11 +58,11 @@ class ListResourcesChooseCategoryCallbackFactory(
 
 
 @dataclass
-class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
+class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
     def _back_callback(self) -> str:
         return "menu"
 
-    def _item_button(self, item: CategorySchema) -> dict:
+    def _item_button(self, item: CategoryItemSchema) -> dict:
         return {
             "text": item.name,
             "callback_data": ListResourcesChooseCategoryCallbackFactory(
@@ -228,7 +228,7 @@ class CreateResourceCallbackFactory(CallbackData, prefix="create_resource"):  # 
 
 
 @dataclass
-class CreateResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema], ABC):
+class CreateResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema], ABC):
     def _pagination_callback(self, page: int) -> CallbackData:
         return CreateResourceCallbackFactory(
             action="change_page",
@@ -239,7 +239,7 @@ class CreateResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Category
     def _back_callback(self) -> str:
         return "manage_resources"
 
-    def _item_button(self, item: CategorySchema) -> dict:
+    def _item_button(self, item: CategoryItemSchema) -> dict:
         return {
             "text": item.name,
             "callback_data": CreateResourceCallbackFactory(
@@ -266,7 +266,7 @@ class DeleteResourceChooseCategoryCallbackFactory(
 
 
 @dataclass
-class DeleteResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema], ABC):
+class DeleteResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema], ABC):
     def _pagination_callback(self, page: int) -> CallbackData:
         return DeleteResourceChooseCategoryCallbackFactory(
             action="change_page",
@@ -277,7 +277,7 @@ class DeleteResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Category
     def _back_callback(self) -> str:
         return "manage_resources"
 
-    def _item_button(self, item: CategorySchema) -> dict:
+    def _item_button(self, item: CategoryItemSchema) -> dict:
         return {
             "text": item.name,
             "callback_data": DeleteResourceChooseCategoryCallbackFactory(
@@ -346,7 +346,7 @@ class EditResourceChooseCategoryCallbackFactory(
 
 
 @dataclass
-class EditResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
+class EditResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
     def _pagination_callback(self, page: int) -> CallbackData:
         return EditResourceChooseCategoryCallbackFactory(
             action="change_page",

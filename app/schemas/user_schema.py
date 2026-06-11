@@ -11,9 +11,8 @@ class PlainUserSchema(BaseModel):
     username: Optional[str]
 
     role: Role
-    language: str
 
-    connection_date: datetime = Field(default_factory=datetime.now)
+    connection_date: datetime
 
 
 class UserSchema(PlainUserSchema):
