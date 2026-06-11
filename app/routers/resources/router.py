@@ -231,10 +231,7 @@ async def list_resource_resource_select(
     if not resource_item:
         return
 
-    state_data = await state.get_data()
-
-    category_id = state_data["category_id"]
-    resources = await ResourceManager.get_many(category_id=category_id)
+    resources = await ResourceManager.get_many(category_id=resource_item.category_id)
     user_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_id=user_id)
     images = await ResourceImageManager.get_many(resource_item_id=callback_data.resource_item_id)

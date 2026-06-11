@@ -5,7 +5,6 @@ from aiogram_i18n.cores import FluentRuntimeCore
 
 from database.orm import init_models
 from routers import common, manage_users, menu
-from routers.list_favorites.router import router as list_favorites_router
 from routers.manage_categories.router import router as manage_categories_router
 from routers.manage_quizes.router import router as manage_quizes_router
 from routers.manage_resources.router import router as manage_resources_router
@@ -24,7 +23,6 @@ async def main():
         manage_quizes_router,
         list_resources_router,
         search_resource_router,
-        list_favorites_router,
         manage_users.router,
     )
 

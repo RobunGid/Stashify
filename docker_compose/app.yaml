@@ -7,7 +7,7 @@ services:
       context: ..
       dockerfile: Dockerfile
     container_name: main-app
-    command: python main.py
+    command: debugpy --listen 0.0.0.0:5678 -m main
     env_file:
       - ../.env
     volumes:
@@ -18,6 +18,8 @@ services:
     depends_on:
       stashify-database:
         condition: service_healthy
+    ports:
+    - "5676:5678"
 
 networks:
   backend:

@@ -34,7 +34,7 @@ async def search_resource_start(callback: CallbackQuery, state: FSMContext, i18n
     keyboard_builder = MenuBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    await callback.message.answer(text=i18n.get("search_resource.enter_text"), reply_markup=keyboard)
+    await callback.message.answer(text=i18n.get("search-resource-enter-text"), reply_markup=keyboard)
     await state.set_state(SearchResourceState.text)
 
 

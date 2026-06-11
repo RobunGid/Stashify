@@ -19,7 +19,8 @@ dependencies = [
     "aiogram-media-group (>=0.5.1,<0.6.0)",
     "aiogram-i18n[runtime] (>=1.5,<2.0)",
     "fluent-runtime (>=0.4.0,<0.5.0)",
-    "psycopg2-binary (>=2.9.12,<3.0.0)"
+    "psycopg2-binary (>=2.9.12,<3.0.0)",
+    "debugpy (>=1.8.21,<2.0.0)"
 ]
 
 [tool.isort]

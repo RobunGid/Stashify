@@ -19,7 +19,6 @@ from schemas.category_schema import CategorySchema
 from schemas.resource_schema import ResourceItemSchema
 
 
-@dataclass
 class ListResourcesChooseResourceCallbackFactory(CallbackData, prefix="lst_rsc_rsc"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
     resource_item_id: UUID | None
@@ -49,7 +48,6 @@ class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSchema]):
         )
 
 
-@dataclass
 class ListResourcesChooseCategoryCallbackFactory(
     CallbackData,
     prefix="list_resources_ctg",  # type: ignore[call-arg]
@@ -82,7 +80,6 @@ class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
         )
 
 
-@dataclass
 class ListResourcesItemCallbackFactory(CallbackData, prefix="lst_rsc_itm"):  # type: ignore[call-arg]
     action: Union[
         Literal["change_page"],
@@ -224,7 +221,6 @@ class ResourceManageBackKeyboardBuilder(BaseBackKeyboardBuilder):
         return "manage_resources"
 
 
-@dataclass
 class CreateResourceCallbackFactory(CallbackData, prefix="create_resource"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
     category_id: UUID | None
@@ -260,7 +256,6 @@ class ManageResourcesBackKeyboardBuilder(BaseBackKeyboardBuilder):
         return "manage_resources"
 
 
-@dataclass
 class DeleteResourceChooseCategoryCallbackFactory(
     CallbackData,
     prefix="delete_resource_ctg",  # type: ignore[call-arg]
@@ -293,7 +288,6 @@ class DeleteResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Category
         }
 
 
-@dataclass
 class DeleteResourceChooseResourceCallbackFactory(
     CallbackData,
     prefix="delete_resource_rsc",  # type: ignore[call-arg]
@@ -342,7 +336,6 @@ class DeleteResourceConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
         return "manage_resources"
 
 
-@dataclass
 class EditResourceChooseCategoryCallbackFactory(
     CallbackData,
     prefix="edit_resource_ctg",  # type: ignore[call-arg]
@@ -375,7 +368,6 @@ class EditResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySc
         }
 
 
-@dataclass
 class EditResourceChooseResourceCallbackFactory(
     CallbackData,
     prefix="edit_resource_rsc",  # type: ignore[call-arg]
