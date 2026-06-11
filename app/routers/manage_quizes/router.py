@@ -1,5 +1,5 @@
 from math import ceil
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
@@ -264,7 +264,7 @@ async def create_quiz_choose(
         resource for resource in state_data["resources"] if resource.resource_item_id == resource_item_id
     )
     quiz = QuizSchema(
-        quiz_id=UUID(),
+        quiz_id=uuid4(),
         resource_item_id=resource_item_id,
         questions=[],
         resource=quiz_resource,
@@ -296,7 +296,7 @@ async def create_quiz_add_question(message: Message, state: FSMContext, i18n: I1
     right_options = [index for index, option in enumerate(question_options) if option.startswith("!")]
 
     question = QuizQuestionSchema(
-        quiz_question_id=UUID(),
+        quiz_question_id=uuid4(),
         image=message.photo[0].file_id if message.photo else None,
         quiz=state_data["quiz"],
         options=question_options,
@@ -535,7 +535,7 @@ async def delete_quiz_choose(
         resource for resource in state_data["resources"] if resource.resource_item_id == resource_item_id
     )
     quiz = QuizSchema(
-        quiz_id=UUID(),
+        quiz_id=uuid4(),
         resource_item_id=resource_item_id,
         questions=[],
         resource=quiz_resource,
@@ -918,7 +918,7 @@ async def add_question_confirm(message: Message, state: FSMContext, i18n: I18nCo
     right_options = [index for index, option in enumerate(question_options) if option.startswith("!")]
 
     question = QuizQuestionBaseSchema(
-        quiz_question_id=UUID(),
+        quiz_question_id=uuid4(),
         quiz_id=quiz_id,
         image=message.photo[0].file_id if message.photo else None,
         options=question_options,

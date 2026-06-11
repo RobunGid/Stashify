@@ -1,5 +1,5 @@
 from math import ceil
-from uuid import UUID
+from uuid import uuid4
 
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
@@ -493,7 +493,7 @@ async def list_resource_resource_rate(
     if existing_resource_rating:
         await ResourceRatingManager.delete(user_id=user_id, resource_item_id=resource_item.resource_item_id)
     resource_rating = ResourceRatingWithoutUserAndResourceSchema(
-        resource_rating_id=UUID(),
+        resource_rating_id=uuid4(),
         resource_item_id=resource_item_id,
         rating=rating,
         user_id=user_id,
@@ -665,7 +665,7 @@ async def list_resource_quiz_question_answer(
         if existing_quiz_result:
             await QuizResultManager.delete(resource_item.resource_item_id, str(callback.from_user.id))
         quiz_result = QuizResultWithoutUserAndQuizSchema(
-            quiz_result_id=UUID(),
+            quiz_result_id=uuid4(),
             quiz_id=quiz.quiz_id,
             user_id=str(callback.from_user.id),
             percent=right_answer_percent,

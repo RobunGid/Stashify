@@ -328,7 +328,7 @@ class DeleteResourceConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
                 "text": self.i18n(
                     "manage-resources-delete-confirm",
                 ),
-                "callback_data": "delete-resource-confirm",
+                "callback_data": "delete_resource_confirm",
             },
         ]
 

@@ -1,6 +1,6 @@
 from math import ceil
 from typing import List
-from uuid import UUID
+from uuid import uuid4
 
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
@@ -242,7 +242,7 @@ async def new_resource_links_choose(message: Message, state: FSMContext, i18n: I
 
     await message.answer(
         text=i18n.get(
-            "manage_resources.create.wait_images",
+            "manage-resources-create-wait-images",
         ),
         reply_markup=keyboard,
     )
@@ -275,7 +275,7 @@ async def new_resource_tags_choose(message: Message, state: FSMContext, i18n: I1
     state_data = await state.get_data()
     resource_data = BaseResourceItemSchema(
         category_id=state_data["category_id"],
-        resource_item_id=UUID(),
+        resource_item_id=uuid4(),
         name=state_data["name"],
         description=state_data["description"],
         links=state_data["links"],
@@ -293,7 +293,7 @@ async def new_resource_tags_choose(message: Message, state: FSMContext, i18n: I1
         await ResourceManager.create(resource_data)
         for resource_image in state_data["images"]:
             image = ResourceImageWithoutResourceSchema(
-                resource_image_id=UUID(),
+                resource_image_id=uuid4(),
                 resource_item_id=resource_data.resource_item_id,
                 image=resource_image,
             )
@@ -301,9 +301,7 @@ async def new_resource_tags_choose(message: Message, state: FSMContext, i18n: I1
     except IntegrityError:
         await message.answer(
             text=i18n.get(
-                "manage_resources.create.fail",
-                message.from_user.language_code,
-            ).format(
+                "manage-resources-create-fail",
                 resource_name=resource_data.name,
                 resource_description=resource_data.description,
                 resource_tags=resource_data.tags,
@@ -315,7 +313,7 @@ async def new_resource_tags_choose(message: Message, state: FSMContext, i18n: I1
         if len(state_data["images"]) > 1:
             media_group = MediaGroupBuilder(
                 caption=i18n.get(
-                    "manage_resources.create.success",
+                    "manage-resources-create-success",
                     resource_name=resource_data.name,
                     resource_description=resource_data.description,
                     resource_tags=resource_data.tags,
@@ -329,7 +327,7 @@ async def new_resource_tags_choose(message: Message, state: FSMContext, i18n: I1
             await message.answer_photo(
                 photo=state_data["images"][0],
                 caption=i18n.get(
-                    "manage_resources.create.success",
+                    "manage-resources-create-success",
                     resource_name=resource_data.name,
                     resource_description=resource_data.description,
                     resource_tags=resource_data.tags,
@@ -558,18 +556,12 @@ async def delete_resource_name_confirm(callback: CallbackQuery, state: FSMContex
         await ResourceManager.delete(resource_item_id=resource_data["resource_item_id"])
     except IntegrityError, ValueError:
         await callback.message.answer(
-            text=i18n.get(
-                "manage_resources.delete.fail",
-                callback.from_user.language_code,
-            ).format(name=resource.name),
+            text=i18n.get("manage-resources-delete-fail", name=resource.name),
             reply_markup=keyboard,
         )
     else:
         await callback.message.answer(
-            text=i18n.get(
-                "manage_resources.delete.success",
-                callback.from_user.language_code,
-            ).format(name=resource.name),
+            text=i18n.get("manage-resources-delete-success", name=resource.name),
             reply_markup=keyboard,
         )
 
@@ -855,7 +847,7 @@ async def edit_resource_description(callback: CallbackQuery, state: FSMContext, 
     keyboard = keyboard_builder.build()
 
     await callback.message.answer(
-        text=i18n.get("manage_resources.edit.description.text", description=resource_description),
+        text=i18n.get("manage-resources-edit-description-text", description=resource_description),
         reply_markup=keyboard,
     )
     await state.set_state(EditResourceState.description)
@@ -943,7 +935,7 @@ async def edit_resource_tags_success(message: Message, state: FSMContext, i18n: 
     except IntegrityError, ValueError:
         await message.answer(
             text=i18n.get(
-                "manage_resources.edit.tags.fail",
+                "manage-resources-edit-tags-fail",
                 tags=message.html_text,
             ),
             reply_markup=keyboard,
@@ -952,7 +944,7 @@ async def edit_resource_tags_success(message: Message, state: FSMContext, i18n: 
     else:
         await message.answer(
             text=i18n.get(
-                "manage_resources.edit.tags.success",
+                "manage-resources-edit-tags-success",
                 tags=message.html_text,
             ),
             reply_markup=keyboard,
