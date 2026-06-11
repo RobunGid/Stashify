@@ -166,7 +166,7 @@ class CreateQuizChooseCategoryCallbackFactory(CallbackData, prefix="create_quiz_
     page: int
 
 
-class CreateQuizCategoryListKeyboardBuildeR(BaseListKeyboardBuilder[CategorySchema]):
+class CreateQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
     def _back_callback(self) -> str:
         return "manage_quizes"
 
@@ -190,7 +190,7 @@ class CreateQuizChooseResourceCallbackFactory(CallbackData, prefix="create_quiz_
     page: int
 
 
-class CreateQuizResourceListKeyboardBuildeR(BaseListKeyboardBuilder[ResourceItemSchema]):
+class CreateQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSchema]):
     def _back_callback(self) -> str:
         return "manage_quizes"
 

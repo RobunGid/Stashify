@@ -6,10 +6,10 @@ from aiogram_i18n.cores import FluentRuntimeCore
 from database.orm import init_models
 from routers import common, manage_users, menu
 from routers.list_favorites.router import router as list_favorites_router
-from routers.list_resources.router import router as list_resources_router
 from routers.manage_categories.router import router as manage_categories_router
 from routers.manage_quizes.router import router as manage_quizes_router
 from routers.manage_resources.router import router as manage_resources_router
+from routers.resources.router import router as list_resources_router
 from routers.search_resource.router import router as search_resource_router
 from settings.config import bot, dp
 
