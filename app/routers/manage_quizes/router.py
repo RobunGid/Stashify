@@ -28,7 +28,6 @@ from keyboards.quizes import (
     DeleteQuizCategoryListKeyboardBuilder,
     DeleteQuizChooseCategoryCallbackFactory,
     DeleteQuizChooseResourceCallbackFactory,
-    DeleteQuizConfirmFinishKeyboardBuilder,
     DeleteQuizResourceListKeyboardBuilder,
     EditQuizActionCallbackFactory,
     EditQuizCategoryListKeyboardBuilder,
@@ -36,6 +35,7 @@ from keyboards.quizes import (
     EditQuizChooseResourceCallbackFactory,
     EditQuizResourceListKeyboardBuilder,
     ManageQuizesBackKeyboardBuilder,
+    QuizConfirmFinishKeyboardBuilder,
     QuizManageEntryKeyboardBuilder,
 )
 from schemas.quiz_question_schema import QuizQuestionBaseSchema, QuizQuestionSchema
@@ -531,7 +531,7 @@ async def delete_quiz_choose(
     )
     await state.update_data(quiz=quiz, questions=[], resource_item_id=resource_item_id)
 
-    keyboard_builder = DeleteQuizConfirmFinishKeyboardBuilder(i18n=i18n)
+    keyboard_builder = QuizConfirmFinishKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
     await callback.message.answer(

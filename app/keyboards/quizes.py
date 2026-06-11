@@ -221,7 +221,7 @@ class DeleteQuizConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
         return "manage_quizes"
 
 
-class DeleteQuizConfirmFinishKeyboardBuilder(BaseConfirmKeyboardBuilder):
+class QuizConfirmFinishKeyboardBuilder(BaseConfirmKeyboardBuilder):
     def _build_confirm_buttons(self) -> list[dict]:
         return [
             {
