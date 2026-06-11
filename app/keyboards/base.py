@@ -247,14 +247,14 @@ class BaseConfirmKeyboardBuilder(
 ):
     def build(self) -> InlineKeyboardMarkup:
         builder = InlineKeyboardBuilder()
-        btns = self._build_quiz_confirm_buttons()
+        btns = self._build_confirm_buttons()
         for btn in btns:
             builder.button(**btn)
         self._append_back_button(builder)
         return builder.as_markup()
 
     @abstractmethod
-    def _build_quiz_confirm_buttons(self) -> list[dict]:
+    def _build_confirm_buttons(self) -> list[dict]:
         """Return data for confirm buttons"""
 
 

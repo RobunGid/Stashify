@@ -19,6 +19,7 @@ from schemas.category_schema import CategorySchema
 from schemas.resource_schema import ResourceItemSchema
 
 
+@dataclass
 class ListResourcesChooseResourceCallbackFactory(CallbackData, prefix="lst_rsc_rsc"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
     resource_item_id: UUID | None
@@ -48,6 +49,7 @@ class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSchema]):
         )
 
 
+@dataclass
 class ListResourcesChooseCategoryCallbackFactory(
     CallbackData,
     prefix="list_resources_ctg",  # type: ignore[call-arg]
@@ -80,6 +82,7 @@ class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
         )
 
 
+@dataclass
 class ListResourcesItemCallbackFactory(CallbackData, prefix="lst_rsc_itm"):  # type: ignore[call-arg]
     action: Union[
         Literal["change_page"],
@@ -171,7 +174,7 @@ class ResourceQuizConfirmKeyboardBuilder(BaseQuizConfirmKeyboardBuilder[Resource
             rating=None,
         )
 
-    def _build_quiz_confirm_buttons(
+    def _build_confirm_buttons(
         self,
     ) -> list[dict]:
         return [
@@ -215,17 +218,20 @@ class ResourceManageEntryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
         return "menu"
 
 
+@dataclass
 class ResourceManageBackKeyboardBuilder(BaseBackKeyboardBuilder):
     def _back_callback(self) -> str | CallbackData | None:
         return "manage_resources"
 
 
+@dataclass
 class CreateResourceCallbackFactory(CallbackData, prefix="create_resource"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
     category_id: UUID | None
     page: int
 
 
+@dataclass
 class CreateResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema], ABC):
     def _pagination_callback(self, page: int) -> CallbackData:
         return CreateResourceCallbackFactory(
@@ -254,6 +260,7 @@ class ManageResourcesBackKeyboardBuilder(BaseBackKeyboardBuilder):
         return "manage_resources"
 
 
+@dataclass
 class DeleteResourceChooseCategoryCallbackFactory(
     CallbackData,
     prefix="delete_resource_ctg",  # type: ignore[call-arg]
@@ -263,6 +270,7 @@ class DeleteResourceChooseCategoryCallbackFactory(
     page: int
 
 
+@dataclass
 class DeleteResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema], ABC):
     def _pagination_callback(self, page: int) -> CallbackData:
         return DeleteResourceChooseCategoryCallbackFactory(
@@ -285,6 +293,7 @@ class DeleteResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Category
         }
 
 
+@dataclass
 class DeleteResourceChooseResourceCallbackFactory(
     CallbackData,
     prefix="delete_resource_rsc",  # type: ignore[call-arg]
@@ -294,6 +303,7 @@ class DeleteResourceChooseResourceCallbackFactory(
     page: int
 
 
+@dataclass
 class DeleteResourceResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSchema], ABC):
     def _pagination_callback(self, page: int) -> CallbackData:
         return DeleteResourceChooseResourceCallbackFactory(
@@ -316,8 +326,9 @@ class DeleteResourceResourceListKeyboardBuilder(BaseListKeyboardBuilder[Resource
         }
 
 
+@dataclass
 class DeleteResourceConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
-    def _build_quiz_confirm_buttons(self) -> list[dict]:
+    def _build_confirm_buttons(self) -> list[dict]:
         return [
             {
                 "text": self.i18n(
@@ -331,6 +342,7 @@ class DeleteResourceConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
         return "manage_resources"
 
 
+@dataclass
 class EditResourceChooseCategoryCallbackFactory(
     CallbackData,
     prefix="edit_resource_ctg",  # type: ignore[call-arg]
@@ -340,6 +352,7 @@ class EditResourceChooseCategoryCallbackFactory(
     page: int
 
 
+@dataclass
 class EditResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
     def _pagination_callback(self, page: int) -> CallbackData:
         return EditResourceChooseCategoryCallbackFactory(
@@ -362,6 +375,7 @@ class EditResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySc
         }
 
 
+@dataclass
 class EditResourceChooseResourceCallbackFactory(
     CallbackData,
     prefix="edit_resource_rsc",  # type: ignore[call-arg]
@@ -371,6 +385,7 @@ class EditResourceChooseResourceCallbackFactory(
     page: int
 
 
+@dataclass
 class EditResourceResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSchema]):
     def _pagination_callback(self, page: int) -> CallbackData:
         return EditResourceChooseResourceCallbackFactory(

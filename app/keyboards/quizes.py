@@ -4,7 +4,12 @@ from uuid import UUID
 
 from aiogram.filters.callback_data import CallbackData
 
-from keyboards.base import BaseBackKeyboardBuilder, BaseListKeyboardBuilder, BaseManageEntryKeyboardBuilder
+from keyboards.base import (
+    BaseBackKeyboardBuilder,
+    BaseConfirmKeyboardBuilder,
+    BaseListKeyboardBuilder,
+    BaseManageEntryKeyboardBuilder,
+)
 from schemas.category_schema import CategorySchema
 from schemas.resource_schema import ResourceItemSchema
 
@@ -114,12 +119,8 @@ class DeleteQuizChooseResourceCallbackFactory(CallbackData, prefix="delete_quiz_
 
 
 class DeleteQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSchema]):
-    def _back_callback(self) -> str | CallbackData | None:
-        return DeleteQuizChooseResourceCallbackFactory(
-            action="change_page",
-            resource_item_id=None,
-            page=self.current_page - 1,
-        )
+    def _back_callback(self) -> str:
+        return "manage_quizes"
 
     def _pagination_callback(self, page: int) -> CallbackData:
         return DeleteQuizChooseResourceCallbackFactory(action="change_page", resource_item_id=None, page=page)
@@ -142,12 +143,8 @@ class DeleteQuizChooseCategoryCallbackFactory(CallbackData, prefix="delete_quiz_
 
 
 class DeleteQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
-    def _back_callback(self) -> str | CallbackData | None:
-        return DeleteQuizChooseCategoryCallbackFactory(
-            action="change_page",
-            category_id=None,
-            page=self.current_page - 1,
-        )
+    def _back_callback(self) -> str:
+        return "manage_quizes"
 
     def _pagination_callback(self, page: int) -> CallbackData:
         return DeleteQuizChooseCategoryCallbackFactory(action="change_page", category_id=None, page=page)
@@ -161,3 +158,77 @@ class DeleteQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySche
                 page=0,
             ),
         }
+
+
+class CreateQuizChooseCategoryCallbackFactory(CallbackData, prefix="create_quiz_ctg"):  # type: ignore[call-arg]
+    action: Union[Literal["select"], Literal["change_page"]]
+    category_id: UUID | None
+    page: int
+
+
+class CreateQuizCategoryListKeyboardBuildeR(BaseListKeyboardBuilder[CategorySchema]):
+    def _back_callback(self) -> str:
+        return "manage_quizes"
+
+    def _pagination_callback(self, page: int) -> CallbackData:
+        return CreateQuizChooseCategoryCallbackFactory(action="change_page", category_id=None, page=page)
+
+    def _item_button(self, item: CategorySchema) -> dict:
+        return {
+            "text": item.name,
+            "callback_data": CreateQuizChooseCategoryCallbackFactory(
+                action="select",
+                category_id=item.category_id,
+                page=0,
+            ),
+        }
+
+
+class CreateQuizChooseResourceCallbackFactory(CallbackData, prefix="create_quiz_rsc"):  # type: ignore[call-arg]
+    action: Union[Literal["select"], Literal["change_page"]]
+    resource_item_id: UUID | None
+    page: int
+
+
+class CreateQuizResourceListKeyboardBuildeR(BaseListKeyboardBuilder[ResourceItemSchema]):
+    def _back_callback(self) -> str:
+        return "manage_quizes"
+
+    def _pagination_callback(self, page: int) -> CallbackData:
+        return CreateQuizChooseResourceCallbackFactory(action="change_page", resource_item_id=None, page=page)
+
+    def _item_button(self, item: ResourceItemSchema) -> dict:
+        return {
+            "text": item.name,
+            "callback_data": CreateQuizChooseResourceCallbackFactory(
+                action="select",
+                resource_item_id=item.resource_item_id,
+                page=0,
+            ),
+        }
+
+
+class DeleteQuizConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
+    def _build_confirm_buttons(self) -> list[dict]:
+        return [
+            {
+                "text": self.i18n.get("manage-quizes-delete-confirm"),
+                "callback_data": "delete_quiz_confirm",
+            },
+        ]
+
+    def _back_callback(self) -> str:
+        return "manage_quizes"
+
+
+class DeleteQuizConfirmFinishKeyboardBuilder(BaseConfirmKeyboardBuilder):
+    def _build_confirm_buttons(self) -> list[dict]:
+        return [
+            {
+                "text": self.i18n.get("manage-quizes-create-stop-questions"),
+                "callback_data": "delete_quiz_confirm",
+            },
+        ]
+
+    def _back_callback(self) -> str:
+        return "manage_quizes"

@@ -6,7 +6,7 @@ from aiogram_i18n import I18nContext
 
 from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
-from keyboards.categories import CategoryManageEntryKeyboardBuilder
+from keyboards.categories import EntryEditCategoryKeyboardBuilder
 from settings.config import bot
 
 router = Router()
@@ -18,7 +18,7 @@ async def manage_categories(callback: CallbackQuery, state: FSMContext, i18n: I1
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
 
-    keyboard_builder = CategoryManageEntryKeyboardBuilder(i18n=i18n)
+    keyboard_builder = EntryEditCategoryKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
     await bot.delete_message(

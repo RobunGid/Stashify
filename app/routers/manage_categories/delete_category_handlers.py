@@ -14,11 +14,9 @@ from database.models.user import Role
 from filters.user_role_filter import UserRoleFilter
 from keyboards.categories import (
     DeleteCategoryIdCallbackFactory,
-    ManageCategoriesBackKeyboardBuilder,
-    ManageCategoriesDeleteKeyboardBuilder,
-)
-from keyboards.manage_categories.manage_categories_edit_keyboard import (
+    DeleteCategoryKeyboardBuilder,
     EditCategoryIdCallbackFactory,
+    ManageCategoriesBackKeyboardBuilder,
 )
 from settings.config import bot
 
@@ -44,7 +42,7 @@ async def delete_category_callback_handler(callback: CallbackQuery, state: FSMCo
     total_pages = ceil(len(categories) / DELETE_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
 
-    keyboard_builder = ManageCategoriesDeleteKeyboardBuilder(
+    keyboard_builder = DeleteCategoryKeyboardBuilder(
         i18n=i18n,
         total_pages=total_pages,
         current_page=1,
@@ -87,7 +85,7 @@ async def delete_category_page(
     ]
     total_pages = categories_data["total_pages"]
 
-    keyboard_builder = ManageCategoriesDeleteKeyboardBuilder(
+    keyboard_builder = DeleteCategoryKeyboardBuilder(
         i18n=i18n,
         total_pages=total_pages,
         current_page=current_page,

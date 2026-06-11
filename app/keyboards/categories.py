@@ -13,7 +13,7 @@ from schemas.category_schema import CategorySchema
 
 
 @dataclass
-class CategoryManageEntryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
+class EntryEditCategoryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
     def _build_entry_buttons(self) -> list[dict]:
         return [
             {
@@ -40,7 +40,7 @@ class DeleteCategoryIdCallbackFactory(CallbackData, prefix="delete_category_id")
     page: int
 
 
-class ManageCategoriesDeleteKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
+class DeleteCategoryKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
     def _back_callback(self) -> str | CallbackData | None:
         return DeleteCategoryIdCallbackFactory(
             action="change_page",
@@ -73,7 +73,7 @@ class EditCategoryIdCallbackFactory(CallbackData, prefix="edit_category_id"):  #
 
 
 @dataclass
-class ManageCategoriesEditKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
+class EditCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategorySchema]):
     def _back_callback(self) -> str | CallbackData | None:
         return EditCategoryIdCallbackFactory(
             action="change_page",
