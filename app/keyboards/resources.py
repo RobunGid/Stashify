@@ -404,11 +404,11 @@ class EditResourceResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceIt
 class EditResourceChooseFieldKeyboardBuilder(BaseEditKeyboardBuilder, BackToMenuKeyboardBuilderMixin):
     def _build_edit_buttons(self) -> list[dict]:
         return [
-            {"text": self.i18n.get("manage_resources.edit.name.choose"), "callback_data": "edit_resource_name"},
+            {"text": self.i18n.get("manage-resources-edit-name-choose"), "callback_data": "edit_resource_name"},
             {
-                "text": self.i18n.get("manage_resources.edit.description.choose"),
+                "text": self.i18n.get("manage-resources-edit-description-choose"),
                 "callback_data": "edit_resource_description",
             },
-            {"text": self.i18n.get("manage_resources.edit.image.choose"), "callback_data": "edit_resource_image"},
-            {"text": self.i18n.get("manage_resources.edit.tags.choose"), "callback_data": "edit_resource_tags"},
+            {"text": self.i18n.get("manage-resources-edit-image-choose"), "callback_data": "edit_resource_image"},
+            {"text": self.i18n.get("manage-resources-edit-tags-choose"), "callback_data": "edit_resource_tags"},
         ]
