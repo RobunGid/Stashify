@@ -4,8 +4,6 @@ from uuid import UUID
 from application.schemas.quiz_item_schema import QuizSchema
 from pydantic import BaseModel
 
-from application.schemas.base_schema import BaseSchema
-
 
 class QuizRatingWithoutUserSchema(BaseModel):
     quiz_rating_id: str

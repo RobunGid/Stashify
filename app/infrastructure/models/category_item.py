@@ -10,7 +10,7 @@ from database.base import Base
 class CategoryItemModel(Base):
     __tablename__ = "category_item"
 
-    category_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    category_item_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     name = Column(String, unique=True, nullable=False)
     resource_items = relationship("ResourceItemModel", back_populates="category_item")

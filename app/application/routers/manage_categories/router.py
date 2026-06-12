@@ -6,7 +6,6 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from aiogram_i18n import I18nContext
-from dishka import FromDishka
 from application.filters.user_role_filter import UserRoleFilter
 from application.filters_schemas.category_item import CategoryItemFiltersSchema
 from application.keyboards.categories import (
@@ -20,6 +19,7 @@ from application.keyboards.categories import (
 from application.schemas.category_item_schema import BaseCategoryItemSchema
 from application.services.category_item import CategoryItemService
 from constants import DELETE_CATEGORIES_ON_PAGE, EDIT_CATEGORIES_ON_PAGE
+from dishka import FromDishka
 from infrastructure.models.user_account import Role
 from sqlalchemy.exc import IntegrityError
 
@@ -56,7 +56,10 @@ class EditCategoryState(StatesGroup):
 
 @router.callback_query(F.data == "edit_category", UserRoleFilter([Role.admin]))
 async def edit_category_callback_handler(
-    callback: CallbackQuery, state: FSMContext, i18n: I18nContext, service: FromDishka[CategoryItemService]
+    callback: CallbackQuery,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[CategoryItemService],
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
@@ -163,7 +166,10 @@ async def edit_category_choose(
 
 @router.message(EditCategoryState.new_category_name)
 async def new_category_name_choose(
-    message: Message, state: FSMContext, i18n: I18nContext, service: FromDishka[CategoryItemService]
+    message: Message,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[CategoryItemService],
 ):
     if not message.from_user or not message.from_user.language_code:
         return
@@ -197,7 +203,10 @@ class DeleteCategoryState(StatesGroup):
 
 @router.callback_query(F.data == "delete_category", UserRoleFilter([Role.admin]))
 async def delete_category_callback_handler(
-    callback: CallbackQuery, state: FSMContext, i18n: I18nContext, service: FromDishka[CategoryItemService]
+    callback: CallbackQuery,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[CategoryItemService],
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return

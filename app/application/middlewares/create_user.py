@@ -1,8 +1,8 @@
 from aiogram import BaseMiddleware
-from dishka import FromDishka
 
 from application.schemas.user_account_schema import UserAccountSchema
 from application.services.user_account import UserAccountService
+from dishka import FromDishka
 
 
 class CreateUserMiddleware(BaseMiddleware):
@@ -21,6 +21,6 @@ class CreateUserMiddleware(BaseMiddleware):
 
             await self.user_service.create(item=user_account_schema.to_entity())
 
-        data["db_user"] = account
+        data["user"] = account
 
         return await handler(event, data)

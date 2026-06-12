@@ -4,6 +4,7 @@ from aiogram.enums.parse_mode import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from containers.factories import get_container
+
 from settings.config import Config
 
 container = get_container()

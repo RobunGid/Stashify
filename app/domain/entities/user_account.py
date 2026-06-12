@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from domain.entities.base import BaseEntity
+from domain.entities.base import BaseEntity, BaseUpdateEntity
 from domain.enums import Role
 
 
@@ -15,7 +15,7 @@ class UserAccountEntity(BaseEntity):
 
 
 @dataclass
-class UserAccountUpdateEntity(BaseEntity):
+class UserAccountUpdateEntity(BaseUpdateEntity):
     user_telegram_id: str | None
     username: str | None
 

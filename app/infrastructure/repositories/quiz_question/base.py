@@ -6,6 +6,7 @@ from infrastructure.repositories.base import BaseRepository
 
 
 class BaseQuizQuestionRepository(
-    BaseRepository[QuizQuestionEntity, QuizQuestionUpdateEntity, QuizQuestionFilters], ABC
+    BaseRepository[QuizQuestionEntity, QuizQuestionUpdateEntity, QuizQuestionFilters],
+    ABC,
 ):
     pass

@@ -1,35 +1,25 @@
 from dishka import AnyOf, provide, Provider, Scope
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from infrastructure.repositories.quiz_item.base import BaseQuizItemRepository
-from infrastructure.repositories.quiz_item.sql import SQLQuizItemRepository
-
-from infrastructure.repositories.quiz_rating.base import BaseQuizRatingRepository
-from infrastructure.repositories.quiz_rating.sql import SQLQuizRatingRepository
-
-from infrastructure.repositories.resource_favorite.base import BaseResourceFavoriteRepository
-from infrastructure.repositories.resource_favorite.sql import SQLResourceFavoriteRepository
-
-from infrastructure.repositories.resource_item.base import BaseResourceItemRepository
-from infrastructure.repositories.resource_item.sql import SQLResourceItemRepository
-
-from infrastructure.repositories.user_account.base import BaseUserAccountRepository
-from infrastructure.repositories.user_account.sql import SQLUserAccountRepository
-
 from infrastructure.repositories.category_item.base import BaseCategoryItemRepository
 from infrastructure.repositories.category_item.sql import SQLCategoryItemRepository
-
+from infrastructure.repositories.quiz_item.base import BaseQuizItemRepository
+from infrastructure.repositories.quiz_item.sql import SQLQuizItemRepository
 from infrastructure.repositories.quiz_question.base import BaseQuizQuestionRepository
 from infrastructure.repositories.quiz_question.sql import SQLQuizQuestionRepository
-
+from infrastructure.repositories.quiz_rating.base import BaseQuizRatingRepository
+from infrastructure.repositories.quiz_rating.sql import SQLQuizRatingRepository
 from infrastructure.repositories.quiz_result.base import BaseQuizResultRepository
 from infrastructure.repositories.quiz_result.sql import SQLQuizResultRepository
-
+from infrastructure.repositories.resource_favorite.base import BaseResourceFavoriteRepository
+from infrastructure.repositories.resource_favorite.sql import SQLResourceFavoriteRepository
 from infrastructure.repositories.resource_image.base import BaseResourceImageRepository
 from infrastructure.repositories.resource_image.sql import SQLResourceImageRepository
-
+from infrastructure.repositories.resource_item.base import BaseResourceItemRepository
+from infrastructure.repositories.resource_item.sql import SQLResourceItemRepository
 from infrastructure.repositories.resource_rating.base import BaseResourceRatingRepository
 from infrastructure.repositories.resource_rating.sql import SQLResourceRatingRepository
+from infrastructure.repositories.user_account.base import BaseUserAccountRepository
+from infrastructure.repositories.user_account.sql import SQLUserAccountRepository
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class RepositoriesProvider(Provider):

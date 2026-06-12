@@ -1,8 +1,7 @@
 from uuid import UUID
 
-from pydantic import ConfigDict, Field
-
 from application.schemas.base_schema import BaseSchema
+from pydantic import ConfigDict, Field
 
 
 class BaseResourceItemSchema(BaseSchema):

@@ -1,11 +1,10 @@
 from typing import List, Optional
 from uuid import UUID, uuid4
 
+from application.schemas.base_schema import BaseSchema
 from domain.entities.user_account import UserAccountEntity
 from infrastructure.models.user_account import Role
 from pydantic import Field
-
-from application.schemas.base_schema import BaseSchema
 
 
 class PlainUserAccountSchema(BaseSchema):

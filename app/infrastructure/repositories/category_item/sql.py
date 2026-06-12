@@ -4,19 +4,19 @@ from uuid import UUID
 from domain.entities.category_item import CategoryItemEntity, CategoryItemUpdateEntity
 from domain.filters.category_item import CategoryItemFilters
 from infrastructure.models.category_item import CategoryItemModel
-from infrastructure.models.resource_favorite import ResourceFavoriteModel
 from infrastructure.models.quiz_item import QuizItemModel
+from infrastructure.models.resource_favorite import ResourceFavoriteModel
 from infrastructure.models.resource_item import ResourceItemModel
 from infrastructure.repositories.base import GetManyResult, SQLAlchemyRepositoryMixin
 from infrastructure.repositories.category_item.base import BaseCategoryItemRepository
-from sqlalchemy import func, select, Update
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import selectinload
 
 
 @dataclass
 class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepositoryMixin):
     async def create(self, category_item: CategoryItemEntity) -> None:
-        item = CategoryItemModel(category_item)
+        item = CategoryItemModel(*category_item)
         self.session.add(item)
         await self.session.commit()
 
@@ -41,7 +41,7 @@ class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepository
         )
         if filters.has_quiz_items:
             subquery = (
-                select(ResourceItemModel.category_id)
+                select(ResourceItemModel.category_item_id)
                 .select_from(QuizItemModel)
                 .outerjoin(
                     ResourceItemModel,
@@ -49,29 +49,29 @@ class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepository
                 )
                 .join(
                     CategoryItemModel,
-                    CategoryItemModel.category_id == ResourceItemModel.category_id,
+                    CategoryItemModel.category_item_id == ResourceItemModel.category_item_id,
                 )
             )
-            statement = statement.where(CategoryItemModel.category_id.in_(subquery))
+            statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))
 
         if filters.has_resource_items:
             subquery = (
-                select(ResourceItemModel.category_id)
+                select(ResourceItemModel.category_item_id)
                 .select_from(CategoryItemModel)
                 .outerjoin(
                     ResourceItemModel,
-                    ResourceItemModel.category_id == CategoryItemModel.category_id,
+                    ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
                 )
             )
-            statement = statement.where(CategoryItemModel.category_id.in_(subquery))
+            statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))
 
         if filters.favorite_user_id:
             subquery = (
-                select(ResourceItemModel.category_id)
+                select(ResourceItemModel.category_item_id)
                 .select_from(CategoryItemModel)
                 .outerjoin(
                     ResourceItemModel,
-                    ResourceItemModel.category_id == CategoryItemModel.category_id,
+                    ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
                 )
                 .outerjoin(
                     ResourceFavoriteModel,
@@ -81,7 +81,7 @@ class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepository
                     ResourceFavoriteModel.user_id == filters.favorite_user_id,
                 )
             )
-            statement = statement.where(CategoryItemModel.category_id.in_(subquery))
+            statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))
 
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()
@@ -103,7 +103,7 @@ class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepository
 
     async def update(self, category_item_id: UUID, category_item: CategoryItemUpdateEntity) -> None:
         statement = (
-            Update(CategoryItemModel)
+            update(CategoryItemModel)
             .where(CategoryItemModel.category_item_id == category_item_id)
             .values(**{k: v for k, v in asdict(category_item).items() if v is not None})
         )

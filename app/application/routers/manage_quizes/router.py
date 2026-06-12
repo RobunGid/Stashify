@@ -27,8 +27,8 @@ from application.keyboards.quizes import (
     QuizConfirmFinishKeyboardBuilder,
     QuizManageEntryKeyboardBuilder,
 )
-from application.schemas.quiz_question_schema import QuizQuestionBaseSchema, QuizQuestionSchema
 from application.schemas.quiz_item_schema import QuizSchema
+from application.schemas.quiz_question_schema import QuizQuestionBaseSchema, QuizQuestionSchema
 from constants import (
     CREATE_QUIZ_CATEGORIES_ON_PAGE,
     CREATE_QUIZ_RESOURCES_ON_PAGE,

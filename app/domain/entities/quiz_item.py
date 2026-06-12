@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from domain.entities.base import BaseEntity
+from domain.entities.base import BaseEntity, BaseUpdateEntity
 
 
 @dataclass
@@ -11,5 +11,5 @@ class QuizItemEntity(BaseEntity):
 
 
 @dataclass
-class QuizItemUpdateEntity(BaseEntity):
+class QuizItemUpdateEntity(BaseUpdateEntity):
     resource_item_id: UUID | None

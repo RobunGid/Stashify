@@ -6,6 +6,7 @@ from infrastructure.repositories.base import BaseRepository
 
 
 class BaseResourceFavoriteRepository(
-    BaseRepository[ResourceFavoriteEntity, ResourceFavoriteUpdateEntity, ResourceFavoriteFilters], ABC
+    BaseRepository[ResourceFavoriteEntity, ResourceFavoriteUpdateEntity, ResourceFavoriteFilters],
+    ABC,
 ):
     pass

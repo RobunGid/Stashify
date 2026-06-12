@@ -1,7 +1,7 @@
 from aiogram import BaseMiddleware
-from dishka import FromDishka
 
 from application.services.user_account import UserAccountService
+from dishka import FromDishka
 from domain.enums import Role
 
 

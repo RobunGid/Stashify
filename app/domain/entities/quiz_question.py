@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from domain.entities.base import BaseEntity
+from domain.entities.base import BaseEntity, BaseUpdateEntity
 
 
 @dataclass
@@ -18,7 +18,7 @@ class QuizQuestionEntity(BaseEntity):
 
 
 @dataclass
-class QuizQuestionUpdateEntity(BaseEntity):
+class QuizQuestionUpdateEntity(BaseUpdateEntity):
     text: str | None
 
     quiz_item_id: UUID | None

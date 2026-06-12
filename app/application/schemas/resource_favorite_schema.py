@@ -1,8 +1,8 @@
 from typing import Optional
 from uuid import UUID
 
-from pydantic import Field
 from application.schemas.base_schema import BaseSchema
+from pydantic import Field
 
 
 class ResourceFavoriteSchema(BaseSchema):

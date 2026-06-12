@@ -1,9 +1,8 @@
 from uuid import UUID, uuid4
 
-from pydantic import Field
-
 from application.schemas.base_schema import BaseSchema
 from domain.entities.category_item import CategoryItemEntity
+from pydantic import Field
 
 
 class BaseCategoryItemSchema(BaseSchema[CategoryItemEntity]):

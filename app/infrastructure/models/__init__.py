@@ -1,9 +1,9 @@
 from infrastructure.models.category_item import *  # noqa
-from infrastructure.models.resource_favorite import *  # noqa
 from infrastructure.models.quiz_item import *  # noqa
 from infrastructure.models.quiz_question import *  # noqa
 from infrastructure.models.quiz_rating import *  # noqa
 from infrastructure.models.quiz_result import *  # noqa
+from infrastructure.models.resource_favorite import *  # noqa
 from infrastructure.models.resource_image import *  # noqa
 from infrastructure.models.resource_item import *  # noqa
 from infrastructure.models.resource_rating import *  # noqa

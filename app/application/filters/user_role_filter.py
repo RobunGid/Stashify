@@ -2,9 +2,9 @@ from typing import List
 
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
-from dishka import FromDishka
 
 from application.services.user_account import UserAccountService
+from dishka import FromDishka
 from domain.enums import Role
 
 
