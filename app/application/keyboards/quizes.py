@@ -100,7 +100,7 @@ class EditQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSc
             "text": item.name,
             "callback_data": EditQuizChooseCategoryCallbackFactory(
                 action="select",
-                category_id=item.category_id,
+                category_id=item.category_item_id,
                 page=0,
             ),
         }

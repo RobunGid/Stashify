@@ -13,7 +13,7 @@ from sqlalchemy import func, select, Update
 @dataclass
 class SQLUserAccountRepository(BaseUserAccountRepository, SQLAlchemyRepositoryMixin):
     async def create(self, user_account: UserAccountEntity) -> None:
-        item = UserAccountModel(user_account)
+        item = UserAccountModel(**user_account.__dict__)
         self.session.add(item)
         await self.session.commit()
 
@@ -58,9 +58,9 @@ class SQLUserAccountRepository(BaseUserAccountRepository, SQLAlchemyRepositoryMi
         await self.session.execute(statement)
         await self.session.commit()
 
-    async def get_one_by_telegram_id(self, telegram_id: int) -> UserAccountEntity | None:
+    async def get_one_by_telegram_id(self, user_telegram_id: int) -> UserAccountEntity | None:
         statement = select(UserAccountModel).where(
-            UserAccountModel.telegram_id == telegram_id,
+            UserAccountModel.user_telegram_id == user_telegram_id,
         )
 
         item = (await self.session.execute(statement)).scalars().first()
@@ -68,4 +68,10 @@ class SQLUserAccountRepository(BaseUserAccountRepository, SQLAlchemyRepositoryMi
         if item is None:
             return None
 
-        return UserAccountModel(**item)
+        return UserAccountEntity(
+            created_at=item.created_at,
+            user_account_id=item.user_account_id,
+            username=item.username,
+            user_telegram_id=item.user_telegram_id,
+            role=item.role,
+        )

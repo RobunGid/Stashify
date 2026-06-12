@@ -1,9 +1,11 @@
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from application.schemas.base_schema import BaseSchema
+from domain.entities.quiz_question import QuizQuestionEntity
+from pydantic import ConfigDict
 
 
-class QuizQuestionBaseSchema(BaseModel):
+class BaseQuizQuestionSchema(BaseSchema[QuizQuestionEntity]):
     quiz_question_id: UUID
     text: str
 
@@ -16,7 +18,7 @@ class QuizQuestionBaseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class QuizQuestionSchema(QuizQuestionBaseSchema):
+class QuizQuestionSchema(BaseQuizQuestionSchema):
     quiz: BaseQuizItemSchema
 
 

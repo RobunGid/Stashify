@@ -4,17 +4,17 @@ from aiogram.types import Message
 
 from aiogram_i18n import I18nContext
 from application.routers.constants import ROLE_MENU_KEYBOARD_BUILDER_MAP
-from infrastructure.models.user_account import Role
+from application.schemas.user_account_schema import UserAccountSchema
 
 router = Router()
 
 
 @router.message(CommandStart())
-async def start(message: Message, i18n: I18nContext, role: Role):
+async def start(message: Message, i18n: I18nContext, user: UserAccountSchema):
     if not message.from_user or not message.from_user.id:
         return
 
-    RoleBuilder = ROLE_MENU_KEYBOARD_BUILDER_MAP[role]
+    RoleBuilder = ROLE_MENU_KEYBOARD_BUILDER_MAP[user.role]
     builder = RoleBuilder(i18n=i18n)
     keyboard = builder.build()
 

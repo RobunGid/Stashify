@@ -1,7 +1,6 @@
-from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, func, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -20,26 +19,27 @@ class ResourceItemModel(Base):
     tags = Column(String, nullable=False)
     verified = Column(Boolean(), default=False, nullable=False)
 
-    category_item_id = Column(UUID(as_uuid=True), ForeignKey("category.category_id"), nullable=False)
-    category = relationship("CategoryModel", back_populates="resource_items", lazy="joined")
+    category_item_id = Column(UUID(as_uuid=True), ForeignKey("category_item.category_item_id"), nullable=False)
+    category_item = relationship("CategoryItemModel", back_populates="resource_items", lazy="joined")
 
-    quiz = relationship(
-        "QuizModel",
+    quiz_item = relationship(
+        "QuizItemModel",
         back_populates="resource_item",
         uselist=False,
         lazy="joined",
     )
-    ratings = relationship(
+    resource_ratings = relationship(
         "ResourceRatingModel",
         back_populates="resource_item",
         cascade="all, delete-orphan",
         lazy="joined",
     )
-    images = relationship(
+    resource_images = relationship(
         "ResourceImageModel",
         back_populates="resource_item",
         cascade="all, delete-orphan",
         lazy="joined",
     )
 
-    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

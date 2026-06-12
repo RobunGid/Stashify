@@ -16,8 +16,8 @@ from sqlalchemy.orm import selectinload
 @dataclass
 class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepositoryMixin):
     async def create(self, category_item: CategoryItemEntity) -> None:
-        item = CategoryItemModel(*category_item)
-        self.session.add(item)
+        model = CategoryItemModel.from_entity(category_item)
+        self.session.add(model)
         await self.session.commit()
 
     async def get_one(self, category_item_id: UUID) -> CategoryItemEntity | None:
@@ -78,7 +78,7 @@ class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepository
                     ResourceFavoriteModel.resource_item_id == ResourceItemModel.resource_item_id,
                 )
                 .where(
-                    ResourceFavoriteModel.user_id == filters.favorite_user_id,
+                    ResourceFavoriteModel.user_account_id == filters.favorite_user_id,
                 )
             )
             statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))

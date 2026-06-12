@@ -25,5 +25,5 @@ class CommonProvider(Provider):
         engine: AsyncEngine,
         session_maker: async_sessionmaker[AsyncSession],
     ) -> AsyncGenerator[AsyncSession, None]:
-        async with session_maker(engine=engine, expire_on_commit=False) as session:
+        async with session_maker() as session:
             yield session

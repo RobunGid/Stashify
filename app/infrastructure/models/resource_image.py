@@ -18,8 +18,9 @@ class ResourceImageModel(Base):
         ForeignKey("resource_item.resource_item_id"),
         nullable=False,
     )
-    resource_item = relationship("ResourceItemModel", back_populates="images")
+    resource_item = relationship("ResourceItemModel", back_populates="resource_images")
+
+    image = Column(String, nullable=False)
 
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-    image = Column(String, nullable=False)

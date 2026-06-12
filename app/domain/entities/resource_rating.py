@@ -10,7 +10,7 @@ class ResourceRatingEntity(BaseEntity):
 
     resource_item_id: UUID
 
-    user_id: str
+    user_account_id: str
 
     rating: int
 
@@ -19,6 +19,6 @@ class ResourceRatingEntity(BaseEntity):
 class ResourceRatingUpdateEntity(BaseUpdateEntity):
     resource_item_id: UUID | None
 
-    user_id: str | None
+    user_account_id: str | None
 
     rating: int | None

@@ -12,7 +12,7 @@ from application.keyboards.resources import (
     ListResourcesChooseResourceCallbackFactory,
     ListResourcesItemCallbackFactory,
 )
-from application.schemas.quiz_question_schema import QuizQuestionBaseSchema
+from application.schemas.quiz_question_schema import BaseQuizQuestionSchema
 from application.schemas.resource_schema import ResourceItemSchema
 
 
@@ -68,7 +68,7 @@ class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceItem
 
 @dataclass
 class ResourceQuizQuestionKeyboardBuilder(
-    BaseQuizQuestionKeyboardBuilder[ResourceItemSchema, QuizQuestionBaseSchema],
+    BaseQuizQuestionKeyboardBuilder[ResourceItemSchema, BaseQuizQuestionSchema],
 ):
     def _build_quiz_callback(self, option_number: int, question_number: int) -> CallbackData:
         return ListResourcesQuizQuestionCallbackFactory(

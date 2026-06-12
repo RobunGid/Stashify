@@ -6,11 +6,11 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from aiogram_i18n import I18nContext
-from app.application.filters_schemas.resource_item import ResourceItemFiltersSchema
-from app.application.services.resource_item import ResourceItemService
-from app.constants import FIND_RESOURCE_RESOURCES_ON_PAGE
+from application.filters_schemas.resource_item import ResourceItemFiltersSchema
 from application.keyboards.menu import MenuBackKeyboardBuilder
 from application.keyboards.search_resource import SearchResourceListKeyboardBuilder
+from application.services.resource_item import ResourceItemService
+from constants import FIND_RESOURCE_RESOURCES_ON_PAGE
 from dishka import FromDishka
 
 from settings.aiogram import bot

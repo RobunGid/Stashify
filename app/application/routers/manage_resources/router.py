@@ -11,6 +11,8 @@ from aiogram.utils.media_group import MediaGroupBuilder
 from aiogram_i18n import I18nContext
 from aiogram_media_group import media_group_handler
 from application.filters.user_role_filter import UserRoleFilter
+from application.filters_schemas.category_item import CategoryItemFiltersSchema
+from application.filters_schemas.resource_item import ResourceItemFiltersSchema
 from application.keyboards.resources import (
     CreateResourceCallbackFactory,
     CreateResourceCategoryListKeyboardBuilder,
@@ -27,8 +29,11 @@ from application.keyboards.resources import (
     ManageResourcesBackKeyboardBuilder,
     ResourceManageEntryKeyboardBuilder,
 )
-from application.schemas.resource_image_schema import ResourceImageWithoutResourceSchema
+from application.schemas.resource_image_schema import BsaeResourceImageSchema
 from application.schemas.resource_schema import BaseResourceItemSchema, ResourceItemSchema
+from application.services.category_item import CategoryItemService
+from application.services.resource_image import ResourceImageService
+from application.services.resource_item import ResourceItemService
 from constants import (
     CREATE_RESOURCE_CATEGORIES_ON_PAGE,
     DELETE_RESOURCE_CATEGORIES_ON_PAGE,
@@ -36,10 +41,10 @@ from constants import (
     EDIT_RESOURCE_CATEGORIES_ON_PAGE,
     EDIT_RESOURCE_RESOURCES_ON_PAGE,
 )
+from dishka import FromDishka
 from infrastructure.models.user_account import Role
 from sqlalchemy.exc import IntegrityError
 
-from database.managers import CategoryManager, ResourceImageManager, ResourceManager
 from settings.aiogram import bot
 
 router = Router()
@@ -69,7 +74,7 @@ async def manage_resources(callback: CallbackQuery, i18n: I18nContext):
 class CreateResourceState(StatesGroup):
     total_pages = State()
     categories = State()
-    category_id = State()
+    category_item_id = State()
     name = State()
     description = State()
     links = State()
@@ -81,7 +86,12 @@ class CreateResourceState(StatesGroup):
     F.data == "create_resource",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def create_resource_callback_handler(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
+async def create_resource_callback_handler(
+    callback: CallbackQuery,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[CategoryItemService],
+):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
     await bot.delete_message(
@@ -89,8 +99,9 @@ async def create_resource_callback_handler(callback: CallbackQuery, state: FSMCo
         message_id=callback.message.message_id,
     )
 
-    categories = await CategoryManager.get_many()
-    total_pages = ceil(len(categories) / CREATE_RESOURCE_CATEGORIES_ON_PAGE)
+    filters = CategoryItemFiltersSchema(count=CREATE_RESOURCE_CATEGORIES_ON_PAGE)
+    categories, count = await service.get_many(filters.to_entity())
+    total_pages = ceil(count / CREATE_RESOURCE_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
 
     keyboard_builder = CreateResourceCategoryListKeyboardBuilder(
@@ -179,7 +190,7 @@ async def create_resource_choose(
         reply_markup=keyboard,
     )
 
-    await state.update_data(category_id=callback_data.category_id)
+    await state.update_data(category_item_id=callback_data.category_item_id)
     await state.set_state(CreateResourceState.name)
 
 
@@ -269,17 +280,24 @@ async def new_resource_image_choose(messages: List[Message], state: FSMContext, 
 
 
 @router.message(CreateResourceState.tags, F.text)
-async def new_resource_tags_choose(message: Message, state: FSMContext, i18n: I18nContext):
+async def new_resource_tags_choose(
+    message: Message,
+    state: FSMContext,
+    i18n: I18nContext,
+    resource_item_service: FromDishka[ResourceItemService],
+    resource_image_service: FromDishka[ResourceImageService],
+):
     if not message.from_user or not message.from_user.language_code:
         return
     state_data = await state.get_data()
     resource_data = BaseResourceItemSchema(
-        category_id=state_data["category_id"],
+        category_item_id=state_data["category_item_id"],
         resource_item_id=uuid4(),
         name=state_data["name"],
         description=state_data["description"],
         links=state_data["links"],
         tags=message.html_text,
+        verified=False,
     )
     category_name = next(
         (category.name for category in state_data["categories"]),
@@ -290,14 +308,14 @@ async def new_resource_tags_choose(message: Message, state: FSMContext, i18n: I1
     keyboard = keyboard_builder.build()
 
     try:
-        await ResourceManager.create(resource_data)
+        await resource_item_service.create(resource_data.to_entity())
         for resource_image in state_data["images"]:
-            image = ResourceImageWithoutResourceSchema(
+            image = BsaeResourceImageSchema(
                 resource_image_id=uuid4(),
                 resource_item_id=resource_data.resource_item_id,
                 image=resource_image,
             )
-            await ResourceImageManager.create(image)
+            await resource_image_service.create(image.to_entity())
     except IntegrityError:
         await message.answer(
             text=i18n.get(
@@ -349,7 +367,12 @@ class DeleteResourceState(StatesGroup):
     F.data == "delete_resource",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def delete_resource_callback_handler(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
+async def delete_resource_callback_handler(
+    callback: CallbackQuery,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[CategoryItemService],
+):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
     await bot.delete_message(
@@ -357,8 +380,9 @@ async def delete_resource_callback_handler(callback: CallbackQuery, state: FSMCo
         message_id=callback.message.message_id,
     )
 
-    categories = await CategoryManager.get_many()
-    total_pages = ceil(len(categories) / DELETE_RESOURCE_CATEGORIES_ON_PAGE)
+    filters = CategoryItemFiltersSchema(count=DELETE_RESOURCE_CATEGORIES_ON_PAGE)
+    categories, count = await service.get_many(filters.to_entity())
+    total_pages = ceil(count / DELETE_RESOURCE_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
 
     keyboard_builder = DeleteResourceCategoryListKeyboardBuilder(
@@ -426,8 +450,15 @@ async def delete_resource_category_select(
     callback_data: DeleteResourceChooseCategoryCallbackFactory,
     state: FSMContext,
     i18n: I18nContext,
+    service: FromDishka[ResourceItemService],
 ):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
+    if (
+        not callback_data.category_item_id
+        or not callback.from_user
+        or not callback.from_user.language_code
+        or not callback.message
+        or not callback.data
+    ):
         return
     await bot.delete_message(
         chat_id=callback.message.chat.id,
@@ -436,10 +467,11 @@ async def delete_resource_category_select(
 
     current_page = callback_data.page
     resources_data = await state.get_data()
-    category_id = callback_data.category_id
-    resources = await ResourceManager.get_many(category_id=category_id)
+    category_item_id = callback_data.category_item_id
+    filters = ResourceItemFiltersSchema(category_item_id=category_item_id, count=DELETE_RESOURCE_CATEGORIES_ON_PAGE)
+    resources, count = await service.get_many(filters.to_entity())
     total_pages = resources_data["total_pages"]
-    await state.update_data(category_id=category_id, resources=resources)
+    await state.update_data(category_item_id=category_item_id, resources=resources)
 
     keyboard_builder = DeleteResourceResourceListKeyboardBuilder(
         i18n=i18n,
@@ -533,7 +565,12 @@ async def delete_resource_select(
     F.data == "delete_resource_confirm",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def delete_resource_name_confirm(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
+async def delete_resource_name_confirm(
+    callback: CallbackQuery,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[ResourceItemService],
+):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
     await bot.delete_message(
@@ -553,7 +590,7 @@ async def delete_resource_name_confirm(callback: CallbackQuery, state: FSMContex
     keyboard = keyboard_builder.build()
 
     try:
-        await ResourceManager.delete(resource_item_id=resource_data["resource_item_id"])
+        await service.delete(item_id=resource_data["resource_item_id"])
     except IntegrityError, ValueError:
         await callback.message.answer(
             text=i18n.get("manage-resources-delete-fail", name=resource.name),
@@ -581,7 +618,12 @@ class EditResourceState(StatesGroup):
     F.data == "edit_resource",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def edit_resource_callback_handler(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
+async def edit_resource_callback_handler(
+    callback: CallbackQuery,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[CategoryItemService],
+):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
     await bot.delete_message(
@@ -589,8 +631,9 @@ async def edit_resource_callback_handler(callback: CallbackQuery, state: FSMCont
         message_id=callback.message.message_id,
     )
 
-    categories = await CategoryManager.get_many()
-    total_pages = ceil(len(categories) / EDIT_RESOURCE_CATEGORIES_ON_PAGE)
+    filters = CategoryItemFiltersSchema(count=EDIT_RESOURCE_CATEGORIES_ON_PAGE)
+    categories, count = await service.get_many(filters.to_entity())
+    total_pages = ceil(count / EDIT_RESOURCE_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, categories=categories)
 
     keyboard_builder = EditResourceCategoryListKeyboardBuilder(
@@ -660,17 +703,25 @@ async def edit_resource_category_choose(
     callback_data: EditResourceChooseCategoryCallbackFactory,
     state: FSMContext,
     i18n: I18nContext,
+    service: FromDishka[ResourceItemService],
 ):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
+    if (
+        not callback_data.category_item_id
+        or not callback.from_user
+        or not callback.from_user.language_code
+        or not callback.message
+        or not callback.data
+    ):
         return
     await bot.delete_message(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
-    category_id = callback_data.category_id
-    resources = await ResourceManager.get_many(category_id=category_id)
+    category_item_id = callback_data.category_item_id
+    filters = ResourceItemFiltersSchema(category_item_id=category_item_id, count=EDIT_RESOURCE_RESOURCES_ON_PAGE)
+    resources, count = await service.get_many(filters.to_entity())
     await state.update_data(resources=resources)
-    total_pages = ceil(len(resources) / EDIT_RESOURCE_RESOURCES_ON_PAGE)
+    total_pages = ceil(count / EDIT_RESOURCE_RESOURCES_ON_PAGE)
 
     keyboard_builder = EditResourceResourceListKeyboardBuilder(
         i18n=i18n,
@@ -680,7 +731,7 @@ async def edit_resource_category_choose(
     )
     keyboard = keyboard_builder.build()
 
-    await state.update_data(category_id=category_id)
+    await state.update_data(category_item_id=category_item_id)
     await callback.message.answer(
         text=i18n.get(
             "manage-resources-edit-choose-to-change",
@@ -797,7 +848,12 @@ async def edit_resource_name(callback: CallbackQuery, state: FSMContext, i18n: I
     UserRoleFilter([Role.admin, Role.manager]),
     F.text,
 )
-async def edit_resource_name_success(message: Message, state: FSMContext, i18n: I18nContext):
+async def edit_resource_name_success(
+    message: Message,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[ResourceItemService],
+):
     if not message.from_user or not message.from_user.language_code:
         return
 
@@ -808,7 +864,7 @@ async def edit_resource_name_success(message: Message, state: FSMContext, i18n: 
 
     try:
         resource_item_data["name"] = message.html_text
-        await ResourceManager.update(**resource_item_data)
+        await service.update(**resource_item_data)
     except IntegrityError, ValueError:
         await message.answer(
             text=i18n.get("manage-resources-edit-name-fail", name=message.html_text),
@@ -858,7 +914,12 @@ async def edit_resource_description(callback: CallbackQuery, state: FSMContext, 
     UserRoleFilter([Role.admin, Role.manager]),
     F.text,
 )
-async def edit_resource_description_success(message: Message, state: FSMContext, i18n: I18nContext):
+async def edit_resource_description_success(
+    message: Message,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[ResourceItemService],
+):
     if not message.from_user or not message.from_user.language_code:
         return
     resource_data = await state.get_data()
@@ -868,7 +929,7 @@ async def edit_resource_description_success(message: Message, state: FSMContext,
 
     try:
         resource_data["description"] = message.html_text
-        await ResourceManager.update(**resource_data)
+        await service.update(**resource_data)
     except IntegrityError, ValueError:
         await message.answer(
             text=i18n.get("manage-resources-edit-description-fail", description=message.html_text),
@@ -921,7 +982,12 @@ async def edit_resource_tags(callback: CallbackQuery, state: FSMContext, i18n: I
     UserRoleFilter([Role.admin, Role.manager]),
     F.text,
 )
-async def edit_resource_tags_success(message: Message, state: FSMContext, i18n: I18nContext):
+async def edit_resource_tags_success(
+    message: Message,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[ResourceItemService],
+):
     if not message.from_user or not message.from_user.language_code:
         return
     resource_data = await state.get_data()
@@ -931,7 +997,7 @@ async def edit_resource_tags_success(message: Message, state: FSMContext, i18n: 
     keyboard = keyboard_builder.build()
 
     try:
-        await ResourceManager.update(**resource_data)
+        await service.update(**resource_data)
     except IntegrityError, ValueError:
         await message.answer(
             text=i18n.get(
@@ -993,6 +1059,7 @@ async def edit_resource_image_success(
     state: FSMContext,
     resource_image: PhotoSize,
     i18n: I18nContext,
+    service: FromDishka[ResourceItemService],
 ):
     if not message.from_user or not message.from_user.language_code:
         return
@@ -1003,7 +1070,7 @@ async def edit_resource_image_success(
     keyboard = keyboard_builder.build()
 
     try:
-        await ResourceManager.update(**resource_data)
+        await service.update(**resource_data)
     except IntegrityError, ValueError:
         await message.answer_photo(
             photo=resource_image.file_id,

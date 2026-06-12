@@ -1,18 +1,28 @@
-from typing import Optional
 from uuid import UUID
 
 from application.schemas.base_schema import BaseSchema
+from domain.entities.resource_favorite import ResourceFavoriteEntity
 from pydantic import Field
 
 
-class ResourceFavoriteSchema(BaseSchema):
-    favorite_id: UUID = Field(default_factory=UUID)
+class BaseResourceFavoriteSchema(BaseSchema[ResourceFavoriteEntity]):
+    resource_favorite_id: UUID = Field(default_factory=UUID)
 
-    user_id: str
-    user: Optional[UserAccountSchema] = None
+    user_account_id: UUID
 
     resource_item_id: UUID
-    resource: Optional[ResourceItemSchema] = Field(default=None)
+
+    def to_entity(self) -> ResourceFavoriteEntity:
+        return ResourceFavoriteEntity(
+            resource_favorite_id=self.resource_favorite_id,
+            user_account_id=self.user_account_id,
+            resource_item_id=self.resource_item_id,
+        )
+
+
+class ResourceFavoriteSchema(BaseResourceFavoriteSchema):
+    user: UserAccountSchema
+    resource: ResourceItemSchema
 
 
 from application.schemas.resource_schema import ResourceItemSchema  # noqa

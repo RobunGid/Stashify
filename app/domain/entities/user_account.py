@@ -8,7 +8,7 @@ from domain.enums import Role
 @dataclass
 class UserAccountEntity(BaseEntity):
     user_account_id: UUID
-    user_telegram_id: str
+    user_telegram_id: int
     username: str | None
 
     role: Role
@@ -16,7 +16,7 @@ class UserAccountEntity(BaseEntity):
 
 @dataclass
 class UserAccountUpdateEntity(BaseUpdateEntity):
-    user_telegram_id: str | None
+    user_telegram_id: int | None
     username: str | None
 
     role: Role | None

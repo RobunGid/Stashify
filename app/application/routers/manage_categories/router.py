@@ -6,7 +6,6 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from aiogram_i18n import I18nContext
-from app.constants import DELETE_CATEGORIES_ON_PAGE, EDIT_CATEGORIES_ON_PAGE
 from application.filters.user_role_filter import UserRoleFilter
 from application.filters_schemas.category_item import CategoryItemFiltersSchema
 from application.keyboards.categories import (
@@ -19,6 +18,7 @@ from application.keyboards.categories import (
 )
 from application.schemas.category_item_schema import BaseCategoryItemSchema
 from application.services.category_item import CategoryItemService
+from constants import DELETE_CATEGORIES_ON_PAGE, EDIT_CATEGORIES_ON_PAGE
 from dishka import FromDishka
 from infrastructure.models.user_account import Role
 from sqlalchemy.exc import IntegrityError
@@ -305,12 +305,12 @@ async def delete_category_choose(
         await service.delete(callback_data.category_id)
     except IntegrityError, ValueError:
         await callback.message.answer(
-            text=i18n.get("manage_categories.delete.fail", category_name=category.name if category else "Unknown"),
+            text=i18n.get("manage-categories-delete-fail", category_name=category.name if category else "Unknown"),
             reply_markup=keyboard,
         )
     else:
         await callback.message.answer(
-            text=i18n.get("manage_categories.delete.success", category_name=category.name if category else "Unknown"),
+            text=i18n.get("manage-categories-delete-success", category_name=category.name if category else "Unknown"),
             reply_markup=keyboard,
         )
 
@@ -332,7 +332,7 @@ async def create_category_callback_handler(callback: CallbackQuery, state: FSMCo
     keyboard = keyboard_builder.build()
 
     await callback.message.answer(
-        text=i18n.get("manage_categories.create.text"),
+        text=i18n.get("manage-categories-create-text"),
         reply_markup=keyboard,
     )
     await state.set_state(CreateCategoryState.choosing_category_name)
@@ -355,11 +355,11 @@ async def create_category_final(message: Message, i18n: I18nContext, service: Fr
         await service.create(category_schema.to_entity())
     except IntegrityError:
         await message.answer(
-            text=i18n.get("manage_categories.create.fail", category_name=category_schema.name),
+            text=i18n.get("manage-categories-create-fail", category_name=category_schema.name),
             reply_markup=keyboard,
         )
     else:
         await message.answer(
-            text=i18n.get("manage_categories.create.success", category_name=category_schema.name),
+            text=i18n.get("manage-categories-create-success", category_name=category_schema.name),
             reply_markup=keyboard,
         )

@@ -14,7 +14,7 @@ class ResourceItemEntity(BaseEntity):
     tags: str
     verified: bool
 
-    category_id: UUID
+    category_item_id: UUID
 
 
 @dataclass
@@ -25,4 +25,4 @@ class ResourceItemUpdateEntity(BaseUpdateEntity):
     tags: str | None
     verified: bool
 
-    category_id: UUID | None
+    category_item_id: UUID | None

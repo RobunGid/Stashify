@@ -8,11 +8,11 @@ from domain.entities.base import BaseEntity, BaseUpdateEntity
 class ResourceFavoriteEntity(BaseEntity):
     resource_favorite_id: UUID
 
-    user_account_id: str
+    user_account_id: UUID
     resource_item_id: UUID
 
 
 @dataclass
 class ResourceFavoriteUpdateEntity(BaseUpdateEntity):
-    user_account_id: str
-    resource_item_id: UUID
+    user_account_id: UUID | None
+    resource_item_id: UUID | None

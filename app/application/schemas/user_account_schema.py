@@ -7,23 +7,28 @@ from infrastructure.models.user_account import Role
 from pydantic import Field
 
 
-class PlainUserAccountSchema(BaseSchema):
+class BaseUserAccountSchema(BaseSchema):
     user_account_id: UUID = Field(default_factory=uuid4)
-    telegram_id: int
+    user_telegram_id: int
     username: Optional[str]
 
     role: Role = Field(default=Role.user)
 
+    def to_entity(self) -> UserAccountEntity:
+        return UserAccountEntity(
+            user_account_id=self.user_account_id,
+            user_telegram_id=self.user_telegram_id,
+            username=self.username,
+            role=self.role,
+        )
 
-class UserAccountSchema(PlainUserAccountSchema):
-    quiz_results: List[QuizResultWithoutUserAndQuizSchema] = Field(
+
+class UserAccountSchema(BaseUserAccountSchema):
+    quiz_results: List[BaseQuizResultSchema] = Field(
         default_factory=list,
     )
-    quiz_ratings: List[QuizRatingWithoutUserSchema] = Field(default_factory=list)
-
-    def to_entity(self) -> UserAccountEntity:
-        return UserAccountEntity(**self.model_dump())
+    quiz_ratings: List[BaseQuizRatingSchema] = Field(default_factory=list)
 
 
-from application.schemas.quiz_rating_schema import QuizRatingWithoutUserSchema  # noqa
-from application.schemas.quiz_result_schema import QuizResultWithoutUserAndQuizSchema  # noqa
+from application.schemas.quiz_rating_schema import BaseQuizRatingSchema  # noqa
+from application.schemas.quiz_result_schema import BaseQuizResultSchema  # noqa

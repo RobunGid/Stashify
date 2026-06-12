@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from app.domain.exceptions.base import ApplicationNotFoundException
+from domain.exceptions.base import ApplicationNotFoundException
 
 
 @dataclass(eq=False)

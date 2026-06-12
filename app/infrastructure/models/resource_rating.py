@@ -6,7 +6,6 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
-    String,
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID
@@ -26,17 +25,18 @@ class ResourceRatingModel(Base):
         ForeignKey("resource_item.resource_item_id"),
         nullable=False,
     )
-    resource_item = relationship("ResourceItemModel", back_populates="ratings")
+    resource_item = relationship("ResourceItemModel", back_populates="resource_ratings")
 
-    user_id = Column(String, ForeignKey("user.user_id"), nullable=False)
-    user = relationship("UserModel", back_populates="resource_ratings")
+    user_account_id = Column(UUID, ForeignKey("user_account.user_account_id"), nullable=False)
+    user_account = relationship("UserAccountModel", back_populates="resource_ratings")
+
+    rating = Column(Integer)
 
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-    rating = Column(Integer)
 
     __table_args__ = (
-        UniqueConstraint("user_id", "resource_item_id", name="resource_rating_uix"),
+        UniqueConstraint("user_account_id", "resource_item_id", name="resource_rating_uix"),
         CheckConstraint(
             "rating >= 1 AND rating <= 5",
             name="rating_boundaries",

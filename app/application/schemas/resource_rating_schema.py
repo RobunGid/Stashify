@@ -1,24 +1,31 @@
 from uuid import UUID
 
 from application.schemas.base_schema import BaseSchema
+from domain.entities.resource_rating import ResourceRatingEntity
 from pydantic import ConfigDict
 
 
-class ResourceRatingWithoutUserAndResourceSchema(BaseSchema):
+class BaseResourceRatingSchema(BaseSchema[ResourceRatingEntity]):
     resource_rating_id: UUID
-
     resource_item_id: UUID
-
-    user_id: str
-
+    user_account_id: str
     rating: int
+
     model_config = ConfigDict(from_attributes=True)
 
+    def to_entity(self) -> ResourceRatingEntity:
+        return ResourceRatingEntity(
+            resource_rating_id=self.resource_rating_id,
+            resource_item_id=self.resource_item_id,
+            user_account_id=self.user_account_id,
+            rating=self.rating,
+        )
 
-class ResourceRatingSchema(ResourceRatingWithoutUserAndResourceSchema):
-    user: PlainUserAccountSchema
+
+class ResourceRatingSchema(BaseResourceRatingSchema):
+    user: BaseUserAccountSchema
     resource: ResourceItemSchema
 
 
 from application.schemas.resource_schema import ResourceItemSchema  # noqa
-from application.schemas.user_account_schema import PlainUserAccountSchema  # noqa
+from application.schemas.user_account_schema import BaseUserAccountSchema  # noqa

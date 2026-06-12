@@ -28,7 +28,7 @@ from application.keyboards.quizes import (
     QuizManageEntryKeyboardBuilder,
 )
 from application.schemas.quiz_item_schema import QuizSchema
-from application.schemas.quiz_question_schema import QuizQuestionBaseSchema, QuizQuestionSchema
+from application.schemas.quiz_question_schema import BaseQuizQuestionSchema, QuizQuestionSchema
 from constants import (
     CREATE_QUIZ_CATEGORIES_ON_PAGE,
     CREATE_QUIZ_RESOURCES_ON_PAGE,
@@ -264,7 +264,7 @@ async def create_quiz_choose(
         resource for resource in state_data["resources"] if resource.resource_item_id == resource_item_id
     )
     quiz = QuizSchema(
-        quiz_id=uuid4(),
+        quiz_item_id=uuid4(),
         resource_item_id=resource_item_id,
         questions=[],
         resource=quiz_resource,
@@ -300,7 +300,7 @@ async def create_quiz_add_question(message: Message, state: FSMContext, i18n: I1
         image=message.photo[0].file_id if message.photo else None,
         quiz=state_data["quiz"],
         options=question_options,
-        quiz_id=state_data["quiz"].id,
+        quiz_item_id=state_data["quiz"].id,
         right_options=right_options,
         text=question_text,
     )
@@ -535,7 +535,7 @@ async def delete_quiz_choose(
         resource for resource in state_data["resources"] if resource.resource_item_id == resource_item_id
     )
     quiz = QuizSchema(
-        quiz_id=uuid4(),
+        quiz_item_id=uuid4(),
         resource_item_id=resource_item_id,
         questions=[],
         resource=quiz_resource,
@@ -911,15 +911,15 @@ async def add_question_confirm(message: Message, state: FSMContext, i18n: I18nCo
     state_data = await state.get_data()
     resource_item_id = state_data["resource_item_id"]
     quiz = await QuizManager.get_one(resource_item_id=resource_item_id)
-    quiz_id = UUID(str(quiz.quiz_id))
+    quiz_item_id = UUID(str(quiz.quiz_item_id))
     question_data = message.html_text.split("\n")
     question_text = question_data[0]
     question_options = question_data[1:]
     right_options = [index for index, option in enumerate(question_options) if option.startswith("!")]
 
-    question = QuizQuestionBaseSchema(
+    question = BaseQuizQuestionSchema(
         quiz_question_id=uuid4(),
-        quiz_id=quiz_id,
+        quiz_item_id=quiz_item_id,
         image=message.photo[0].file_id if message.photo else None,
         options=question_options,
         right_options=right_options,
@@ -1027,15 +1027,15 @@ async def edit_question_text(message: Message, state: FSMContext, i18n: I18nCont
     questions = await QuizQuestionManager.get_many(resource_item_id)
     question_id = questions[question_number].quiz_question_id
     quiz = await QuizManager.get_one(resource_item_id=resource_item_id)
-    quiz_id = UUID(str(quiz.quiz_id))
+    quiz_item_id = UUID(str(quiz.quiz_item_id))
     question_data = message.html_text.split("\n")
     question_text = question_data[0]
     question_options = question_data[1:]
     right_options = [index for index, option in enumerate(question_options) if option.startswith("!")]
 
-    question = QuizQuestionBaseSchema(
+    question = BaseQuizQuestionSchema(
         quiz_question_id=question_id,
-        quiz_id=quiz_id,
+        quiz_item_id=quiz_item_id,
         image=message.photo[0].file_id if message.photo else None,
         options=question_options,
         right_options=right_options,

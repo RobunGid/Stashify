@@ -1,20 +1,24 @@
 from uuid import UUID
 
 from application.schemas.base_schema import BaseSchema
+from domain.entities.quiz_item import QuizItemEntity
 from pydantic import ConfigDict, Field
 
 
-class BaseQuizItemSchema(BaseSchema):
-    quiz_id: UUID = Field()
+class BaseQuizItemSchema(BaseSchema[QuizItemEntity]):
+    quiz_item_id: UUID = Field()
     resource_item_id: UUID
 
     model_config = ConfigDict(from_attributes=True)
 
+    def to_entity(self) -> QuizItemEntity:
+        return QuizItemEntity(quiz_item_id=self.quiz_item_id, resource_item_id=self.resource_item_id)
+
 
 class QuizSchema(BaseQuizItemSchema):
     resource: ResourceItemSchema
-    questions: list[QuizQuestionBaseSchema] = Field(default_factory=list)
+    questions: list[BaseQuizQuestionSchema] = Field(default_factory=list)
 
 
-from application.schemas.quiz_question_schema import QuizQuestionBaseSchema  # noqa
+from application.schemas.quiz_question_schema import BaseQuizQuestionSchema  # noqa
 from application.schemas.resource_schema import ResourceItemSchema  # noqa

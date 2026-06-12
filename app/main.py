@@ -2,7 +2,7 @@ import asyncio
 
 from aiogram_i18n import I18nMiddleware
 from aiogram_i18n.cores import FluentRuntimeCore
-from app.settings.aiogram import bot, dp
+from application.middlewares.create_user import CreateUserMiddleware
 from application.routers import common, menu
 from application.routers.manage_categories.router import router as manage_categories_router
 from application.routers.manage_quizes.router import router as manage_quizes_router
@@ -14,6 +14,7 @@ from containers.factories import get_container
 from dishka.integrations.aiogram import setup_dishka
 
 from database.init import init_models
+from settings.aiogram import bot, dp
 
 
 async def main():
@@ -32,8 +33,10 @@ async def main():
     )
 
     i18n_middleware = I18nMiddleware(core=FluentRuntimeCore(path="locales/{locale}"))
+    create_user_middleware = CreateUserMiddleware(container)
 
     dp.message.middleware(i18n_middleware)
+    dp.message.middleware(create_user_middleware)
     dp.update.middleware()
     i18n_middleware.setup(dispatcher=dp)
 

@@ -22,9 +22,9 @@ from application.keyboards.resources import (
     ResourceListKeyboardBuilder,
     ResourceQuizConfirmKeyboardBuilder,
 )
-from application.schemas.quiz_result_schema import QuizResultWithoutUserAndQuizSchema
-from application.schemas.resource_favorite_schema import ResourceFavoriteSchema
-from application.schemas.resource_rating_schema import ResourceRatingWithoutUserAndResourceSchema
+from application.schemas.quiz_result_schema import BaseQuizResultSchema
+from application.schemas.resource_favorite_schema import BaseResourceFavoriteSchema
+from application.schemas.resource_rating_schema import BaseResourceRatingSchema
 from constants import (
     LIST_RESOURCES_CATEGORIES_ON_PAGE,
     LIST_RESOURCES_RESOURCES_ON_PAGE,
@@ -232,13 +232,13 @@ async def list_resource_resource_select(
         return
 
     resources = await ResourceManager.get_many(category_id=resource_item.category_id)
-    user_id = str(callback.from_user.id)
-    favorites = await FavoriteManager.get_many(user_id=user_id)
+    user_account_id = str(callback.from_user.id)
+    favorites = await FavoriteManager.get_many(user_account_id=user_account_id)
     images = await ResourceImageManager.get_many(resource_item_id=callback_data.resource_item_id)
     is_favorite = any(resource_item.resource_item_id == favorite.resource_item_id for favorite in favorites)
 
     resource_rating = await ResourceRatingManager.get_one(
-        user_id=user_id,
+        user_account_id=user_account_id,
         resource_item_id=resource_item.resource_item_id,
     )
     resource_rating_number = resource_rating.rating if resource_rating else None
@@ -297,12 +297,12 @@ async def list_resource_resource_change_page(
         return
     state_data = await state.get_data()
     resources = state_data["resources"]
-    user_id = str(callback.from_user.id)
-    favorites = await FavoriteManager.get_many(user_id=user_id)
+    user_account_id = str(callback.from_user.id)
+    favorites = await FavoriteManager.get_many(user_account_id=user_account_id)
     images = await ResourceImageManager.get_many(resource_item_id=callback_data.resource_item_id)
     is_favorite = any(resource_item.resource_item_id == favorite.resource_item_id for favorite in favorites)
     resource_rating = await ResourceRatingManager.get_one(
-        user_id=user_id,
+        user_account_id=user_account_id,
         resource_item_id=resource_item.resource_item_id,
     )
     resource_rating_number = resource_rating.rating if resource_rating else None
@@ -362,10 +362,13 @@ async def list_resource_resource_add_favorite(
         return
     state_data = await state.get_data()
     resources = state_data["resources"]
-    user_id = str(callback.from_user.id)
-    favorite = ResourceFavoriteSchema(user_id=user_id, resource_item_id=resource_item.resource_item_id)
+    user_account_id = str(callback.from_user.id)
+    favorite = BaseResourceFavoriteSchema(
+        user_account_id=user_account_id,
+        resource_item_id=resource_item.resource_item_id,
+    )
     resource_rating = await ResourceRatingManager.get_one(
-        user_id=user_id,
+        user_account_id=user_account_id,
         resource_item_id=resource_item.resource_item_id,
     )
     await FavoriteManager.create(favorite)
@@ -423,13 +426,13 @@ async def list_resource_resource_remove_favorite(
         return
     state_data = await state.get_data()
     resources = state_data["resources"]
-    user_id = str(callback.from_user.id)
+    user_account_id = str(callback.from_user.id)
     resource_rating = await ResourceRatingManager.get_one(
-        user_id=user_id,
+        user_account_id=user_account_id,
         resource_item_id=resource_item.resource_item_id,
     )
 
-    await FavoriteManager.delete(user_id=user_id, resource_item_id=resource_item.resource_item_id)
+    await FavoriteManager.delete(user_account_id=user_account_id, resource_item_id=resource_item.resource_item_id)
     resource_rating_number = resource_rating.rating if resource_rating else None
     await state.update_data(resources=resources)
     keyboard_builder = ResourceItemKeyboardBuilder(
@@ -482,21 +485,24 @@ async def list_resource_resource_rate(
         return
     state_data = await state.get_data()
     resources = state_data["resources"]
-    user_id = str(callback.from_user.id)
-    favorites = await FavoriteManager.get_many(user_id=user_id)
+    user_account_id = str(callback.from_user.id)
+    favorites = await FavoriteManager.get_many(user_account_id=user_account_id)
     is_favorite = any(resource_item.resource_item_id == favorite.resource_item_id for favorite in favorites)
     rating = callback_data.rating
     existing_resource_rating = await ResourceRatingManager.get_one(
-        user_id=user_id,
+        user_account_id=user_account_id,
         resource_item_id=resource_item.resource_item_id,
     )
     if existing_resource_rating:
-        await ResourceRatingManager.delete(user_id=user_id, resource_item_id=resource_item.resource_item_id)
-    resource_rating = ResourceRatingWithoutUserAndResourceSchema(
+        await ResourceRatingManager.delete(
+            user_account_id=user_account_id,
+            resource_item_id=resource_item.resource_item_id,
+        )
+    resource_rating = BaseResourceRatingSchema(
         resource_rating_id=uuid4(),
         resource_item_id=resource_item_id,
         rating=rating,
-        user_id=user_id,
+        user_account_id=user_account_id,
     )
     resource_rating_number = resource_rating.rating if resource_rating else None
     keyboard_builder = ResourceItemKeyboardBuilder(
@@ -664,10 +670,10 @@ async def list_resource_quiz_question_answer(
         )
         if existing_quiz_result:
             await QuizResultManager.delete(resource_item.resource_item_id, str(callback.from_user.id))
-        quiz_result = QuizResultWithoutUserAndQuizSchema(
+        quiz_result = BaseQuizResultSchema(
             quiz_result_id=uuid4(),
-            quiz_id=quiz.quiz_id,
-            user_id=str(callback.from_user.id),
+            quiz_item_id=quiz.quiz_item_id,
+            user_account_id=str(callback.from_user.id),
             percent=right_answer_percent,
         )
         await QuizResultManager.create(quiz_result)
