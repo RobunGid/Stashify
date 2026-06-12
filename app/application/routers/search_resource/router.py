@@ -6,13 +6,13 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from aiogram_i18n import I18nContext
-from dishka import FromDishka
 from app.application.filters_schemas.resource_item import ResourceItemFiltersSchema
 from app.application.services.resource_item import ResourceItemService
 from app.constants import FIND_RESOURCE_RESOURCES_ON_PAGE
-from app.domain.filters.resource_item import ResourceItemFilters
 from application.keyboards.menu import MenuBackKeyboardBuilder
 from application.keyboards.search_resource import SearchResourceListKeyboardBuilder
+from dishka import FromDishka
+
 from settings.aiogram import bot
 
 router = Router()
@@ -41,7 +41,12 @@ async def search_resource_item_start(callback: CallbackQuery, state: FSMContext,
 
 
 @router.message(SearchResourceState.text)
-async def search_resource_item_search(message: Message, state: FSMContext, i18n: I18nContext, service: FromDishka[ResourceItemService]):
+async def search_resource_item_search(
+    message: Message,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[ResourceItemService],
+):
     if not message.from_user or not message.from_user.language_code or not message or not message.text:
         return
 
