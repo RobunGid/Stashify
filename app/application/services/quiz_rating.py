@@ -3,5 +3,5 @@ from domain.entities.quiz_rating import QuizRatingEntity, QuizRatingUpdateEntity
 from domain.filters.quiz_rating import QuizRatingFilters
 
 
-class QuizItemService(BaseService[QuizRatingEntity, QuizRatingUpdateEntity, QuizRatingFilters]):
+class QuizRatingService(BaseService[QuizRatingEntity, QuizRatingUpdateEntity, QuizRatingFilters]):
     pass
