@@ -3,8 +3,8 @@ from typing import List
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
+from application.containers.factories import get_container
 from application.services.user_account import UserAccountService
-from containers.factories import get_container
 from domain.enums import Role
 
 

@@ -1,6 +1,6 @@
 from domain.entities.category_item import CategoryItemEntity, CategoryItemUpdateEntity
 from domain.filters.category_item import CategoryItemFilters
-from infrastructure.repositories.base import BaseRepository
+from domain.repositories.base import BaseRepository
 
 
 class BaseCategoryItemRepository(BaseRepository[CategoryItemEntity, CategoryItemUpdateEntity, CategoryItemFilters]):

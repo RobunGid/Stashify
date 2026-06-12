@@ -6,15 +6,15 @@ from domain.entities.base import BaseEntity, BaseUpdateEntity
 
 @dataclass
 class QuizRatingEntity(BaseEntity):
-    quiz_rating_id: str
+    quiz_rating_id: UUID
 
     quiz_item_id: UUID
-    user_account_id: str
+    user_account_id: UUID
     rating: int
 
 
 @dataclass
 class QuizRatingUpdateEntity(BaseUpdateEntity):
     quiz_item_id: UUID | None
-    user_account_id: str | None
+    user_account_id: UUID | None
     rating: int | None

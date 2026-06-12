@@ -1,17 +1,19 @@
 from dataclasses import asdict, dataclass
 from uuid import UUID
 
+from domain.entities.base import GetManyResult
 from domain.entities.resource_item import ResourceItemEntity, ResourceItemUpdateEntity
 from domain.filters.resource_item import ResourceItemFilters
 from infrastructure.models.category_item import CategoryItemModel
 from infrastructure.models.resource_item import ResourceItemModel
-from infrastructure.repositories.base import GetManyResult, SQLAlchemyRepositoryMixin
-from infrastructure.repositories.resource_item.base import BaseResourceItemRepository
-from sqlalchemy import func, select, Update
+from infrastructure.repositories.base import BaseSQLAlchemyRepository
+from sqlalchemy import func, select, update
 
 
 @dataclass
-class SQLResourceItemRepository(BaseResourceItemRepository, SQLAlchemyRepositoryMixin):
+class SQLResourceItemRepository(
+    BaseSQLAlchemyRepository[ResourceItemEntity, ResourceItemUpdateEntity, ResourceItemFilters]
+):
     async def create(self, resource_item: ResourceItemEntity) -> None:
         item = ResourceItemModel(resource_item)
         self.session.add(item)
@@ -52,7 +54,7 @@ class SQLResourceItemRepository(BaseResourceItemRepository, SQLAlchemyRepository
 
     async def update(self, resource_item_id: UUID, resource_item: ResourceItemUpdateEntity) -> None:
         statement = (
-            Update(CategoryItemModel)
+            update(CategoryItemModel)
             .where(CategoryItemModel.resource_item_id == resource_item_id)
             .values(**{k: v for k, v in asdict(resource_item).items() if v is not None})
         )

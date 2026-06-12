@@ -1,8 +1,8 @@
 from functools import lru_cache
 
-from containers.providers.common import CommonProvider
-from containers.providers.repositories import RepositoriesProvider
-from containers.providers.services import ServicesProvider
+from application.containers.providers.common import CommonProvider
+from application.containers.providers.repositories import RepositoriesProvider
+from application.containers.providers.services import ServicesProvider
 from dishka import AsyncContainer, make_async_container
 
 

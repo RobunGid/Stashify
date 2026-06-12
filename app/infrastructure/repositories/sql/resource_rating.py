@@ -1,17 +1,19 @@
 from dataclasses import asdict, dataclass
 from uuid import UUID
 
+from domain.entities.base import GetManyResult
 from domain.entities.resource_rating import ResourceRatingEntity, ResourceRatingUpdateEntity
 from domain.filters.resource_rating import ResourceRatingFilters
 from infrastructure.models.category_item import CategoryItemModel
 from infrastructure.models.resource_rating import ResourceRatingModel
-from infrastructure.repositories.base import GetManyResult, SQLAlchemyRepositoryMixin
-from infrastructure.repositories.resource_rating.base import BaseResourceRatingRepository
-from sqlalchemy import func, select, Update
+from infrastructure.repositories.base import BaseSQLAlchemyRepository
+from sqlalchemy import func, select, update
 
 
 @dataclass
-class SQLResourceRatingRepository(BaseResourceRatingRepository, SQLAlchemyRepositoryMixin):
+class SQLResourceRatingRepository(
+    BaseSQLAlchemyRepository[ResourceRatingEntity, ResourceRatingUpdateEntity, ResourceRatingFilters]
+):
     async def create(self, resource_rating: ResourceRatingEntity) -> None:
         item = ResourceRatingModel(resource_rating)
         self.session.add(item)
@@ -52,7 +54,7 @@ class SQLResourceRatingRepository(BaseResourceRatingRepository, SQLAlchemyReposi
 
     async def update(self, resource_rating_id: UUID, resource_rating: ResourceRatingUpdateEntity) -> None:
         statement = (
-            Update(CategoryItemModel)
+            update(CategoryItemModel)
             .where(CategoryItemModel.resource_rating_id == resource_rating_id)
             .values(**{k: v for k, v in asdict(resource_rating).items() if v is not None})
         )

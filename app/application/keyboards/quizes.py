@@ -80,7 +80,7 @@ class EditQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSc
 
 class EditQuizChooseCategoryCallbackFactory(CallbackData, prefix="edit_quiz_ctg"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
-    category_id: UUID | None
+    category_item_id: UUID | None
     page: int
 
 
@@ -88,19 +88,19 @@ class EditQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSc
     def _back_callback(self) -> str | CallbackData | None:
         return EditQuizChooseCategoryCallbackFactory(
             action="change_page",
-            category_id=None,
+            category_item_id=None,
             page=self.current_page - 1,
         )
 
     def _pagination_callback(self, page: int) -> CallbackData:
-        return EditQuizChooseCategoryCallbackFactory(action="change_page", category_id=None, page=page)
+        return EditQuizChooseCategoryCallbackFactory(action="change_page", category_item_id=None, page=page)
 
     def _item_button(self, item: ResourceItemSchema) -> dict:
         return {
             "text": item.name,
             "callback_data": EditQuizChooseCategoryCallbackFactory(
                 action="select",
-                category_id=item.category_item_id,
+                category_item_id=item.category_item_id,
                 page=0,
             ),
         }
@@ -138,7 +138,7 @@ class DeleteQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItem
 
 class DeleteQuizChooseCategoryCallbackFactory(CallbackData, prefix="delete_quiz_ctg"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
-    category_id: UUID | None
+    category_item_id: UUID | None
     page: int
 
 
@@ -147,14 +147,14 @@ class DeleteQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItem
         return "manage_quizes"
 
     def _pagination_callback(self, page: int) -> CallbackData:
-        return DeleteQuizChooseCategoryCallbackFactory(action="change_page", category_id=None, page=page)
+        return DeleteQuizChooseCategoryCallbackFactory(action="change_page", category_item_id=None, page=page)
 
     def _item_button(self, item: CategoryItemSchema) -> dict:
         return {
             "text": item.name,
             "callback_data": DeleteQuizChooseCategoryCallbackFactory(
                 action="select",
-                category_id=item.category_item - id,
+                category_item_id=item.category_item_id,
                 page=0,
             ),
         }
@@ -162,7 +162,7 @@ class DeleteQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItem
 
 class CreateQuizChooseCategoryCallbackFactory(CallbackData, prefix="create_quiz_ctg"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
-    category_id: UUID | None
+    category_item_id: UUID | None
     page: int
 
 
@@ -171,14 +171,14 @@ class CreateQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItem
         return "manage_quizes"
 
     def _pagination_callback(self, page: int) -> CallbackData:
-        return CreateQuizChooseCategoryCallbackFactory(action="change_page", category_id=None, page=page)
+        return CreateQuizChooseCategoryCallbackFactory(action="change_page", category_item_id=None, page=page)
 
     def _item_button(self, item: CategoryItemSchema) -> dict:
         return {
             "text": item.name,
             "callback_data": CreateQuizChooseCategoryCallbackFactory(
                 action="select",
-                category_id=item.category_item - id,
+                category_item_id=item.category_item_id,
                 page=0,
             ),
         }

@@ -55,7 +55,7 @@ class ListResourcesChooseCategoryCallbackFactory(
     prefix="list_resources_ctg",  # type: ignore[call-arg]
 ):
     action: Union[Literal["select"], Literal["change_page"]]
-    category_id: UUID | None
+    category_item_id: UUID | None
     page: int
 
 
@@ -69,7 +69,7 @@ class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
             "text": item.name,
             "callback_data": ListResourcesChooseCategoryCallbackFactory(
                 action="select",
-                category_id=item.category_item_id,
+                category_item_id=item.category_item_id,
                 page=0,
             ),
         }
@@ -77,7 +77,7 @@ class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
     def _pagination_callback(self, page: int) -> CallbackData:
         return ListResourcesChooseCategoryCallbackFactory(
             action="change_page",
-            category_id=None,
+            category_item_id=None,
             page=page,
         )
 
@@ -159,7 +159,7 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemSchema]):
     def _back_callback(self) -> CallbackData:
         return ListResourcesChooseCategoryCallbackFactory(
             action="select",
-            category_id=self.current_item.category_item_id,
+            category_item_id=self.current_item.category_item_id,
             page=0,
         )
 

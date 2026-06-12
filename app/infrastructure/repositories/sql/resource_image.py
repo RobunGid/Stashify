@@ -1,17 +1,19 @@
 from dataclasses import asdict, dataclass
 from uuid import UUID
 
+from domain.entities.base import GetManyResult
 from domain.entities.resource_image import ResourceImageEntity, ResourceImageUpdateEntity
 from domain.filters.resource_image import ResourceImageFilters
 from infrastructure.models.category_item import CategoryItemModel
 from infrastructure.models.resource_image import ResourceImageModel
-from infrastructure.repositories.base import GetManyResult, SQLAlchemyRepositoryMixin
-from infrastructure.repositories.resource_image.base import BaseResourceImageRepository
-from sqlalchemy import func, select, Update
+from infrastructure.repositories.base import BaseSQLAlchemyRepository
+from sqlalchemy import func, select, update
 
 
 @dataclass
-class SQLResourceImageRepository(BaseResourceImageRepository, SQLAlchemyRepositoryMixin):
+class SQLResourceImageRepository(
+    BaseSQLAlchemyRepository[ResourceImageEntity, ResourceImageUpdateEntity, ResourceImageFilters]
+):
     async def create(self, resource_image: ResourceImageEntity) -> None:
         item = ResourceImageModel(resource_image)
         self.session.add(item)
@@ -52,7 +54,7 @@ class SQLResourceImageRepository(BaseResourceImageRepository, SQLAlchemyReposito
 
     async def update(self, resource_image_id: UUID, resource_image: ResourceImageUpdateEntity) -> None:
         statement = (
-            Update(CategoryItemModel)
+            update(CategoryItemModel)
             .where(CategoryItemModel.resource_image_id == resource_image_id)
             .values(**{k: v for k, v in asdict(resource_image).items() if v is not None})
         )

@@ -1,17 +1,19 @@
 from dataclasses import asdict, dataclass
 from uuid import UUID
 
+from domain.entities.base import GetManyResult
 from domain.entities.user_account import UserAccountEntity, UserAccountUpdateEntity
 from domain.filters.user_account import UserAccountFilters
 from infrastructure.models.category_item import CategoryItemModel
 from infrastructure.models.user_account import UserAccountModel
-from infrastructure.repositories.base import GetManyResult, SQLAlchemyRepositoryMixin
-from infrastructure.repositories.user_account.base import BaseUserAccountRepository
-from sqlalchemy import func, select, Update
+from infrastructure.repositories.base import BaseSQLAlchemyRepository
+from sqlalchemy import func, select, update
 
 
 @dataclass
-class SQLUserAccountRepository(BaseUserAccountRepository, SQLAlchemyRepositoryMixin):
+class SQLUserAccountRepository(
+    BaseSQLAlchemyRepository[UserAccountEntity, UserAccountUpdateEntity, UserAccountFilters]
+):
     async def create(self, user_account: UserAccountEntity) -> None:
         item = UserAccountModel(**user_account.__dict__)
         self.session.add(item)
@@ -51,7 +53,7 @@ class SQLUserAccountRepository(BaseUserAccountRepository, SQLAlchemyRepositoryMi
 
     async def update(self, user_account_id: UUID, user_account: UserAccountUpdateEntity) -> None:
         statement = (
-            Update(CategoryItemModel)
+            update(CategoryItemModel)
             .where(CategoryItemModel.user_account_id == user_account_id)
             .values(**{k: v for k, v in asdict(user_account).items() if v is not None})
         )

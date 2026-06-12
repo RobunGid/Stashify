@@ -9,16 +9,16 @@ from application.services.resource_item import ResourceItemService
 from application.services.resource_rating import ResourceRatingService
 from application.services.user_account import UserAccountService
 from dishka import provide, Provider, Scope
-from infrastructure.repositories.category_item.base import BaseCategoryItemRepository
-from infrastructure.repositories.quiz_item.base import BaseQuizItemRepository
-from infrastructure.repositories.quiz_question.base import BaseQuizQuestionRepository
-from infrastructure.repositories.quiz_rating.base import BaseQuizRatingRepository
-from infrastructure.repositories.quiz_result.base import BaseQuizResultRepository
-from infrastructure.repositories.resource_favorite.base import BaseResourceFavoriteRepository
-from infrastructure.repositories.resource_image.base import BaseResourceImageRepository
-from infrastructure.repositories.resource_item.base import BaseResourceItemRepository
-from infrastructure.repositories.resource_rating.base import BaseResourceRatingRepository
-from infrastructure.repositories.user_account.base import BaseUserAccountRepository
+from domain.repositories.category_item import BaseCategoryItemRepository
+from domain.repositories.quiz_item import BaseQuizItemRepository
+from domain.repositories.quiz_question import BaseQuizQuestionRepository
+from domain.repositories.quiz_rating import BaseQuizRatingRepository
+from domain.repositories.quiz_result import BaseQuizResultRepository
+from domain.repositories.resource_favorite import BaseResourceFavoriteRepository
+from domain.repositories.resource_image import BaseResourceImageRepository
+from domain.repositories.resource_item import BaseResourceItemRepository
+from domain.repositories.resource_rating import BaseResourceRatingRepository
+from domain.repositories.user_account import BaseUserAccountRepository
 
 
 class ServicesProvider(Provider):
