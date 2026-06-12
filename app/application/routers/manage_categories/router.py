@@ -6,6 +6,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from aiogram_i18n import I18nContext
+from app.constants import DELETE_CATEGORIES_ON_PAGE, EDIT_CATEGORIES_ON_PAGE
 from application.filters.user_role_filter import UserRoleFilter
 from application.filters_schemas.category_item import CategoryItemFiltersSchema
 from application.keyboards.categories import (
@@ -18,7 +19,6 @@ from application.keyboards.categories import (
 )
 from application.schemas.category_item_schema import BaseCategoryItemSchema
 from application.services.category_item import CategoryItemService
-from constants import DELETE_CATEGORIES_ON_PAGE, EDIT_CATEGORIES_ON_PAGE
 from dishka import FromDishka
 from infrastructure.models.user_account import Role
 from sqlalchemy.exc import IntegrityError
