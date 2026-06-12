@@ -2,10 +2,8 @@ from abc import abstractmethod
 from datetime import datetime
 from typing import Generic, TypeVar
 
-from pydantic import BaseModel, Field
-
 from domain.entities.base import BaseEntity
-
+from pydantic import BaseModel, Field
 
 Ent = TypeVar("Ent", bound=BaseEntity)
 

@@ -3,12 +3,12 @@ from dataclasses import dataclass
 from typing import Generic, TypeVar
 from uuid import UUID
 
-from domain.entities.base import BaseEntity, GetManyResult
+from domain.entities.base import BaseEntity, BaseUpdateEntity, GetManyResult
 from domain.filters.base import BaseFilters
 from sqlalchemy.ext.asyncio import AsyncSession
 
 Ent = TypeVar("Ent", bound=BaseEntity)
-UpdEnt = TypeVar("UpdEnt", bound=BaseEntity)
+UpdEnt = TypeVar("UpdEnt", bound=BaseUpdateEntity)
 Fils = TypeVar("Fils", bound=BaseFilters)
 
 

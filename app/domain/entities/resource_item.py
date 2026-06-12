@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from domain.entities.base import BaseEntity
+from domain.entities.base import BaseEntity, BaseUpdateEntity
 
 
 @dataclass
@@ -18,7 +18,7 @@ class ResourceItemEntity(BaseEntity):
 
 
 @dataclass
-class ResourceItemUpdateEntity(BaseEntity):
+class ResourceItemUpdateEntity(BaseUpdateEntity):
     name: str | None
     description: str | None
     links: str | None

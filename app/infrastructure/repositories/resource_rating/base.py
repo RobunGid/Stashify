@@ -6,6 +6,7 @@ from infrastructure.repositories.base import BaseRepository
 
 
 class BaseResourceRatingRepository(
-    BaseRepository[ResourceRatingEntity, ResourceRatingUpdateEntity, ResourceRatingFilters], ABC
+    BaseRepository[ResourceRatingEntity, ResourceRatingUpdateEntity, ResourceRatingFilters],
+    ABC,
 ):
     pass

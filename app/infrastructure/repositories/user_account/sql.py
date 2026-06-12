@@ -30,7 +30,6 @@ class SQLUserAccountRepository(BaseUserAccountRepository, SQLAlchemyRepositoryMi
         return UserAccountEntity(**item)
 
     async def get_many(self, filters: UserAccountFilters) -> GetManyResult[UserAccountEntity]:
-
         statement = select(UserAccountModel)
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()
@@ -58,3 +57,15 @@ class SQLUserAccountRepository(BaseUserAccountRepository, SQLAlchemyRepositoryMi
         )
         await self.session.execute(statement)
         await self.session.commit()
+
+    async def get_one_by_telegram_id(self, telegram_id: int) -> UserAccountEntity | None:
+        statement = select(UserAccountModel).where(
+            UserAccountModel.telegram_id == telegram_id,
+        )
+
+        item = (await self.session.execute(statement)).scalars().first()
+
+        if item is None:
+            return None
+
+        return UserAccountModel(**item)

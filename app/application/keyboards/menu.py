@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -42,8 +42,9 @@ class BaseMenuKeyboardBuilder(BaseKeyboardBuilder, ABC):
             ],
         ]
 
+    @abstractmethod
     def _role_buttons(self) -> list[list[InlineKeyboardButton]]:
-        return []
+        pass
 
 
 @dataclass

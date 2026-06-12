@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from pydantic import ConfigDict
 from application.schemas.base_schema import BaseSchema
+from pydantic import ConfigDict
 
 
 class ResourceImageWithoutResourceSchema(BaseSchema):

@@ -58,15 +58,3 @@ class SQLResourceItemRepository(BaseResourceItemRepository, SQLAlchemyRepository
         )
         await self.session.execute(statement)
         await self.session.commit()
-
-    async def get_one_by_telegram_id(self, telegram_id: int) -> ResourceItemEntity | None:
-        statement = select(CategoryItemModel).where(
-            ResourceItemModel.telegram_id == telegram_id,
-        )
-
-        item = (await self.session.execute(statement)).scalars().first()
-
-        if item is None:
-            return None
-
-        return ResourceItemEntity(**item)

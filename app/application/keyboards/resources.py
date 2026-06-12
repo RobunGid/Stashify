@@ -5,6 +5,7 @@ from uuid import UUID
 
 from aiogram.filters.callback_data import CallbackData
 
+from app.domain.entities.resource_item import ResourceItemEntity
 from application.keyboards.base import (
     BackToMenuKeyboardBuilderMixin,
     BaseBackKeyboardBuilder,
@@ -26,11 +27,11 @@ class ListResourcesChooseResourceCallbackFactory(CallbackData, prefix="lst_rsc_r
 
 
 @dataclass
-class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSchema]):
+class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
     def _back_callback(self) -> str:
         return "resources"
 
-    def _item_button(self, item: ResourceItemSchema) -> dict:
+    def _item_button(self, item: ResourceItemEntity) -> dict:
         return {
             "text": item.name,
             "callback_data": ListResourcesChooseResourceCallbackFactory(
@@ -67,7 +68,7 @@ class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
             "text": item.name,
             "callback_data": ListResourcesChooseCategoryCallbackFactory(
                 action="select",
-                category_id=item.category_item - id,
+                category_id=item.category_item_id,
                 page=0,
             ),
         }
@@ -244,7 +245,7 @@ class CreateResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Category
             "text": item.name,
             "callback_data": CreateResourceCallbackFactory(
                 action="select",
-                category_id=item.category_item - id,
+                category_id=item.category_item_id,
                 page=0,
             ),
         }
@@ -282,7 +283,7 @@ class DeleteResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Category
             "text": item.name,
             "callback_data": DeleteResourceChooseCategoryCallbackFactory(
                 action="select",
-                category_id=item.category_item - id,
+                category_id=item.category_item_id,
                 page=0,
             ),
         }

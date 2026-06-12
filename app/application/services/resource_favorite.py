@@ -4,6 +4,6 @@ from domain.filters.resource_favorite import ResourceFavoriteFilters
 
 
 class ResourceFavoriteService(
-    BaseService[ResourceFavoriteEntity, ResourceFavoriteUpdateEntity, ResourceFavoriteFilters]
+    BaseService[ResourceFavoriteEntity, ResourceFavoriteUpdateEntity, ResourceFavoriteFilters],
 ):
     pass

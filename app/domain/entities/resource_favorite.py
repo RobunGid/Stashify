@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from domain.entities.base import BaseEntity
+from domain.entities.base import BaseEntity, BaseUpdateEntity
 
 
 @dataclass
@@ -13,6 +13,6 @@ class ResourceFavoriteEntity(BaseEntity):
 
 
 @dataclass
-class ResourceFavoriteUpdateEntity(BaseEntity):
+class ResourceFavoriteUpdateEntity(BaseUpdateEntity):
     user_account_id: str
     resource_item_id: UUID

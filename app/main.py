@@ -1,22 +1,19 @@
 import asyncio
 
-from dishka.integrations.aiogram import setup_dishka
-
 from aiogram_i18n import I18nMiddleware
 from aiogram_i18n.cores import FluentRuntimeCore
+from app.settings.aiogram import bot, dp
 from application.routers import common, menu
-
-# from application.routers import manage_users
 from application.routers.manage_categories.router import router as manage_categories_router
-
-# from application.routers.manage_quizes.router import router as manage_quizes_router
-# from application.routers.manage_resources.router import router as manage_resources_router
+from application.routers.manage_quizes.router import router as manage_quizes_router
+from application.routers.manage_resources.router import router as manage_resources_router
+from application.routers.manage_users import router as manage_users_router
 from application.routers.resources.router import router as list_resources_router
-
-# from application.routers.search_resource.router import router as search_resource_router
+from application.routers.search_resource.router import router as search_resource_router
 from containers.factories import get_container
+from dishka.integrations.aiogram import setup_dishka
+
 from database.init import init_models
-from app.settings.aiogram import dp, bot
 
 
 async def main():
@@ -26,12 +23,12 @@ async def main():
     dp.include_routers(
         common.router,
         menu.router,
-        # manage_resources_router,
+        manage_resources_router,
         manage_categories_router,
-        # manage_quizes_router,
+        manage_quizes_router,
         list_resources_router,
-        # search_resource_router,
-        # manage_users.router,
+        search_resource_router,
+        manage_users_router,
     )
 
     i18n_middleware = I18nMiddleware(core=FluentRuntimeCore(path="locales/{locale}"))

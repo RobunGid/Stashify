@@ -1,9 +1,7 @@
 from typing import Generic, Type, TypeVar
 
-from pydantic import BaseModel
-
 from domain.filters.base import BaseFilters
-
+from pydantic import BaseModel
 
 Fils = TypeVar("Fils", bound=BaseFilters)
 

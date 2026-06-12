@@ -6,6 +6,7 @@ from infrastructure.repositories.base import BaseRepository
 
 
 class BaseResourceImageRepository(
-    BaseRepository[ResourceImageEntity, ResourceImageUpdateEntity, ResourceImageFilters], ABC
+    BaseRepository[ResourceImageEntity, ResourceImageUpdateEntity, ResourceImageFilters],
+    ABC,
 ):
     pass
