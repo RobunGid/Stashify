@@ -5,6 +5,7 @@ from uuid import UUID
 from aiogram.filters.callback_data import CallbackData
 
 from application.keyboards.base import (
+    BackKeyboardBuilderMixin,
     BaseBackKeyboardBuilder,
     BaseListKeyboardBuilder,
     BaseManageEntryKeyboardBuilder,
@@ -37,7 +38,7 @@ class EntryEditCategoryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
 
 class DeleteCategoryIdCallbackFactory(CallbackData, prefix="delete_category_id"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
-    category_id: UUID | None
+    category_item_id: UUID | None
     page: int
 
 
@@ -45,14 +46,14 @@ class DeleteCategoryKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity])
     def _back_callback(self) -> str | CallbackData | None:
         return DeleteCategoryIdCallbackFactory(
             action="change_page",
-            category_id=None,
+            category_item_id=None,
             page=self.current_page - 1,
         )
 
     def _pagination_callback(self, page: int) -> CallbackData:
         return DeleteCategoryIdCallbackFactory(
             action="change_page",
-            category_id=None,
+            category_item_id=None,
             page=page,
         )
 
@@ -61,7 +62,7 @@ class DeleteCategoryKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity])
             "text": item.name,
             "callback_data": DeleteCategoryIdCallbackFactory(
                 action="select",
-                category_id=item.category_item - id,
+                category_item_id=item.category_item_id,
                 page=0,
             ),
         }
@@ -69,23 +70,30 @@ class DeleteCategoryKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity])
 
 class EditCategoryIdCallbackFactory(CallbackData, prefix="edit_category_id"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
-    category_id: UUID | None
+    category_item_id: UUID | None
     page: int
 
 
 @dataclass
-class EditCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
+class ManageCategoriesBackKeyboardBuilder(BaseBackKeyboardBuilder):
     def _back_callback(self) -> str | CallbackData | None:
-        return EditCategoryIdCallbackFactory(
-            action="change_page",
-            category_id=None,
-            page=self.current_page - 1,
-        )
+        return "manage_categories"
 
+
+@dataclass
+class ManageCategoriesBackKeyboardBuilderMixin(BackKeyboardBuilderMixin):
+    def _back_callback(self) -> str:
+        return "manage_categories"
+
+
+@dataclass
+class EditCategoryListKeyboardBuilder(
+    BaseListKeyboardBuilder[CategoryItemEntity], ManageCategoriesBackKeyboardBuilderMixin
+):
     def _pagination_callback(self, page: int) -> CallbackData:
         return EditCategoryIdCallbackFactory(
             action="change_page",
-            category_id=None,
+            category_item_id=None,
             page=page,
         )
 
@@ -94,13 +102,7 @@ class EditCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity
             "text": item.name,
             "callback_data": EditCategoryIdCallbackFactory(
                 action="select",
-                category_id=item.category_item - id,
+                category_item_id=item.category_item_id,
                 page=0,
             ),
         }
-
-
-@dataclass
-class ManageCategoriesBackKeyboardBuilder(BaseBackKeyboardBuilder):
-    def _back_callback(self) -> str | CallbackData | None:
-        return "manage_categories"

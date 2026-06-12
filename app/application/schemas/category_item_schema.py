@@ -1,7 +1,7 @@
 from uuid import UUID, uuid4
 
-from application.schemas.base_schema import BaseSchema
-from domain.entities.category_item import CategoryItemEntity
+from application.schemas.base_schema import BaseSchema, BaseUpdateSchema
+from domain.entities.category_item import CategoryItemEntity, CategoryItemUpdateEntity
 from pydantic import Field
 
 
@@ -12,6 +12,13 @@ class BaseCategoryItemSchema(BaseSchema[CategoryItemEntity]):
 
     def to_entity(self) -> CategoryItemEntity:
         return CategoryItemEntity(category_item_id=self.category_item_id, name=self.name)
+
+
+class CategoryItemUpdateSchema(BaseUpdateSchema[CategoryItemUpdateEntity]):
+    name: str | None
+
+    def to_entity(self) -> CategoryItemUpdateEntity:
+        return CategoryItemUpdateEntity(name=self.name)
 
 
 class CategoryItemSchema(BaseCategoryItemSchema):

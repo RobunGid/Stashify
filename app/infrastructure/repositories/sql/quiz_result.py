@@ -1,17 +1,17 @@
 from dataclasses import asdict, dataclass
 from uuid import UUID
 
+from domain.entities.base import GetManyResult
 from domain.entities.quiz_result import QuizResultEntity, QuizResultUpdateEntity
 from domain.filters.quiz_result import QuizResultFilters
 from infrastructure.models.category_item import CategoryItemModel
 from infrastructure.models.quiz_result import QuizResultModel
-from infrastructure.repositories.base import GetManyResult, SQLAlchemyRepositoryMixin
-from infrastructure.repositories.quiz_result.base import BaseQuizResultRepository
-from sqlalchemy import func, select, Update
+from infrastructure.repositories.base import BaseSQLAlchemyRepository
+from sqlalchemy import func, select, update
 
 
 @dataclass
-class SQLQuizResultRepository(BaseQuizResultRepository, SQLAlchemyRepositoryMixin):
+class SQLQuizResultRepository(BaseSQLAlchemyRepository[QuizResultEntity, QuizResultUpdateEntity, QuizResultFilters]):
     async def create(self, quiz_result: QuizResultEntity) -> None:
         item = QuizResultModel(quiz_result)
         self.session.add(item)
@@ -52,7 +52,7 @@ class SQLQuizResultRepository(BaseQuizResultRepository, SQLAlchemyRepositoryMixi
 
     async def update(self, quiz_result_id: UUID, quiz_result: QuizResultUpdateEntity) -> None:
         statement = (
-            Update(CategoryItemModel)
+            update(CategoryItemModel)
             .where(CategoryItemModel.quiz_result_id == quiz_result_id)
             .values(**{k: v for k, v in asdict(quiz_result).items() if v is not None})
         )

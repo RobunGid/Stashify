@@ -138,9 +138,9 @@ async def list_resources_category_select(
         message_id=callback.message.message_id,
     )
 
-    category_id = callback_data.category_id
-    await state.update_data(category_id=category_id)
-    resources = await ResourceManager.get_many(category_id=category_id)
+    category_item_id = callback_data.category_item_id
+    await state.update_data(category_item_id=category_item_id)
+    resources = await ResourceManager.get_many(category_item_id=category_item_id)
     total_resources_pages = ceil(len(resources) / LIST_RESOURCES_RESOURCES_ON_PAGE)
 
     keyboard_builder = ResourceListKeyboardBuilder(
@@ -152,7 +152,7 @@ async def list_resources_category_select(
     keyboard = keyboard_builder.build()
 
     await state.update_data(
-        category_id=category_id,
+        category_item_id=category_item_id,
         resources=resources,
         total_resources_pages=total_resources_pages,
     )
@@ -231,7 +231,7 @@ async def list_resource_resource_select(
     if not resource_item:
         return
 
-    resources = await ResourceManager.get_many(category_id=resource_item.category_id)
+    resources = await ResourceManager.get_many(category_item_id=resource_item.category_item_id)
     user_account_id = str(callback.from_user.id)
     favorites = await FavoriteManager.get_many(user_account_id=user_account_id)
     images = await ResourceImageManager.get_many(resource_item_id=callback_data.resource_item_id)

@@ -10,7 +10,7 @@ class ResourceRatingEntity(BaseEntity):
 
     resource_item_id: UUID
 
-    user_account_id: str
+    user_account_id: UUID
 
     rating: int
 

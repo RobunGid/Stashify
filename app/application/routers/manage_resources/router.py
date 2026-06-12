@@ -29,18 +29,18 @@ from application.keyboards.resources import (
     ManageResourcesBackKeyboardBuilder,
     ResourceManageEntryKeyboardBuilder,
 )
-from application.schemas.resource_image_schema import BsaeResourceImageSchema
-from application.schemas.resource_schema import BaseResourceItemSchema, ResourceItemSchema
-from application.services.category_item import CategoryItemService
-from application.services.resource_image import ResourceImageService
-from application.services.resource_item import ResourceItemService
-from constants import (
+from application.routers.constants import (
     CREATE_RESOURCE_CATEGORIES_ON_PAGE,
     DELETE_RESOURCE_CATEGORIES_ON_PAGE,
     DELETE_RESOURCE_RESOURCES_ON_PAGE,
     EDIT_RESOURCE_CATEGORIES_ON_PAGE,
     EDIT_RESOURCE_RESOURCES_ON_PAGE,
 )
+from application.schemas.resource_image_schema import BsaeResourceImageSchema
+from application.schemas.resource_schema import BaseResourceItemSchema, ResourceItemSchema
+from application.services.category_item import CategoryItemService
+from application.services.resource_image import ResourceImageService
+from application.services.resource_item import ResourceItemService
 from dishka import FromDishka
 from infrastructure.models.user_account import Role
 from sqlalchemy.exc import IntegrityError
@@ -381,13 +381,13 @@ async def delete_resource_callback_handler(
     )
 
     filters = CategoryItemFiltersSchema(count=DELETE_RESOURCE_CATEGORIES_ON_PAGE)
-    categories, count = await service.get_many(filters.to_entity())
+    category_entities, count = await service.get_many(filters.to_entity())
     total_pages = ceil(count / DELETE_RESOURCE_CATEGORIES_ON_PAGE)
-    await state.update_data(total_pages=total_pages, categories=categories)
+    await state.update_data(total_pages=total_pages, category_items=category_entities)
 
     keyboard_builder = DeleteResourceCategoryListKeyboardBuilder(
         i18n=i18n,
-        items=categories,
+        items=category_entities,
         total_pages=total_pages,
         current_page=1,
     )
@@ -632,13 +632,13 @@ async def edit_resource_callback_handler(
     )
 
     filters = CategoryItemFiltersSchema(count=EDIT_RESOURCE_CATEGORIES_ON_PAGE)
-    categories, count = await service.get_many(filters.to_entity())
+    category_entities, count = await service.get_many(filters.to_entity())
     total_pages = ceil(count / EDIT_RESOURCE_CATEGORIES_ON_PAGE)
-    await state.update_data(total_pages=total_pages, categories=categories)
+    await state.update_data(total_pages=total_pages, category_items=category_entities)
 
     keyboard_builder = EditResourceCategoryListKeyboardBuilder(
         i18n=i18n,
-        items=categories,
+        items=category_entities,
         current_page=1,
         total_pages=total_pages,
     )

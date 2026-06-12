@@ -9,7 +9,7 @@ class QuizResultEntity(BaseEntity):
     quiz_result_id: UUID
 
     quiz_item_id: UUID
-    user_account_id: str
+    user_account_id: UUID
     percent: int
 
 

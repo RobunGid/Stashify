@@ -1,20 +1,23 @@
 from dataclasses import asdict, dataclass
 from uuid import UUID
 
+from domain.entities.base import GetManyResult
 from domain.entities.category_item import CategoryItemEntity, CategoryItemUpdateEntity
 from domain.filters.category_item import CategoryItemFilters
+from infrastructure.mappers.category_item import CategoryItemMapper
 from infrastructure.models.category_item import CategoryItemModel
 from infrastructure.models.quiz_item import QuizItemModel
 from infrastructure.models.resource_favorite import ResourceFavoriteModel
 from infrastructure.models.resource_item import ResourceItemModel
-from infrastructure.repositories.base import GetManyResult, SQLAlchemyRepositoryMixin
-from infrastructure.repositories.category_item.base import BaseCategoryItemRepository
+from infrastructure.repositories.base import BaseSQLAlchemyRepository
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import selectinload
 
 
 @dataclass
-class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepositoryMixin):
+class SQLCategoryItemRepository(
+    BaseSQLAlchemyRepository[CategoryItemEntity, CategoryItemUpdateEntity, CategoryItemFilters]
+):
     async def create(self, category_item: CategoryItemEntity) -> None:
         model = CategoryItemModel.from_entity(category_item)
         self.session.add(model)
@@ -36,8 +39,8 @@ class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepository
 
         statement = select(CategoryItemModel).options(
             selectinload(CategoryItemModel.resource_items)
-            .selectinload(ResourceItemModel.quiz)
-            .selectinload(QuizItemModel.questions),
+            .selectinload(ResourceItemModel.quiz_item)
+            .selectinload(QuizItemModel.quiz_questions),
         )
         if filters.has_quiz_items:
             subquery = (
@@ -92,7 +95,7 @@ class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepository
             statement = statement.limit(filters.count)
 
         categories = (await self.session.execute(statement)).scalars().all()
-        categories_entities = [CategoryItemEntity(**category) for category in categories]
+        categories_entities = [CategoryItemMapper.to_entity(model=category) for category in categories]
         return GetManyResult(items=categories_entities, total=total)
 
     async def delete(self, category_item_id: UUID) -> None:

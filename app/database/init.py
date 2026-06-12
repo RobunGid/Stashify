@@ -1,4 +1,4 @@
-from containers.factories import get_container
+from application.containers.factories import get_container
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from database.base import Base

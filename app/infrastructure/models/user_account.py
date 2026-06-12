@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 from domain.enums import Role
-from sqlalchemy import Column, DateTime, Enum, func, Integer, String
+from sqlalchemy import BigInteger, Column, DateTime, Enum, func, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -12,7 +12,7 @@ class UserAccountModel(Base):
     __tablename__ = "user_account"
 
     user_account_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    user_telegram_id = Column(Integer)
+    user_telegram_id = Column(BigInteger)
     username = Column(String)
 
     role = Column(Enum(Role))

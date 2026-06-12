@@ -9,8 +9,8 @@ from aiogram_i18n import I18nContext
 from application.filters_schemas.resource_item import ResourceItemFiltersSchema
 from application.keyboards.menu import MenuBackKeyboardBuilder
 from application.keyboards.search_resource import SearchResourceListKeyboardBuilder
+from application.routers.constants import FIND_RESOURCE_RESOURCES_ON_PAGE
 from application.services.resource_item import ResourceItemService
-from constants import FIND_RESOURCE_RESOURCES_ON_PAGE
 from dishka import FromDishka
 
 from settings.aiogram import bot

@@ -71,9 +71,7 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
         nav_buttons = self._build_pagination_buttons()
         for btn in nav_buttons:
             builder.button(**btn)
-
-        nav_count = len(nav_buttons)
-        builder.adjust(*([1] * len(self.items)), nav_count)
+            builder.adjust(1)
 
         self._append_back_button(builder)
         return builder.as_markup()
@@ -89,11 +87,11 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
         if pages > 1:
             buttons += [
                 {
-                    "text": self.i18n.get("items.start"),
+                    "text": self.i18n.get("items-start"),
                     "callback_data": self._pagination_callback(1),
                 },
                 {
-                    "text": self.i18n.get("items.back"),
+                    "text": self.i18n.get("items-back"),
                     "callback_data": self._pagination_callback(pages - 1),
                 },
             ]
@@ -103,11 +101,11 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
         if pages < total_pages:
             buttons += [
                 {
-                    "text": self.i18n.get("items.forward"),
+                    "text": self.i18n.get("items-forward"),
                     "callback_data": self._pagination_callback(pages + 1),
                 },
                 {
-                    "text": self.i18n.get("items.end"),
+                    "text": self.i18n.get("items-end"),
                     "callback_data": self._pagination_callback(total_pages),
                 },
             ]

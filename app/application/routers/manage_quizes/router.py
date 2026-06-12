@@ -27,9 +27,7 @@ from application.keyboards.quizes import (
     QuizConfirmFinishKeyboardBuilder,
     QuizManageEntryKeyboardBuilder,
 )
-from application.schemas.quiz_item_schema import QuizSchema
-from application.schemas.quiz_question_schema import BaseQuizQuestionSchema, QuizQuestionSchema
-from constants import (
+from application.routers.constants import (
     CREATE_QUIZ_CATEGORIES_ON_PAGE,
     CREATE_QUIZ_RESOURCES_ON_PAGE,
     DELETE_QUIZ_CATEGORIES_ON_PAGE,
@@ -37,10 +35,12 @@ from constants import (
     EDIT_QUIZ_CATEGORIES_ON_PAGE,
     EDIT_QUIZ_RESOURCES_ON_PAGE,
 )
+from application.schemas.quiz_item_schema import QuizSchema
+from application.schemas.quiz_question_schema import BaseQuizQuestionSchema, QuizQuestionSchema
 from infrastructure.models.user_account import Role
 from sqlalchemy.exc import IntegrityError
 
-from database.managers import CategoryManager, QuizManager, QuizQuestionManager, ResourceManager
+# from database.managers import CategoryManager, QuizManager, QuizQuestionManager, ResourceManager
 from settings.aiogram import bot
 
 router = Router()
@@ -74,7 +74,7 @@ class CreateQuizState(StatesGroup):
     resources = State()
     categories = State()
     resource_item_id = State()
-    category_id = State()
+    category_item_id = State()
     name = State()
     description = State()
     image = State()
@@ -174,12 +174,12 @@ async def create_quiz_category_choose(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
-    category_id = callback_data.category_id
-    resources = await ResourceManager.get_many(category_id=category_id, has_quiz=False)
+    category_item_id = callback_data.category_item_id
+    resources = await ResourceManager.get_many(category_item_id=category_item_id, has_quiz=False)
     await state.update_data(resources=resources)
     total_pages = ceil(len(resources) / CREATE_QUIZ_RESOURCES_ON_PAGE)
 
-    await state.update_data(category_id=category_id)
+    await state.update_data(category_item_id=category_item_id)
 
     keyboard_builder = CreateQuizResourceListKeyboardBuilder(
         i18n=i18n,
@@ -362,7 +362,7 @@ class DeleteQuizState(StatesGroup):
     resources = State()
     categories = State()
     resource_item_id = State()
-    category_id = State()
+    category_item_id = State()
     confirm = State()
 
 
@@ -451,8 +451,8 @@ async def delete_quiz_category_choose(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
-    category_id = callback_data.category_id
-    resources = await ResourceManager.get_many(category_id=category_id, has_quiz=True)
+    category_item_id = callback_data.category_item_id
+    resources = await ResourceManager.get_many(category_item_id=category_item_id, has_quiz=True)
     await state.update_data(resources=resources)
     total_pages = ceil(len(resources) / DELETE_QUIZ_RESOURCES_ON_PAGE)
 
@@ -464,7 +464,7 @@ async def delete_quiz_category_choose(
     )
     keyboard = keyboard_builder.build()
 
-    await state.update_data(category_id=category_id)
+    await state.update_data(category_item_id=category_item_id)
     await callback.message.answer(
         text=i18n.get(
             "manage-quizes-delete-choose-resource",
@@ -686,12 +686,12 @@ async def edit_quizes_category_choose(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
-    category_id = callback_data.category_id
-    resources = await ResourceManager.get_many(category_id=category_id, has_quiz=True)
+    category_item_id = callback_data.category_item_id
+    resources = await ResourceManager.get_many(category_item_id=category_item_id, has_quiz=True)
     await state.update_data(resources=resources)
     total_pages = ceil(len(resources) / EDIT_QUIZ_RESOURCES_ON_PAGE)
 
-    await state.update_data(category_id=category_id)
+    await state.update_data(category_item_id=category_item_id)
 
     keyboard_builder = EditQuizResourceListKeyboardBuilder(
         i18n=i18n,
