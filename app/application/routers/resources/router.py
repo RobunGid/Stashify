@@ -12,7 +12,7 @@ from application.exceptions.quiz_item import QuizItemNotFoundException
 from application.exceptions.quiz_question import QuizQuestionNotFoundException
 from application.exceptions.resource_item import ResourceItemNotFoundException
 from application.filters_schemas.category_item import CategoryItemFiltersSchema
-from application.filters_schemas.resource_favorite import ResourceFavoriteFiltersSchema
+from application.filters_schemas.quiz_question import QuizQuestionFiltersSchema
 from application.filters_schemas.resource_image import ResourceImageFiltersSchema
 from application.filters_schemas.resource_item import ResourceItemFiltersSchema
 from application.formaters.resource_item import ResourceItemFormatter
@@ -53,7 +53,6 @@ router = Router()
 @router.callback_query(F.data == "resources")
 async def list_resources_callback_handler(
     callback: CallbackQuery,
-    state: FSMContext,
     i18n: I18nContext,
     service: FromDishka[CategoryItemService],
 ):
@@ -65,17 +64,12 @@ async def list_resources_callback_handler(
     )
 
     filters = CategoryItemFiltersSchema(count=LIST_RESOURCES_CATEGORIES_ON_PAGE, has_resource_items=True)
-    category_items, count = await service.get_many(filters.to_entity())
+    category_item_entities, count = await service.get_many(filters.to_entity())
     total_category_items_pages = ceil(count / LIST_RESOURCES_CATEGORIES_ON_PAGE)
-    await state.update_data(
-        total_categories_pages=total_category_items_pages,
-        categories=category_items,
-        current_page=1,
-    )
 
     keyboard_builder = CategoryListKeyboardBuilder(
         i18n,
-        items=category_items,
+        items=category_item_entities,
         current_page=1,
         total_pages=total_category_items_pages,
     )
@@ -94,9 +88,9 @@ async def list_resources_callback_handler(
 )
 async def list_resources_category_page(
     callback: CallbackQuery,
-    state: FSMContext,
     callback_data: ListResourcesChooseCategoryCallbackFactory,
     i18n: I18nContext,
+    service: FromDishka[CategoryItemService],
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
@@ -105,20 +99,15 @@ async def list_resources_category_page(
         message_id=callback.message.message_id,
     )
     current_page = callback_data.page
-
-    await state.update_data(current_page=current_page)
-
-    categories_data = await state.get_data()
-    categories = categories_data["categories"][
-        (current_page - 1) * LIST_RESOURCES_CATEGORIES_ON_PAGE : current_page * (LIST_RESOURCES_CATEGORIES_ON_PAGE)
-    ]
-    total_categories_pages = categories_data["total_categories_pages"]
+    filters = CategoryItemFiltersSchema(count=LIST_RESOURCES_CATEGORIES_ON_PAGE, has_resource_items=True)
+    category_item_entities, count = await service.get_many(filters.to_entity())
+    total_category_items_pages = ceil(count / LIST_RESOURCES_CATEGORIES_ON_PAGE)
 
     keyboard_builder = CategoryListKeyboardBuilder(
         i18n,
-        items=categories,
+        items=category_item_entities,
         current_page=current_page,
-        total_pages=total_categories_pages,
+        total_pages=total_category_items_pages,
     )
     keyboard = keyboard_builder.build()
 
@@ -136,11 +125,16 @@ async def list_resources_category_page(
 async def list_resources_category_select(
     callback: CallbackQuery,
     callback_data: ListResourcesChooseCategoryCallbackFactory,
-    state: FSMContext,
     i18n: I18nContext,
     service: FromDishka[ResourceItemService],
 ):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
+    if (
+        not callback.from_user
+        or not callback.from_user.language_code
+        or not callback.message
+        or not callback.data
+        or not callback_data.category_item_id
+    ):
         return
     await bot.delete_message(
         chat_id=callback.message.chat.id,
@@ -148,7 +142,6 @@ async def list_resources_category_select(
     )
 
     category_item_id = callback_data.category_item_id
-    await state.update_data(category_item_id=category_item_id)
     filters = ResourceItemFiltersSchema(count=LIST_RESOURCES_RESOURCES_ON_PAGE, category_item_id=category_item_id)
     resource_items, count = await service.get_many(filters.to_entity())
     total_resources_pages = ceil(count / LIST_RESOURCES_RESOURCES_ON_PAGE)
@@ -158,14 +151,10 @@ async def list_resources_category_select(
         items=resource_items,
         current_page=1,
         total_pages=total_resources_pages,
+        category_item_id=category_item_id,
     )
     keyboard = keyboard_builder.build()
 
-    await state.update_data(
-        category_item_id=category_item_id,
-        resources=resource_items,
-        total_resources_pages=total_resources_pages,
-    )
     await callback.message.answer(
         text=i18n.get(
             "list-resources-choose-resource",
@@ -179,30 +168,35 @@ async def list_resources_category_select(
 )
 async def list_resource_resource_page(
     callback: CallbackQuery,
-    state: FSMContext,
     callback_data: ListResourcesChooseResourceCallbackFactory,
     i18n: I18nContext,
+    service: FromDishka[ResourceItemService],
 ):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
+    if (
+        not callback.from_user
+        or not callback.from_user.language_code
+        or not callback.message
+        or not callback.data
+        or not callback_data.category_item_id
+    ):
         return
     await bot.delete_message(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
     current_page = callback_data.page
-    await state.update_data(current_page=current_page)
 
-    resources_data = await state.get_data()
-    resources = resources_data["resources"][
-        (current_page - 1) * LIST_RESOURCES_RESOURCES_ON_PAGE : current_page * (LIST_RESOURCES_RESOURCES_ON_PAGE)
-    ]
-    total_resources_pages = resources_data["total_resources_pages"]
+    category_item_id = callback_data.category_item_id
+    filters = ResourceItemFiltersSchema(count=LIST_RESOURCES_RESOURCES_ON_PAGE, category_item_id=category_item_id)
+    resource_item_entities, count = await service.get_many(filters.to_entity())
+    total_resources_pages = ceil(count / LIST_RESOURCES_RESOURCES_ON_PAGE)
 
     keyboard_builder = ResourceListKeyboardBuilder(
         i18n,
-        items=resources,
+        items=resource_item_entities,
         current_page=current_page,
         total_pages=total_resources_pages,
+        category_item_id=category_item_id,
     )
     keyboard = keyboard_builder.build()
 
@@ -219,7 +213,6 @@ async def list_resource_resource_page(
 )
 async def list_resource_resource_select(
     callback: CallbackQuery,
-    state: FSMContext,
     callback_data: ListResourcesChooseResourceCallbackFactory,
     i18n: I18nContext,
     resource_item_service: FromDishka[ResourceItemService],
@@ -228,15 +221,10 @@ async def list_resource_resource_select(
     resource_image_service: FromDishka[ResourceImageService],
     resource_rating_service: FromDishka[ResourceRatingService],
     quiz_item_service: FromDishka[QuizItemService],
+    quiz_result_service: FromDishka[QuizResultService],
     user_account: UserAccountSchema,
 ):
-    if (
-        not callback.from_user
-        or not callback.from_user.language_code
-        or not callback.message
-        or not callback.data
-        or not callback_data.resource_item_id
-    ):
+    if not callback.message or not callback.data or not callback_data.resource_item_id:
         return
 
     await bot.delete_message(
@@ -245,46 +233,52 @@ async def list_resource_resource_select(
     )
     resource_item_id = callback_data.resource_item_id
 
-    resource_item = await resource_item_service.get_one(resource_item_id)
-    if not resource_item:
+    resource_item_entity = await resource_item_service.get_one(resource_item_id)
+    if not resource_item_entity:
         raise ResourceItemNotFoundException(resource_item_id)
 
-    quiz_item = await quiz_item_service.get_one_by_resource_item_id(resource_item_id)
-    category_item = await category_item_service.get_one(resource_item.category_item_id)
-    if not category_item:
-        raise CategoryItemNotFoundException(resource_item.category_item_id)
+    is_quiz_exists = await quiz_item_service.check_exists_by_resource_item_id(resource_item_id)
+    quiz_result_entity = await quiz_result_service.get_one(resource_item_id)
 
     resource_entities_filters = ResourceItemFiltersSchema(
-        category_item_id=resource_item.category_item_id,
-        count=LIST_RESOURCES_RESOURCES_ON_PAGE,
+        category_item_id=resource_item_entity.category_item_id,
+        count=4,
     )
-    resource_entities, _ = await resource_item_service.get_many(resource_entities_filters.to_entity())
-
-    resource_favorite_filters = ResourceFavoriteFiltersSchema(user_account_id=user_account.user_account_id)
-    resource_favorite_entities, _ = await resource_favorite_service.get_many(resource_favorite_filters.to_entity())
+    resource_item_entities, count = await resource_item_service.get_many(resource_entities_filters.to_entity())
+    category_item_entity = await category_item_service.get_one(resource_item_entity.category_item_id)
+    if not category_item_entity:
+        raise CategoryItemNotFoundException(resource_item_entity.category_item_id)
 
     resource_image_filters = ResourceImageFiltersSchema(resource_item_id=resource_item_id)
     resource_image_entities, _ = await resource_image_service.get_many(resource_image_filters.to_entity())
-    is_favorite = any(
-        resource_item.resource_item_id == favorite.resource_item_id for favorite in resource_favorite_entities
+    is_favorite = await resource_favorite_service.check_exits_by_user_account_id_and_resource_item_id(
+        user_account.user_account_id,
+        resource_item_id,
     )
 
     resource_rating = await resource_rating_service.get_one_by_user_account_id_and_resource_item_id(
         user_account_id=user_account.user_account_id,
-        resource_item_id=resource_item.resource_item_id,
+        resource_item_id=resource_item_entity.resource_item_id,
     )
     resource_rating_number = resource_rating.rating if resource_rating else None
-
-    await state.update_data(resources=resource_entities, resource_item=resource_item)
+    quiz_result_percent = quiz_result_entity.percent if quiz_result_entity else None
+    resource_item_index_in_category = await category_item_service.get_resource_item_index_in_category(
+        resource_item_id,
+        resource_item_entity.category_item_id,
+    )
+    if not resource_item_index_in_category:
+        raise ResourceItemNotFoundException(resource_item_id)
 
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
-        items=resource_entities,
-        current_item=resource_item,
+        item_ids=tuple(resource_item_entity.resource_item_id for resource_item_entity in resource_item_entities),
+        current_item=resource_item_entity,
+        total_items=count,
         is_favorite=is_favorite,
+        has_quiz=is_quiz_exists,
         rating=resource_rating_number,
-        quiz_percent=0,
-        has_quiz=bool(quiz_item),
+        current_item_index=resource_item_index_in_category,
+        quiz_percent=quiz_result_percent,
     )
     keyboard = keyboard_builder.build()
 
@@ -299,8 +293,8 @@ async def list_resource_resource_select(
 
     await callback.message.answer(
         text=ResourceItemFormatter.translate_resource_item(
-            resource_item=resource_item,
-            category_item=category_item,
+            resource_item=resource_item_entity,
+            category_item=category_item_entity,
             i18n=i18n,
         ),
         reply_markup=keyboard,
@@ -312,7 +306,6 @@ async def list_resource_resource_select(
 )
 async def list_resource_resource_change_page(
     callback: CallbackQuery,
-    state: FSMContext,
     callback_data: ListResourcesChooseResourceCallbackFactory,
     i18n: I18nContext,
     resource_item_service: FromDishka[ResourceItemService],
@@ -321,15 +314,10 @@ async def list_resource_resource_change_page(
     resource_image_service: FromDishka[ResourceImageService],
     resource_rating_service: FromDishka[ResourceRatingService],
     quiz_item_service: FromDishka[QuizItemService],
+    quiz_result_service: FromDishka[QuizResultService],
     user_account: UserAccountSchema,
 ):
-    if (
-        not callback.from_user
-        or not callback.from_user.language_code
-        or not callback.message
-        or not callback.data
-        or not callback_data.resource_item_id
-    ):
+    if not callback.message or not callback.data or not callback_data.resource_item_id:
         return
     await bot.delete_message(
         chat_id=callback.message.chat.id,
@@ -337,45 +325,52 @@ async def list_resource_resource_change_page(
     )
     resource_item_id = callback_data.resource_item_id
 
-    resource_item = await resource_item_service.get_one(resource_item_id)
-    if not resource_item:
+    resource_item_entity = await resource_item_service.get_one(resource_item_id)
+    if not resource_item_entity:
         raise ResourceItemNotFoundException(resource_item_id)
 
-    quiz_item = await quiz_item_service.get_one_by_resource_item_id(resource_item_id)
-    category_item = await category_item_service.get_one(resource_item.category_item_id)
-    if not category_item:
-        raise CategoryItemNotFoundException(resource_item.category_item_id)
+    is_quiz_exists = await quiz_item_service.check_exists_by_resource_item_id(resource_item_id)
+    quiz_result_entity = await quiz_result_service.get_one(resource_item_id)
 
     resource_entities_filters = ResourceItemFiltersSchema(
-        category_item_id=resource_item.category_item_id,
-        count=LIST_RESOURCES_RESOURCES_ON_PAGE,
+        category_item_id=resource_item_entity.category_item_id,
+        count=4,
     )
-    resource_entities, _ = await resource_item_service.get_many(resource_entities_filters.to_entity())
-
-    resource_favorite_filters = ResourceFavoriteFiltersSchema(user_account_id=user_account.user_account_id)
-    resource_favorite_entities, _ = await resource_favorite_service.get_many(resource_favorite_filters.to_entity())
+    resource_item_entities, count = await resource_item_service.get_many(resource_entities_filters.to_entity())
+    category_item_entity = await category_item_service.get_one(resource_item_entity.category_item_id)
+    if not category_item_entity:
+        raise CategoryItemNotFoundException(resource_item_entity.category_item_id)
 
     resource_image_filters = ResourceImageFiltersSchema(resource_item_id=resource_item_id)
     resource_image_entities, _ = await resource_image_service.get_many(resource_image_filters.to_entity())
-    is_favorite = any(
-        resource_item.resource_item_id == favorite.resource_item_id for favorite in resource_favorite_entities
+    is_favorite = await resource_favorite_service.check_exits_by_user_account_id_and_resource_item_id(
+        user_account.user_account_id,
+        resource_item_id,
     )
 
     resource_rating = await resource_rating_service.get_one_by_user_account_id_and_resource_item_id(
         user_account_id=user_account.user_account_id,
-        resource_item_id=resource_item.resource_item_id,
+        resource_item_id=resource_item_entity.resource_item_id,
     )
     resource_rating_number = resource_rating.rating if resource_rating else None
+    quiz_result_percent = quiz_result_entity.percent if quiz_result_entity else None
+    resource_item_index_in_category = await category_item_service.get_resource_item_index_in_category(
+        resource_item_id,
+        resource_item_entity.category_item_id,
+    )
+    if not resource_item_index_in_category:
+        raise ResourceItemNotFoundException(resource_item_id)
 
-    await state.update_data(resources=resource_entities, resource_item=resource_item)
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
-        items=resource_entities,
-        current_item=resource_item,
+        item_ids=tuple(resource_item_entity.resource_item_id for resource_item_entity in resource_item_entities),
+        current_item=resource_item_entity,
+        total_items=count,
         is_favorite=is_favorite,
+        has_quiz=is_quiz_exists,
         rating=resource_rating_number,
-        quiz_percent=0,
-        has_quiz=bool(quiz_item),
+        current_item_index=resource_item_index_in_category,
+        quiz_percent=quiz_result_percent,
     )
     keyboard = keyboard_builder.build()
     if resource_image_entities:
@@ -388,16 +383,12 @@ async def list_resource_resource_change_page(
         )
     await callback.message.answer(
         text=ResourceItemFormatter.translate_resource_item(
-            resource_item=resource_item,
-            category_item=category_item,
+            resource_item=resource_item_entity,
+            category_item=category_item_entity,
             i18n=i18n,
         ),
         reply_markup=keyboard,
     )
-
-
-# FAVORITES
-# TODO: Make multiple callback factories for pagination, select, etc.
 
 
 @router.callback_query(
@@ -405,7 +396,6 @@ async def list_resource_resource_change_page(
 )
 async def list_resource_resource_add_favorite(
     callback: CallbackQuery,
-    state: FSMContext,
     callback_data: ListResourcesChooseResourceCallbackFactory,
     i18n: I18nContext,
     resource_item_service: FromDishka[ResourceItemService],
@@ -414,6 +404,7 @@ async def list_resource_resource_add_favorite(
     resource_image_service: FromDishka[ResourceImageService],
     quiz_item_service: FromDishka[QuizItemService],
     category_item_service: FromDishka[CategoryItemService],
+    quiz_result_service: FromDishka[QuizResultService],
     user_account: UserAccountSchema,
 ):
     if (
@@ -429,54 +420,68 @@ async def list_resource_resource_add_favorite(
         message_id=callback.message.message_id,
     )
     resource_item_id = callback_data.resource_item_id
-    resource_item = await resource_item_service.get_one(resource_item_id)
-    if not resource_item:
+
+    resource_item_entity = await resource_item_service.get_one(resource_item_id)
+    if not resource_item_entity:
         raise ResourceItemNotFoundException(resource_item_id)
 
-    quiz_item = await quiz_item_service.get_one_by_resource_item_id(resource_item_id)
+    is_quiz_exists = await quiz_item_service.check_exists_by_resource_item_id(resource_item_id)
+    quiz_result_entity = await quiz_result_service.get_one(resource_item_id)
 
-    category_item = await category_item_service.get_one(resource_item.category_item_id)
-    if not category_item:
-        raise CategoryItemNotFoundException(resource_item.category_item_id)
+    resource_entities_filters = ResourceItemFiltersSchema(
+        category_item_id=resource_item_entity.category_item_id,
+        count=4,
+    )
+    resource_item_entities, count = await resource_item_service.get_many(resource_entities_filters.to_entity())
+    category_item_entity = await category_item_service.get_one(resource_item_entity.category_item_id)
+    if not category_item_entity:
+        raise CategoryItemNotFoundException(resource_item_entity.category_item_id)
 
-    state_data = await state.get_data()
-    resource_entities = state_data["resources"]
-    favorite = BaseResourceFavoriteSchema(
+    resource_image_filters = ResourceImageFiltersSchema(resource_item_id=resource_item_id)
+    resource_image_entities, _ = await resource_image_service.get_many(resource_image_filters.to_entity())
+    resource_favorite_schema = BaseResourceFavoriteSchema(
         user_account_id=user_account.user_account_id,
-        resource_item_id=resource_item.resource_item_id,
+        resource_item_id=resource_item_id,
     )
-    resource_rating = await resource_rating_service.get_one_by_user_account_id_and_resource_item_id(
-        user_account.user_account_id,
-        resource_item_id,
-    )
-    await resource_favorite_service.create(favorite.to_entity())
+    await resource_favorite_service.create(resource_favorite_schema.to_entity())
 
-    filters = ResourceImageFiltersSchema(resource_item_id=resource_item_id)
-    resource_images, _ = await resource_image_service.get_many(filters.to_entity())
+    resource_rating = await resource_rating_service.get_one_by_user_account_id_and_resource_item_id(
+        user_account_id=user_account.user_account_id,
+        resource_item_id=resource_item_entity.resource_item_id,
+    )
     resource_rating_number = resource_rating.rating if resource_rating else None
-    await state.update_data(resources=resource_entities)
+    quiz_result_percent = quiz_result_entity.percent if quiz_result_entity else None
+    resource_item_index_in_category = await category_item_service.get_resource_item_index_in_category(
+        resource_item_id,
+        resource_item_entity.category_item_id,
+    )
+    if not resource_item_index_in_category:
+        raise ResourceItemNotFoundException(resource_item_id)
+
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
-        items=resource_entities,
-        current_item=resource_item,
-        has_quiz=bool(quiz_item),
+        item_ids=tuple(resource_item_entity.resource_item_id for resource_item_entity in resource_item_entities),
+        current_item=resource_item_entity,
+        total_items=count,
         is_favorite=True,
-        quiz_percent=0,
+        has_quiz=is_quiz_exists,
         rating=resource_rating_number,
+        current_item_index=resource_item_index_in_category,
+        quiz_percent=quiz_result_percent,
     )
     keyboard = keyboard_builder.build()
-    # TODO: MAKE QUIZ_PERCENT GETTING!!
-    if resource_images:
+    if resource_image_entities:
         media_group = MediaGroupBuilder()
-        for image in resource_images:
+        for image in resource_image_entities:
             media_group.add_photo(type="photo", media=image.image)
         await callback.message.answer_media_group(
             media=list(media_group.build()),
+            reply_markup=keyboard,
         )
     await callback.message.answer(
         text=ResourceItemFormatter.translate_resource_item(
-            resource_item=resource_item,
-            category_item=category_item,
+            resource_item=resource_item_entity,
+            category_item=category_item_entity,
             i18n=i18n,
         ),
         reply_markup=keyboard,
@@ -488,7 +493,6 @@ async def list_resource_resource_add_favorite(
 )
 async def list_resource_resource_remove_favorite(
     callback: CallbackQuery,
-    state: FSMContext,
     callback_data: ListResourcesChooseResourceCallbackFactory,
     i18n: I18nContext,
     resource_item_service: FromDishka[ResourceItemService],
@@ -497,6 +501,7 @@ async def list_resource_resource_remove_favorite(
     resource_image_service: FromDishka[ResourceImageService],
     quiz_item_service: FromDishka[QuizItemService],
     category_item_service: FromDishka[CategoryItemService],
+    quiz_result_service: FromDishka[QuizResultService],
     user_account: UserAccountSchema,
 ):
     if (
@@ -513,53 +518,66 @@ async def list_resource_resource_remove_favorite(
     )
     resource_item_id = callback_data.resource_item_id
 
-    resource_item = await resource_item_service.get_one(resource_item_id)
-    if not resource_item:
+    resource_item_entity = await resource_item_service.get_one(resource_item_id)
+    if not resource_item_entity:
         raise ResourceItemNotFoundException(resource_item_id)
-    category_item = await category_item_service.get_one(resource_item.category_item_id)
-    if not category_item:
-        raise CategoryItemNotFoundException(resource_item.category_item_id)
 
-    quiz_item = await quiz_item_service.get_one_by_resource_item_id(resource_item_id)
+    is_quiz_exists = await quiz_item_service.check_exists_by_resource_item_id(resource_item_id)
+    quiz_result_entity = await quiz_result_service.get_one(resource_item_id)
 
-    filters = ResourceImageFiltersSchema(resource_item_id=resource_item_id)
-    resource_images, _ = await resource_image_service.get_many(filters.to_entity())
-
-    state_data = await state.get_data()
-    resourc_entities = state_data["resources"]
-    resource_rating = await resource_rating_service.get_one_by_user_account_id_and_resource_item_id(
-        user_account_id=user_account.user_account_id,
-        resource_item_id=resource_item.resource_item_id,
+    resource_entities_filters = ResourceItemFiltersSchema(
+        category_item_id=resource_item_entity.category_item_id,
+        count=4,
     )
+    resource_item_entities, count = await resource_item_service.get_many(resource_entities_filters.to_entity())
+    category_item_entity = await category_item_service.get_one(resource_item_entity.category_item_id)
+    if not category_item_entity:
+        raise CategoryItemNotFoundException(resource_item_entity.category_item_id)
 
+    resource_image_filters = ResourceImageFiltersSchema(resource_item_id=resource_item_id)
+    resource_image_entities, _ = await resource_image_service.get_many(resource_image_filters.to_entity())
     await resource_favorite_service.delete_by_user_account_id_and_resource_item_id(
         user_account_id=user_account.user_account_id,
         resource_item_id=resource_item_id,
     )
+
+    resource_rating = await resource_rating_service.get_one_by_user_account_id_and_resource_item_id(
+        user_account_id=user_account.user_account_id,
+        resource_item_id=resource_item_entity.resource_item_id,
+    )
     resource_rating_number = resource_rating.rating if resource_rating else None
-    await state.update_data(resources=resourc_entities)
+    quiz_result_percent = quiz_result_entity.percent if quiz_result_entity else None
+    resource_item_index_in_category = await category_item_service.get_resource_item_index_in_category(
+        resource_item_id,
+        resource_item_entity.category_item_id,
+    )
+    if not resource_item_index_in_category:
+        raise ResourceItemNotFoundException(resource_item_id)
+
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
-        items=resourc_entities,
-        current_item=resource_item,
-        has_quiz=bool(quiz_item),
-        is_favorite=True,
-        quiz_percent=0,
+        item_ids=tuple(resource_item_entity.resource_item_id for resource_item_entity in resource_item_entities),
+        current_item=resource_item_entity,
+        total_items=count,
+        is_favorite=False,
+        has_quiz=is_quiz_exists,
         rating=resource_rating_number,
+        current_item_index=resource_item_index_in_category,
+        quiz_percent=quiz_result_percent,
     )
     keyboard = keyboard_builder.build()
-    if resource_images:
+    if resource_image_entities:
         media_group = MediaGroupBuilder()
-        for photo in resource_images:
-            media_group.add_photo(type="photo", media=str(photo.image))
-
+        for image in resource_image_entities:
+            media_group.add_photo(type="photo", media=image.image)
         await callback.message.answer_media_group(
             media=list(media_group.build()),
+            reply_markup=keyboard,
         )
     await callback.message.answer(
         text=ResourceItemFormatter.translate_resource_item(
-            resource_item=resource_item,
-            category_item=category_item,
+            resource_item=resource_item_entity,
+            category_item=category_item_entity,
             i18n=i18n,
         ),
         reply_markup=keyboard,
@@ -571,7 +589,6 @@ async def list_resource_resource_remove_favorite(
 )
 async def list_resource_resource_rate(
     callback: CallbackQuery,
-    state: FSMContext,
     callback_data: ListResourcesItemCallbackFactory,
     i18n: I18nContext,
     resource_item_service: FromDishka[ResourceItemService],
@@ -580,44 +597,45 @@ async def list_resource_resource_rate(
     resource_image_service: FromDishka[ResourceImageService],
     quiz_item_service: FromDishka[QuizItemService],
     category_item_service: FromDishka[CategoryItemService],
+    quiz_result_service: FromDishka[QuizResultService],
     user_account: UserAccountSchema,
 ):
-    if (
-        not callback.from_user
-        or not callback.from_user.language_code
-        or not callback.message
-        or not callback.data
-        or not callback_data.resource_item_id
-        or not callback_data.rating
-    ):
+    if not callback.message or not callback.data or not callback_data.resource_item_id or not callback_data.rating:
         return
-
     await bot.delete_message(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
     )
-
     resource_item_id = callback_data.resource_item_id
-    rating = callback_data.rating
 
-    resource_item = await resource_item_service.get_one(resource_item_id)
-    if not resource_item:
+    resource_item_entity = await resource_item_service.get_one(resource_item_id)
+    if not resource_item_entity:
         raise ResourceItemNotFoundException(resource_item_id)
 
-    category_item = await category_item_service.get_one(resource_item.category_item_id)
-    if not category_item:
-        raise CategoryItemNotFoundException(resource_item.category_item_id)
+    is_quiz_exists = await quiz_item_service.check_exists_by_resource_item_id(resource_item_id)
+    quiz_result_entity = await quiz_result_service.get_one(resource_item_id)
 
-    quiz_item = await quiz_item_service.get_one_by_resource_item_id(resource_item_id)
+    resource_entities_filters = ResourceItemFiltersSchema(
+        category_item_id=resource_item_entity.category_item_id,
+        count=4,
+    )
+    resource_item_entities, count = await resource_item_service.get_many(resource_entities_filters.to_entity())
+    category_item_entity = await category_item_service.get_one(resource_item_entity.category_item_id)
+    if not category_item_entity:
+        raise CategoryItemNotFoundException(resource_item_entity.category_item_id)
 
-    state_data = await state.get_data()
-    resource_entities = state_data["resources"]
+    resource_image_filters = ResourceImageFiltersSchema(resource_item_id=resource_item_id)
+    resource_image_entities, _ = await resource_image_service.get_many(resource_image_filters.to_entity())
+    is_favorite = await resource_favorite_service.check_exits_by_user_account_id_and_resource_item_id(
+        user_account.user_account_id,
+        resource_item_id,
+    )
 
-    existing_rating = await resource_rating_service.get_one_by_user_account_id_and_resource_item_id(
+    existing_resource_rating = await resource_rating_service.get_one_by_user_account_id_and_resource_item_id(
         user_account_id=user_account.user_account_id,
         resource_item_id=resource_item_id,
     )
-    if existing_rating:
+    if existing_resource_rating:
         await resource_rating_service.delete_by_user_account_id_and_resource_item_id(
             user_account_id=user_account.user_account_id,
             resource_item_id=resource_item_id,
@@ -626,45 +644,42 @@ async def list_resource_resource_rate(
     new_rating = BaseResourceRatingSchema(
         resource_rating_id=uuid4(),
         resource_item_id=resource_item_id,
-        rating=rating,
+        rating=callback_data.rating,
         user_account_id=user_account.user_account_id,
     )
     await resource_rating_service.create(new_rating.to_entity())
-
-    resource_favorite_filters = ResourceFavoriteFiltersSchema(user_account_id=user_account.user_account_id)
-    favorites, _ = await resource_favorite_service.get_many(resource_favorite_filters.to_entity())
-
-    is_favorite = any(resource_item.resource_item_id == favorite.resource_item_id for favorite in favorites)
-
-    resource_images_filters = ResourceImageFiltersSchema(resource_item_id=resource_item_id)
-    resource_images, _ = await resource_image_service.get_many(resource_images_filters.to_entity())
-
-    await state.update_data(resources=resource_entities)
+    quiz_result_percent = quiz_result_entity.percent if quiz_result_entity else None
+    resource_item_index_in_category = await category_item_service.get_resource_item_index_in_category(
+        resource_item_id,
+        resource_item_entity.category_item_id,
+    )
+    if not resource_item_index_in_category:
+        raise ResourceItemNotFoundException(resource_item_id)
 
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
-        items=resource_entities,
-        current_item=resource_item,
-        has_quiz=bool(quiz_item),
+        item_ids=tuple(resource_item_entity.resource_item_id for resource_item_entity in resource_item_entities),
+        current_item=resource_item_entity,
+        total_items=count,
         is_favorite=is_favorite,
-        quiz_percent=0,
-        rating=rating,
+        has_quiz=is_quiz_exists,
+        rating=callback_data.rating,
+        current_item_index=resource_item_index_in_category,
+        quiz_percent=quiz_result_percent,
     )
     keyboard = keyboard_builder.build()
-
-    if resource_images:
+    if resource_image_entities:
         media_group = MediaGroupBuilder()
-        for image in resource_images:
+        for image in resource_image_entities:
             media_group.add_photo(type="photo", media=image.image)
-
         await callback.message.answer_media_group(
             media=list(media_group.build()),
+            reply_markup=keyboard,
         )
-
     await callback.message.answer(
         text=ResourceItemFormatter.translate_resource_item(
-            resource_item=resource_item,
-            category_item=category_item,
+            resource_item=resource_item_entity,
+            category_item=category_item_entity,
             i18n=i18n,
         ),
         reply_markup=keyboard,
@@ -676,9 +691,11 @@ async def list_resource_resource_rate(
 )
 async def list_resource_start_quiz(
     callback: CallbackQuery,
-    state: FSMContext,
     callback_data: ListResourcesItemCallbackFactory,
     i18n: I18nContext,
+    quiz_item_service: FromDishka[QuizItemService],
+    resource_item_service: FromDishka[ResourceItemService],
+    quiz_question_service: FromDishka[QuizQuestionService],
 ):
     if (
         not callback.from_user
@@ -693,18 +710,32 @@ async def list_resource_start_quiz(
         message_id=callback.message.message_id,
     )
 
-    state_data = await state.get_data()
-    resource_item = state_data["resource_item"]
-    state_data = await state.get_data()
+    resource_item_id = callback_data.resource_item_id
 
-    keyboard_builder = ResourceQuizConfirmKeyboardBuilder(i18n=i18n, current_item=resource_item)
+    resource_item_entity = await resource_item_service.get_one(resource_item_id)
+    if not resource_item_entity:
+        raise ResourceItemNotFoundException(resource_item_id)
+
+    resource_item_id = callback_data.resource_item_id
+
+    resource_item_entity = await resource_item_service.get_one(resource_item_id)
+    if not resource_item_entity:
+        raise ResourceItemNotFoundException(resource_item_id)
+
+    quiz_item_entity = await quiz_item_service.get_one_by_resource_item_id(resource_item_id)
+    if not quiz_item_entity:
+        raise QuizItemNotFoundException(resource_item_id)
+
+    quiz_question_count = await quiz_question_service.get_count_by_quiz_item_id(quiz_item_entity.quiz_item_id)
+
+    keyboard_builder = ResourceQuizConfirmKeyboardBuilder(i18n=i18n, current_item=resource_item_entity)
     keyboard = keyboard_builder.build()
 
     await callback.message.answer(
         text=i18n.get(
             "list-resources-start-quiz-question",
-            question_count=len(resource_item.quiz.questions),
-            resource_name=resource_item.name,
+            question_count=quiz_question_count,
+            resource_name=resource_item_entity.name,
         ),
         reply_markup=keyboard,
     )
@@ -715,7 +746,6 @@ async def list_resource_start_quiz(
 )
 async def list_resource_start_quiz_confirm(
     callback: CallbackQuery,
-    state: FSMContext,
     callback_data: ListResourcesItemCallbackFactory,
     i18n: I18nContext,
     quiz_item_service: FromDishka[QuizItemService],
@@ -740,7 +770,6 @@ async def list_resource_start_quiz_confirm(
     if not resource_item_entity:
         raise ResourceItemNotFoundException(resource_item_id)
 
-    state_data = await state.get_data()
     quiz_item = await quiz_item_service.get_one_by_resource_item_id(resource_item_id)
     if not quiz_item:
         raise QuizItemNotFoundException(resource_item_id)
@@ -752,15 +781,13 @@ async def list_resource_start_quiz_confirm(
     if not quiz_question_entity:
         raise QuizQuestionNotFoundException(resource_item_id)
 
-    page = state_data["current_page"]
-    await state.update_data(quiz=quiz_item)
-    await state.update_data(quiz_answers=[])
     keyboard_builder = ResourceQuizQuestionKeyboardBuilder(
         i18n=i18n,
         item=resource_item_entity,
         question=quiz_question_entity,
-        page=page,
+        page=1,
         question_number=0,
+        quiz_item=quiz_item,
     )
     keyboard = keyboard_builder.build()
 
@@ -779,69 +806,77 @@ async def list_resource_start_quiz_confirm(
 )
 async def list_resource_quiz_question_answer(
     callback: CallbackQuery,
-    state: FSMContext,
     callback_data: ListResourcesQuizQuestionCallbackFactory,
     i18n: I18nContext,
     quiz_result_service: FromDishka[QuizResultService],
+    quiz_item_service: FromDishka[QuizItemService],
+    quiz_question_service: FromDishka[QuizQuestionService],
+    resource_item_service: FromDishka[ResourceItemService],
     user_account: UserAccountSchema,
+    state: FSMContext,
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
-    state_data = await state.get_data()
-    quiz = state_data["quiz"]
-    current_quiz_answers = state_data["quiz_answers"]
-    resource_item = state_data["resource"]
     question_number = callback_data.question_number
-    page = state_data["current_page"]
 
-    if question_number + 1 < len(quiz.questions):
+    quiz_item_id = callback_data.quiz_item_id
+    quiz_item_entity = await quiz_item_service.get_one(quiz_item_id)
+    if not quiz_item_entity:
+        raise QuizItemNotFoundException(quiz_item_id)
+
+    resource_item_entity = await resource_item_service.get_one(quiz_item_entity.resource_item_id)
+    if not resource_item_entity:
+        raise ResourceItemNotFoundException(quiz_item_entity.resource_item_id)
+
+    filters = QuizQuestionFiltersSchema(resource_item_id=resource_item_entity.resource_item_id)
+    quiz_question_entities, count = await quiz_question_service.get_many(filters.to_entity())
+
+    if question_number + 1 < count:
         keyboard_builder = ResourceQuizQuestionKeyboardBuilder(
             i18n=i18n,
-            item=resource_item,
-            page=page,
-            question=quiz.questions[question_number + 1],
+            item=resource_item_entity,
+            page=0,
+            question=quiz_question_entities[question_number + 1],
             question_number=question_number,
+            quiz_item=quiz_item_entity,
         )
         keyboard = keyboard_builder.build()
-        await state.update_data(
-            quiz_answers=current_quiz_answers + [callback_data.option_number],
-        )
-        if quiz.questions[question_number + 1].image:
+        if quiz_question_entities[question_number + 1].image is not None:
             await callback.message.answer_photo(
-                photo=quiz.questions[question_number + 1].image,
-                text=quiz.questions[question_number + 1].text,
+                photo=quiz_question_entities[question_number + 1].image,
+                text=quiz_question_entities[question_number + 1].text,
                 reply_markup=keyboard,
             )
         else:
-            await callback.message.answer(text=quiz.questions[question_number + 1].text, reply_markup=keyboard)
+            await callback.message.answer(text=quiz_question_entities[question_number + 1].text, reply_markup=keyboard)
     else:
+        state_data = await state.get_data()
+        current_quiz_answers = state_data["current_quiz_answers"]
         quiz_answers = current_quiz_answers + [callback_data.option_number]
-        right_answers = [question.right_options for question in quiz.questions]
+        right_answers = [question.right_options for question in quiz_question_entities]
         right_answers_len = len(
             [quiz_answers[i] for i in range(len(quiz_answers)) if quiz_answers[i] in right_answers[i]],
         )
         right_answer_percent = int(100 * right_answers_len / len(quiz_answers))
 
-        state_data = await state.get_data()
-        resource_item = state_data["resource"]
         existing_quiz_result = await quiz_result_service.get_one_by_user_account_id_and_resource_item_id(
-            resource_item.resource_item_id,
+            resource_item_entity.resource_item_id,
             user_account.user_account_id,
         )
         if existing_quiz_result:
             await quiz_result_service.delete_by_user_account_id_and_resource_item_id(
-                resource_item.resource_item_id,
+                resource_item_entity.resource_item_id,
                 user_account.user_account_id,
             )
         quiz_result = BaseQuizResultSchema(
             quiz_result_id=uuid4(),
-            quiz_item_id=quiz.quiz_item_id,
+            quiz_item_id=quiz_item_entity.quiz_item_id,
             user_account_id=user_account.user_account_id,
             percent=right_answer_percent,
         )
         await quiz_result_service.create(quiz_result.to_entity())
 
-        keyboard_builder = ResourceQuizFinalKeyboardBuilder(i18n=i18n, item=resource_item, page=page)
+        keyboard_builder = ResourceQuizFinalKeyboardBuilder(i18n=i18n, item=resource_item_entity, page=0)
         keyboard = keyboard_builder.build()
         await callback.message.answer(
             text=i18n.get("start-quiz-final", percent=right_answer_percent),

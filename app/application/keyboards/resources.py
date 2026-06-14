@@ -22,11 +22,14 @@ from domain.entities.resource_item import ResourceItemEntity
 class ListResourcesChooseResourceCallbackFactory(CallbackData, prefix="lst_rsc_rsc"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
     resource_item_id: UUID | None
+    category_item_id: UUID | None
     page: int
 
 
 @dataclass
 class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
+    category_item_id: UUID
+
     def _back_callback(self) -> str:
         return "resources"
 
@@ -37,6 +40,7 @@ class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
                 action="select",
                 resource_item_id=item.resource_item_id,
                 page=0,
+                category_item_id=item.category_item_id,
             ),
         }
 
@@ -45,6 +49,7 @@ class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
             action="change_page",
             resource_item_id=None,
             page=page,
+            category_item_id=self.category_item_id,
         )
 
 

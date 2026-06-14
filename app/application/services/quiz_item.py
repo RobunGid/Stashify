@@ -11,3 +11,6 @@ class QuizItemService(BaseService[QuizItemEntity, QuizItemUpdateEntity, QuizItem
 
     async def get_one_by_resource_item_id(self, resource_item_id: UUID) -> QuizItemEntity | None:
         return await self.repository.get_one_by_resource_item_id(resource_item_id)
+
+    async def check_exists_by_resource_item_id(self, resource_item_id: UUID) -> bool:
+        return await self.repository.check_exists_by_resource_item_id(resource_item_id)

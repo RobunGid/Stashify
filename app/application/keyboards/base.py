@@ -8,6 +8,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from aiogram_i18n import I18nContext
+from domain.entities.base import BaseEntity
 
 
 @dataclass
@@ -52,8 +53,9 @@ class QuizWithOptions(Protocol):
     options: list[str]
 
 
-It = TypeVar("It")
+It = TypeVar("It", bound=BaseEntity)
 Qs = TypeVar("Qs", bound=QuizWithOptions)
+Qz = TypeVar("Qz")
 
 
 @dataclass
@@ -121,9 +123,9 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
 
 
 @dataclass
-class NavigationKeyboardBuilderMixin(ABC, Generic[It]):
+class NavigationKeyboardBuilderMixin(ABC):
     @abstractmethod
-    def _navigation_callback(self, item: It) -> CallbackData:
+    def _navigation_callback(self, item_id: UUID) -> CallbackData:
         """Return callback_data for pagination button"""
 
 
@@ -134,13 +136,15 @@ class BaseItemKeyboardBuilder(
     BackKeyboardBuilderMixin,
     Generic[It],
 ):
-    items: list[It]
+    item_ids: tuple[UUID, ...]
     current_item: It
+    current_item_index: int
+    total_items: int
 
     is_favorite: bool
     rating: int | None
     has_quiz: bool
-    quiz_percent: int
+    quiz_percent: int | None
 
     def build(self) -> InlineKeyboardMarkup:
         builder = InlineKeyboardBuilder()
@@ -152,13 +156,8 @@ class BaseItemKeyboardBuilder(
         return builder.as_markup()
 
     def _build_navigation_buttons(self) -> list[dict]:
-        item_ids = [self._get_item_id(item) for item in self.items]
-        current_item_id = self._get_item_id(self.current_item)
-        current_item_id_index = item_ids.index(current_item_id)
-        total_items = len(self.items)
-
-        is_at_start = current_item_id_index == 0
-        is_at_end = current_item_id_index == total_items - 1
+        is_at_start = self.current_item_index == 0
+        is_at_end = self.current_item_index == self.total_items - 1
 
         buttons: list[dict] = []
 
@@ -166,27 +165,27 @@ class BaseItemKeyboardBuilder(
             buttons += [
                 {
                     "text": self.i18n.get("items-start"),
-                    "callback_data": self._navigation_callback(self.items[0]).pack(),
+                    "callback_data": self._navigation_callback(self.item_ids[0]).pack(),
                 },
                 {
                     "text": self.i18n.get("items-back"),
                     "callback_data": self._navigation_callback(
-                        self.items[current_item_id_index - 1],
+                        self.item_ids[self.current_item_index - 1],
                     ).pack(),
                 },
             ]
-        buttons.append({"text": f"{current_item_id_index + 1}/{total_items}", "callback_data": " "})
+        buttons.append({"text": f"{self.current_item_index + 1}/{self.total_items}", "callback_data": " "})
         if not is_at_end:
             buttons += [
                 {
                     "text": self.i18n.get("items-forward"),
                     "callback_data": self._navigation_callback(
-                        self.items[current_item_id_index + 1],
+                        self.item_ids[self.current_item_index + 1],
                     ).pack(),
                 },
                 {
                     "text": self.i18n.get("items-end"),
-                    "callback_data": self._navigation_callback(self.items[-1]).pack(),
+                    "callback_data": self._navigation_callback(self.item_ids[-1]).pack(),
                 },
             ]
         return buttons
@@ -303,10 +302,11 @@ class BaseQuizQuestionKeyboardBuilder(
     BaseKeyboardBuilder,
     BackKeyboardBuilderMixin,
     ABC,
-    Generic[It, Qs],
+    Generic[It, Qs, Qz],
 ):
     item: It
     question: Qs
+    quiz_item: Qz
     page: int
     question_number: int
 

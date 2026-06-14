@@ -17,3 +17,7 @@ class BaseQuizQuestionRepository(
     @abstractmethod
     async def get_one_by_question_number(self, resource_item_id: UUID, quiz_question_number: int) -> None:
         pass
+
+    @abstractmethod
+    async def get_count_by_quiz_item_id(self, quiz_item_id: UUID) -> int:
+        pass

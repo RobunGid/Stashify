@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Literal, Union
+from uuid import UUID
 
 from aiogram.filters.callback_data import CallbackData
 
@@ -12,6 +13,7 @@ from application.keyboards.resources import (
     ListResourcesChooseResourceCallbackFactory,
     ListResourcesItemCallbackFactory,
 )
+from domain.entities.quiz_item import QuizItemEntity
 from domain.entities.quiz_question import QuizQuestionEntity
 from domain.entities.resource_item import ResourceItemEntity
 
@@ -20,6 +22,7 @@ class ListResourcesQuizQuestionCallbackFactory(CallbackData, prefix="lst_rsc_qst
     action: Union[Literal["answer"], None]
     option_number: int
     question_number: int
+    quiz_item_id: UUID
 
 
 @dataclass
@@ -63,23 +66,26 @@ class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceItem
             action="change_page",
             page=self.page,
             resource_item_id=self.item.resource_item_id,
+            category_item_id=None,
         )
 
 
 @dataclass
 class ResourceQuizQuestionKeyboardBuilder(
-    BaseQuizQuestionKeyboardBuilder[ResourceItemEntity, QuizQuestionEntity],
+    BaseQuizQuestionKeyboardBuilder[ResourceItemEntity, QuizQuestionEntity, QuizItemEntity],
 ):
     def _build_quiz_callback(self, option_number: int, question_number: int) -> CallbackData:
         return ListResourcesQuizQuestionCallbackFactory(
             action="answer",
             option_number=option_number,
             question_number=question_number,
+            quiz_item_id=self.quiz_item.quiz_item_id,
         )
 
     def _back_callback(self) -> str | CallbackData | None:
         return ListResourcesChooseResourceCallbackFactory(
             action="change_page",
-            page=self.page,
             resource_item_id=self.item.resource_item_id,
+            category_item_id=None,
+            page=self.page,
         )

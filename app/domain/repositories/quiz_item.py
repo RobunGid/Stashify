@@ -10,3 +10,7 @@ class BaseQuizItemRepository(BaseRepository[QuizItemEntity, QuizItemUpdateEntity
     @abstractmethod
     async def get_one_by_resource_item_id(self, resource_item_id: UUID) -> QuizItemEntity | None:
         pass
+
+    @abstractmethod
+    async def check_exists_by_resource_item_id(self, resource_item_id: UUID) -> bool:
+        pass

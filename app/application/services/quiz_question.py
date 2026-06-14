@@ -20,3 +20,6 @@ class QuizQuestionService(BaseService[QuizQuestionEntity, QuizQuestionUpdateEnti
         quiz_question_number: int,
     ) -> QuizQuestionEntity | None:
         return await self.repository.get_one_by_question_number(resource_item_id, quiz_question_number)
+
+    async def get_count_by_quiz_item_id(self, quiz_item_id: UUID) -> int:
+        return await self.repository.get_count_by_quiz_item_id(quiz_item_id)
