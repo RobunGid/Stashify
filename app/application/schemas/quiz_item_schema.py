@@ -13,8 +13,8 @@ class BaseQuizItemSchema(BaseSchema[QuizItemEntity]):
 
     def to_entity(self) -> QuizItemEntity:
         return QuizItemEntity(
-            quiz_item_id=self.quiz_item_id, 
-            resource_item_id=self.resource_item_id
+            quiz_item_id=self.quiz_item_id,
+            resource_item_id=self.resource_item_id,
         )
 
 

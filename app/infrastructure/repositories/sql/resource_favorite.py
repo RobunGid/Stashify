@@ -12,7 +12,7 @@ from sqlalchemy import func, select, update
 
 @dataclass
 class SQLResourceFavoriteRepository(
-    BaseSQLAlchemyRepository[ResourceFavoriteEntity, ResourceFavoriteUpdateEntity, ResourceFavoriteFilters]
+    BaseSQLAlchemyRepository[ResourceFavoriteEntity, ResourceFavoriteUpdateEntity, ResourceFavoriteFilters],
 ):
     async def create(self, resource_favorite: ResourceFavoriteEntity) -> None:
         item = ResourceFavoriteModel(resource_favorite)
@@ -46,7 +46,7 @@ class SQLResourceFavoriteRepository(
         resource_favorites_entities = [ResourceFavoriteEntity(**category) for category in resource_favorites]
         return GetManyResult(items=resource_favorites_entities, total=total)
 
-    async def delete(self, resource_favorite_id: UUID) -> None:
+    async def delete_by_id(self, resource_favorite_id: UUID) -> None:
         statement = select(CategoryItemModel).where(CategoryItemModel.resource_favorite_id == resource_favorite_id)
         category = (await self.session.execute(statement)).scalars().first()
         await self.session.delete(category)

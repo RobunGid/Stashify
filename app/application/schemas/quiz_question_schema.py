@@ -1,7 +1,7 @@
 from uuid import UUID
 
-from application.schemas.base_schema import BaseSchema
-from domain.entities.quiz_question import QuizQuestionEntity
+from application.schemas.base_schema import BaseSchema, BaseUpdateSchema
+from domain.entities.quiz_question import QuizQuestionEntity, QuizQuestionUpdateEntity
 from pydantic import ConfigDict
 
 
@@ -21,7 +21,24 @@ class BaseQuizQuestionSchema(BaseSchema[QuizQuestionEntity]):
         return QuizQuestionEntity(
             quiz_question_id=self.quiz_question_id,
             text=self.text,
-            quiz_item_id=self.quiz_item_id, 
+            quiz_item_id=self.quiz_item_id,
+            options=self.options,
+            right_options=self.right_options,
+            image=self.image,
+        )
+
+
+class QuizQuestionUpdateSchema(BaseUpdateSchema[QuizQuestionUpdateEntity]):
+    text: str | None
+
+    options: list[str] | None
+    right_options: list[int] | None
+
+    image: str | None
+
+    def to_entity(self) -> QuizQuestionUpdateEntity:
+        return QuizQuestionUpdateEntity(
+            text=self.text,
             options=self.options,
             right_options=self.right_options,
             image=self.image,

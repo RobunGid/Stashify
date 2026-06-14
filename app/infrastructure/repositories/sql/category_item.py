@@ -16,7 +16,7 @@ from sqlalchemy.orm import selectinload
 
 @dataclass
 class SQLCategoryItemRepository(
-    BaseSQLAlchemyRepository[CategoryItemEntity, CategoryItemUpdateEntity, CategoryItemFilters]
+    BaseSQLAlchemyRepository[CategoryItemEntity, CategoryItemUpdateEntity, CategoryItemFilters],
 ):
     async def create(self, category_item: CategoryItemEntity) -> None:
         model = CategoryItemModel.from_entity(category_item)
@@ -98,7 +98,7 @@ class SQLCategoryItemRepository(
         categories_entities = [CategoryItemMapper.to_entity(model=category) for category in categories]
         return GetManyResult(items=categories_entities, total=total)
 
-    async def delete(self, category_item_id: UUID) -> None:
+    async def delete_by_id(self, category_item_id: UUID) -> None:
         statement = select(CategoryItemModel).where(CategoryItemModel.category_item_id == category_item_id)
         category = (await self.session.execute(statement)).scalars().first()
         await self.session.delete(category)

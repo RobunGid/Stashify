@@ -12,7 +12,7 @@ from sqlalchemy import func, select, update
 
 @dataclass
 class SQLResourceRatingRepository(
-    BaseSQLAlchemyRepository[ResourceRatingEntity, ResourceRatingUpdateEntity, ResourceRatingFilters]
+    BaseSQLAlchemyRepository[ResourceRatingEntity, ResourceRatingUpdateEntity, ResourceRatingFilters],
 ):
     async def create(self, resource_rating: ResourceRatingEntity) -> None:
         item = ResourceRatingModel(resource_rating)
@@ -46,7 +46,7 @@ class SQLResourceRatingRepository(
         resource_ratings_entities = [ResourceRatingEntity(**category) for category in resource_ratings]
         return GetManyResult(items=resource_ratings_entities, total=total)
 
-    async def delete(self, resource_rating_id: UUID) -> None:
+    async def delete_by_id(self, resource_rating_id: UUID) -> None:
         statement = select(CategoryItemModel).where(CategoryItemModel.resource_rating_id == resource_rating_id)
         category = (await self.session.execute(statement)).scalars().first()
         await self.session.delete(category)

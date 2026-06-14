@@ -12,7 +12,7 @@ from sqlalchemy import func, select, update
 
 @dataclass
 class SQLUserAccountRepository(
-    BaseSQLAlchemyRepository[UserAccountEntity, UserAccountUpdateEntity, UserAccountFilters]
+    BaseSQLAlchemyRepository[UserAccountEntity, UserAccountUpdateEntity, UserAccountFilters],
 ):
     async def create(self, user_account: UserAccountEntity) -> None:
         item = UserAccountModel(**user_account.__dict__)
@@ -45,7 +45,7 @@ class SQLUserAccountRepository(
         user_accounts_entities = [UserAccountEntity(**category) for category in user_accounts]
         return GetManyResult(items=user_accounts_entities, total=total)
 
-    async def delete(self, user_account_id: UUID) -> None:
+    async def delete_by_id(self, user_account_id: UUID) -> None:
         statement = select(CategoryItemModel).where(CategoryItemModel.user_account_id == user_account_id)
         category = (await self.session.execute(statement)).scalars().first()
         await self.session.delete(category)

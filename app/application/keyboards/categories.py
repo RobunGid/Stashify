@@ -88,7 +88,8 @@ class ManageCategoriesBackKeyboardBuilderMixin(BackKeyboardBuilderMixin):
 
 @dataclass
 class EditCategoryListKeyboardBuilder(
-    BaseListKeyboardBuilder[CategoryItemEntity], ManageCategoriesBackKeyboardBuilderMixin
+    BaseListKeyboardBuilder[CategoryItemEntity],
+    ManageCategoriesBackKeyboardBuilderMixin,
 ):
     def _pagination_callback(self, page: int) -> CallbackData:
         return EditCategoryIdCallbackFactory(

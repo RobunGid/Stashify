@@ -590,7 +590,7 @@ async def delete_resource_name_confirm(
     keyboard = keyboard_builder.build()
 
     try:
-        await service.delete(item_id=resource_data["resource_item_id"])
+        await service.delete_by_id(item_id=resource_data["resource_item_id"])
     except IntegrityError, ValueError:
         await callback.message.answer(
             text=i18n.get("manage-resources-delete-fail", name=resource.name),

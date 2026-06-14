@@ -44,7 +44,7 @@ class SQLQuizItemRepository(BaseSQLAlchemyRepository[QuizItemEntity, QuizItemUpd
         quiz_items_entities = [QuizItemEntity(**category) for category in quiz_items]
         return GetManyResult(items=quiz_items_entities, total=total)
 
-    async def delete(self, quiz_item_id: UUID) -> None:
+    async def delete_by_id(self, quiz_item_id: UUID) -> None:
         statement = select(CategoryItemModel).where(CategoryItemModel.quiz_item_id == quiz_item_id)
         category = (await self.session.execute(statement)).scalars().first()
         await self.session.delete(category)
