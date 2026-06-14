@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 from aiogram_i18n import I18nContext
-from application.exceptions.user_account import UserAccountNotFoundException
+from app.application.exceptions.user_account import UserAccountNotFoundException
 from application.routers.constants import ROLE_MENU_KEYBOARD_BUILDER_MAP
 from application.services.user_account import UserAccountService
 from dishka import FromDishka
@@ -14,7 +14,11 @@ router = Router()
 
 
 @router.message(Command("menu"))
-async def main_menu_command(message: Message, i18n: I18nContext, service: FromDishka[UserAccountService]):
+async def main_menu_command_message_handler(
+    message: Message,
+    i18n: I18nContext,
+    service: FromDishka[UserAccountService],
+):
     if not message.from_user or not message.from_user.id:
         return
 

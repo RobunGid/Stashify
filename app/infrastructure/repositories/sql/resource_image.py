@@ -12,7 +12,7 @@ from sqlalchemy import func, select, update
 
 @dataclass
 class SQLResourceImageRepository(
-    BaseSQLAlchemyRepository[ResourceImageEntity, ResourceImageUpdateEntity, ResourceImageFilters]
+    BaseSQLAlchemyRepository[ResourceImageEntity, ResourceImageUpdateEntity, ResourceImageFilters],
 ):
     async def create(self, resource_image: ResourceImageEntity) -> None:
         item = ResourceImageModel(resource_image)
@@ -46,7 +46,7 @@ class SQLResourceImageRepository(
         resource_images_entities = [ResourceImageEntity(**category) for category in resource_images]
         return GetManyResult(items=resource_images_entities, total=total)
 
-    async def delete(self, resource_image_id: UUID) -> None:
+    async def delete_by_id(self, resource_image_id: UUID) -> None:
         statement = select(CategoryItemModel).where(CategoryItemModel.resource_image_id == resource_image_id)
         category = (await self.session.execute(statement)).scalars().first()
         await self.session.delete(category)

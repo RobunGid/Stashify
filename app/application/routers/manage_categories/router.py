@@ -307,18 +307,20 @@ async def delete_category_choose(
     try:
         if not callback_data.category_item_id:
             raise ValueError
-        await service.delete(callback_data.category_item_id)
+        await service.delete_by_id(callback_data.category_item_id)
     except IntegrityError, ValueError:
         await callback.message.answer(
             text=i18n.get(
-                "manage-categories-delete-fail", category_name=category_item.name if category_item else "Unknown"
+                "manage-categories-delete-fail",
+                category_name=category_item.name if category_item else "Unknown",
             ),
             reply_markup=keyboard,
         )
     else:
         await callback.message.answer(
             text=i18n.get(
-                "manage-categories-delete-success", category_name=category_item.name if category_item else "Unknown"
+                "manage-categories-delete-success",
+                category_name=category_item.name if category_item else "Unknown",
             ),
             reply_markup=keyboard,
         )

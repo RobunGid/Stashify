@@ -21,8 +21,6 @@ class QuizQuestionEntity(BaseEntity):
 class QuizQuestionUpdateEntity(BaseUpdateEntity):
     text: str | None
 
-    quiz_item_id: UUID | None
-
     options: list[str] | None
     right_options: list[int] | None
 

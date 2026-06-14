@@ -1,4 +1,5 @@
-from abc import ABC
+from abc import ABC, abstractmethod
+from uuid import UUID
 
 from domain.entities.quiz_question import QuizQuestionEntity, QuizQuestionUpdateEntity
 from domain.filters.quiz_question import QuizQuestionFilters
@@ -9,4 +10,6 @@ class BaseQuizQuestionRepository(
     BaseRepository[QuizQuestionEntity, QuizQuestionUpdateEntity, QuizQuestionFilters],
     ABC,
 ):
-    pass
+    @abstractmethod
+    async def delete_by_question_number(self, resource_item_id: UUID, quiz_question_number: int) -> None:
+        pass

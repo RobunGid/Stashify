@@ -25,8 +25,8 @@ class BaseService(ABC, Generic[Ent, UpdEnt, Fils]):
     async def create(self, item: Ent) -> None:
         return await self.repository.create(item)
 
-    async def delete(self, item_id: UUID) -> None:
-        return await self.repository.delete(item_id)
+    async def delete_by_id(self, item_id: UUID) -> None:
+        return await self.repository.delete_by_id(item_id)
 
     async def update(self, item_id: UUID, item: UpdEnt) -> None:
         return await self.repository.update(item_id, item)

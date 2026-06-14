@@ -12,7 +12,7 @@ from sqlalchemy import func, select, update
 
 @dataclass
 class SQLQuizQuestionRepository(
-    BaseSQLAlchemyRepository[QuizQuestionEntity, QuizQuestionUpdateEntity, QuizQuestionFilters]
+    BaseSQLAlchemyRepository[QuizQuestionEntity, QuizQuestionUpdateEntity, QuizQuestionFilters],
 ):
     async def create(self, quiz_question: QuizQuestionEntity) -> None:
         item = QuizQuestionModel(quiz_question)
@@ -46,7 +46,7 @@ class SQLQuizQuestionRepository(
         quiz_questions_entities = [QuizQuestionEntity(**category) for category in quiz_questions]
         return GetManyResult(items=quiz_questions_entities, total=total)
 
-    async def delete(self, quiz_question_id: UUID) -> None:
+    async def delete_by_id(self, quiz_question_id: UUID) -> None:
         statement = select(CategoryItemModel).where(CategoryItemModel.quiz_question_id == quiz_question_id)
         category = (await self.session.execute(statement)).scalars().first()
         await self.session.delete(category)

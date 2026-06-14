@@ -24,7 +24,7 @@ class BaseRepository(ABC, Generic[Ent, UpdEnt, Fils]):
         pass
 
     @abstractmethod
-    async def delete(self, item_id: UUID) -> None:
+    async def delete_by_id(self, item_id: UUID) -> None:
         pass
 
     @abstractmethod
