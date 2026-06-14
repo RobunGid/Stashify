@@ -10,8 +10,8 @@ from application.keyboards.base import (
     BaseListKeyboardBuilder,
     BaseManageEntryKeyboardBuilder,
 )
-from application.schemas.category_item_schema import CategoryItemSchema
-from application.schemas.resource_schema import ResourceItemSchema
+from domain.entities.category_item import CategoryItemEntity
+from domain.entities.resource_item import ResourceItemEntity
 
 
 class EditQuizActionCallbackFactory(CallbackData, prefix="edit_quiz_actn"):  # type: ignore[call-arg]
@@ -56,7 +56,7 @@ class EditQuizChooseResourceCallbackFactory(CallbackData, prefix="edit_quiz_rsc"
     page: int
 
 
-class EditQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSchema]):
+class EditQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
     def _back_callback(self) -> str | CallbackData | None:
         return EditQuizChooseResourceCallbackFactory(
             action="change_page",
@@ -67,7 +67,7 @@ class EditQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSc
     def _pagination_callback(self, page: int) -> CallbackData:
         return EditQuizChooseResourceCallbackFactory(action="change_page", resource_item_id=None, page=page)
 
-    def _item_button(self, item: ResourceItemSchema) -> dict:
+    def _item_button(self, item: ResourceItemEntity) -> dict:
         return {
             "text": item.name,
             "callback_data": EditQuizChooseResourceCallbackFactory(
@@ -84,7 +84,7 @@ class EditQuizChooseCategoryCallbackFactory(CallbackData, prefix="edit_quiz_ctg"
     page: int
 
 
-class EditQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
+class EditQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
     def _back_callback(self) -> str | CallbackData | None:
         return EditQuizChooseCategoryCallbackFactory(
             action="change_page",
@@ -95,7 +95,7 @@ class EditQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSc
     def _pagination_callback(self, page: int) -> CallbackData:
         return EditQuizChooseCategoryCallbackFactory(action="change_page", category_item_id=None, page=page)
 
-    def _item_button(self, item: ResourceItemSchema) -> dict:
+    def _item_button(self, item: CategoryItemEntity) -> dict:
         return {
             "text": item.name,
             "callback_data": EditQuizChooseCategoryCallbackFactory(
@@ -118,14 +118,14 @@ class DeleteQuizChooseResourceCallbackFactory(CallbackData, prefix="delete_quiz_
     page: int
 
 
-class DeleteQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSchema]):
+class DeleteQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
     def _back_callback(self) -> str:
         return "manage_quizes"
 
     def _pagination_callback(self, page: int) -> CallbackData:
         return DeleteQuizChooseResourceCallbackFactory(action="change_page", resource_item_id=None, page=page)
 
-    def _item_button(self, item: ResourceItemSchema) -> dict:
+    def _item_button(self, item: ResourceItemEntity) -> dict:
         return {
             "text": item.name,
             "callback_data": DeleteQuizChooseResourceCallbackFactory(
@@ -142,14 +142,14 @@ class DeleteQuizChooseCategoryCallbackFactory(CallbackData, prefix="delete_quiz_
     page: int
 
 
-class DeleteQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
+class DeleteQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
     def _back_callback(self) -> str:
         return "manage_quizes"
 
     def _pagination_callback(self, page: int) -> CallbackData:
         return DeleteQuizChooseCategoryCallbackFactory(action="change_page", category_item_id=None, page=page)
 
-    def _item_button(self, item: CategoryItemSchema) -> dict:
+    def _item_button(self, item: CategoryItemEntity) -> dict:
         return {
             "text": item.name,
             "callback_data": DeleteQuizChooseCategoryCallbackFactory(
@@ -166,14 +166,14 @@ class CreateQuizChooseCategoryCallbackFactory(CallbackData, prefix="create_quiz_
     page: int
 
 
-class CreateQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
+class CreateQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
     def _back_callback(self) -> str:
         return "manage_quizes"
 
     def _pagination_callback(self, page: int) -> CallbackData:
         return CreateQuizChooseCategoryCallbackFactory(action="change_page", category_item_id=None, page=page)
 
-    def _item_button(self, item: CategoryItemSchema) -> dict:
+    def _item_button(self, item: CategoryItemEntity) -> dict:
         return {
             "text": item.name,
             "callback_data": CreateQuizChooseCategoryCallbackFactory(
@@ -190,14 +190,14 @@ class CreateQuizChooseResourceCallbackFactory(CallbackData, prefix="create_quiz_
     page: int
 
 
-class CreateQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemSchema]):
+class CreateQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
     def _back_callback(self) -> str:
         return "manage_quizes"
 
     def _pagination_callback(self, page: int) -> CallbackData:
         return CreateQuizChooseResourceCallbackFactory(action="change_page", resource_item_id=None, page=page)
 
-    def _item_button(self, item: ResourceItemSchema) -> dict:
+    def _item_button(self, item: ResourceItemEntity) -> dict:
         return {
             "text": item.name,
             "callback_data": CreateQuizChooseResourceCallbackFactory(

@@ -12,7 +12,10 @@ class BaseQuizItemSchema(BaseSchema[QuizItemEntity]):
     model_config = ConfigDict(from_attributes=True)
 
     def to_entity(self) -> QuizItemEntity:
-        return QuizItemEntity(quiz_item_id=self.quiz_item_id, resource_item_id=self.resource_item_id)
+        return QuizItemEntity(
+            quiz_item_id=self.quiz_item_id, 
+            resource_item_id=self.resource_item_id
+        )
 
 
 class QuizSchema(BaseQuizItemSchema):
