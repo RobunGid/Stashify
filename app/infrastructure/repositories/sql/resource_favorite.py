@@ -4,23 +4,22 @@ from uuid import UUID
 from domain.entities.base import GetManyResult
 from domain.entities.resource_favorite import ResourceFavoriteEntity, ResourceFavoriteUpdateEntity
 from domain.filters.resource_favorite import ResourceFavoriteFilters
-from infrastructure.models.category_item import CategoryItemModel
+from domain.repositories.resource_favorite import BaseResourceFavoriteRepository
+from infrastructure.mappers.resource_favorite import ResourceFavoriteMapper
 from infrastructure.models.resource_favorite import ResourceFavoriteModel
-from infrastructure.repositories.base import BaseSQLAlchemyRepository
-from sqlalchemy import func, select, update
+from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
+from sqlalchemy import and_, func, select, update
 
 
 @dataclass
-class SQLResourceFavoriteRepository(
-    BaseSQLAlchemyRepository[ResourceFavoriteEntity, ResourceFavoriteUpdateEntity, ResourceFavoriteFilters],
-):
+class SQLResourceFavoriteRepository(BaseResourceFavoriteRepository, SQLAlchemyRepositoryMixin):
     async def create(self, resource_favorite: ResourceFavoriteEntity) -> None:
         item = ResourceFavoriteModel(resource_favorite)
         self.session.add(item)
         await self.session.commit()
 
     async def get_one(self, resource_favorite_id: UUID) -> ResourceFavoriteEntity | None:
-        statement = select(CategoryItemModel).where(
+        statement = select(ResourceFavoriteModel).where(
             ResourceFavoriteModel.resource_favorite_id == resource_favorite_id,
         )
 
@@ -42,21 +41,41 @@ class SQLResourceFavoriteRepository(
         if filters.count is not None:
             statement = statement.limit(filters.count)
 
-        resource_favorites = (await self.session.execute(statement)).scalars().all()
-        resource_favorites_entities = [ResourceFavoriteEntity(**category) for category in resource_favorites]
+        resource_favorite_models = (await self.session.execute(statement)).scalars().all()
+        resource_favorites_entities = [
+            ResourceFavoriteMapper.to_entity(model=resource_favorite_model)
+            for resource_favorite_model in resource_favorite_models
+        ]
         return GetManyResult(items=resource_favorites_entities, total=total)
 
     async def delete_by_id(self, resource_favorite_id: UUID) -> None:
-        statement = select(CategoryItemModel).where(CategoryItemModel.resource_favorite_id == resource_favorite_id)
+        statement = select(ResourceFavoriteModel).where(
+            ResourceFavoriteModel.resource_favorite_id == resource_favorite_id,
+        )
         category = (await self.session.execute(statement)).scalars().first()
         await self.session.delete(category)
         await self.session.commit()
 
     async def update(self, resource_favorite_id: UUID, resource_favorite: ResourceFavoriteUpdateEntity) -> None:
         statement = (
-            update(CategoryItemModel)
-            .where(CategoryItemModel.resource_favorite_id == resource_favorite_id)
+            update(ResourceFavoriteModel)
+            .where(ResourceFavoriteModel.resource_favorite_id == resource_favorite_id)
             .values(**{k: v for k, v in asdict(resource_favorite).items() if v is not None})
         )
         await self.session.execute(statement)
+        await self.session.commit()
+
+    async def delete_by_user_account_id_and_resource_item_id(
+        self,
+        user_account_id: UUID,
+        resource_item_id: UUID,
+    ) -> None:
+        statement = select(ResourceFavoriteModel).where(
+            and_(
+                ResourceFavoriteModel.user_account_id == user_account_id,
+                ResourceFavoriteModel.resource_item_id == resource_item_id,
+            ),
+        )
+        category = (await self.session.execute(statement)).scalars().first()
+        await self.session.delete(category)
         await self.session.commit()

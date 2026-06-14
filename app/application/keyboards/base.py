@@ -4,7 +4,7 @@ from typing import Generic, Protocol, TypeVar
 from uuid import UUID
 
 from aiogram.filters.callback_data import CallbackData
-from aiogram.types import InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from aiogram_i18n import I18nContext
@@ -19,7 +19,6 @@ class BackKeyboardBuilderMixin:
             text=self.i18n.get("common-back"),
             callback_data=self._back_callback(),
         )
-        builder.adjust(1)
 
     @abstractmethod
     def _back_callback(self) -> str | CallbackData | None:
@@ -67,13 +66,13 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
         builder = InlineKeyboardBuilder()
         for item in self.items:
             builder.button(**self._item_button(item))
-
+        builder.adjust(1)
         nav_buttons = self._build_pagination_buttons()
-        for btn in nav_buttons:
-            builder.button(**btn)
-            builder.adjust(1)
+        builder.row(*[InlineKeyboardButton(**btn) for btn in nav_buttons])
+        builder.adjust(len(nav_buttons))
 
         self._append_back_button(builder)
+        builder.adjust(1)
         return builder.as_markup()
 
     def _build_pagination_buttons(self) -> list[dict]:
@@ -88,11 +87,11 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
             buttons += [
                 {
                     "text": self.i18n.get("items-start"),
-                    "callback_data": self._pagination_callback(1),
+                    "callback_data": self._pagination_callback(1).pack(),
                 },
                 {
                     "text": self.i18n.get("items-back"),
-                    "callback_data": self._pagination_callback(pages - 1),
+                    "callback_data": self._pagination_callback(pages - 1).pack(),
                 },
             ]
 
@@ -102,11 +101,11 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
             buttons += [
                 {
                     "text": self.i18n.get("items-forward"),
-                    "callback_data": self._pagination_callback(pages + 1),
+                    "callback_data": self._pagination_callback(pages + 1).pack(),
                 },
                 {
                     "text": self.i18n.get("items-end"),
-                    "callback_data": self._pagination_callback(total_pages),
+                    "callback_data": self._pagination_callback(total_pages).pack(),
                 },
             ]
 
@@ -147,9 +146,9 @@ class BaseItemKeyboardBuilder(
         builder = InlineKeyboardBuilder()
 
         nav_buttons = self._build_navigation_buttons()
-        for btns in nav_buttons:
-            builder.button(**btns)
+        builder.row(*[InlineKeyboardButton(**btn) for btn in nav_buttons])
         self._append_back_button(builder)
+        builder.adjust(len(nav_buttons), 1)
         return builder.as_markup()
 
     def _build_navigation_buttons(self) -> list[dict]:
@@ -167,13 +166,13 @@ class BaseItemKeyboardBuilder(
             buttons += [
                 {
                     "text": self.i18n.get("items-start"),
-                    "callback_data": self._navigation_callback(self.items[0]),
+                    "callback_data": self._navigation_callback(self.items[0]).pack(),
                 },
                 {
                     "text": self.i18n.get("items-back"),
                     "callback_data": self._navigation_callback(
                         self.items[current_item_id_index - 1],
-                    ),
+                    ).pack(),
                 },
             ]
         buttons.append({"text": f"{current_item_id_index + 1}/{total_items}", "callback_data": " "})
@@ -183,11 +182,11 @@ class BaseItemKeyboardBuilder(
                     "text": self.i18n.get("items-forward"),
                     "callback_data": self._navigation_callback(
                         self.items[current_item_id_index + 1],
-                    ),
+                    ).pack(),
                 },
                 {
                     "text": self.i18n.get("items-end"),
-                    "callback_data": self._navigation_callback(self.items[-1]),
+                    "callback_data": self._navigation_callback(self.items[-1]).pack(),
                 },
             ]
         return buttons
@@ -197,13 +196,13 @@ class BaseItemKeyboardBuilder(
             return [
                 {
                     "text": self.i18n.get("favorite-remove"),
-                    "callback_data": self._remove_favorite_callback(self.current_item),
+                    "callback_data": self._remove_favorite_callback(self.current_item).pack(),
                 },
             ]
         return [
             {
                 "text": self.i18n.get("favorite-add"),
-                "callback_data": self._add_favorite_callback(self.current_item),
+                "callback_data": self._add_favorite_callback(self.current_item).pack(),
             },
         ]
 
@@ -211,7 +210,7 @@ class BaseItemKeyboardBuilder(
         return [
             {
                 "text": "⭐" if self.rating and i <= self.rating else "☆",
-                "callback_data": self._rating_callback(self.current_item, i),
+                "callback_data": self._rating_callback(self.current_item, i).pack(),
             }
             for i in range(1, 6)
         ]

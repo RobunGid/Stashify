@@ -32,7 +32,6 @@ class CreateUserMiddleware(BaseMiddleware):
                 await user_account_service.create(item=user_account_schema.to_entity())
 
                 user_account = await user_account_service.get_one_by_telegram_id(user.id)
-
-            data["user"] = user_account
+            data["user_account"] = user_account
 
             return await handler(event, data)

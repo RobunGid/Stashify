@@ -4,16 +4,15 @@ from uuid import UUID
 from domain.entities.base import GetManyResult
 from domain.entities.user_account import UserAccountEntity, UserAccountUpdateEntity
 from domain.filters.user_account import UserAccountFilters
+from domain.repositories.user_account import BaseUserAccountRepository
 from infrastructure.models.category_item import CategoryItemModel
 from infrastructure.models.user_account import UserAccountModel
-from infrastructure.repositories.base import BaseSQLAlchemyRepository
+from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
 from sqlalchemy import func, select, update
 
 
 @dataclass
-class SQLUserAccountRepository(
-    BaseSQLAlchemyRepository[UserAccountEntity, UserAccountUpdateEntity, UserAccountFilters],
-):
+class SQLUserAccountRepository(BaseUserAccountRepository, SQLAlchemyRepositoryMixin):
     async def create(self, user_account: UserAccountEntity) -> None:
         item = UserAccountModel(**user_account.__dict__)
         self.session.add(item)

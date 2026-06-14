@@ -6,11 +6,12 @@ from infrastructure.models.quiz_question import QuizQuestionModel
 
 
 class QuizQuestionMapper(BaseMapper[QuizQuestionEntity, QuizQuestionModel]):
-    def to_entity(self, model: QuizQuestionModel) -> QuizQuestionEntity:
+    @staticmethod
+    def to_entity(model: QuizQuestionModel) -> QuizQuestionEntity:
         return QuizQuestionEntity(
-            quiz_question_id=UUID(model.quiz_question_id),
+            quiz_question_id=UUID(str(model.quiz_question_id)),
             text=model.text,
-            quiz_item_id=UUID(model.quiz_item_id),
+            quiz_item_id=UUID(str(model.quiz_item_id)),
             options=model.options,
             right_options=model.right_options,
             image=model.image,
@@ -18,7 +19,8 @@ class QuizQuestionMapper(BaseMapper[QuizQuestionEntity, QuizQuestionModel]):
             updated_at=model.updated_at,
         )
 
-    def to_model(self, entity: QuizQuestionEntity) -> QuizQuestionModel:
+    @staticmethod
+    def to_model(entity: QuizQuestionEntity) -> QuizQuestionModel:
         return QuizQuestionModel(
             quiz_question_id=str(entity.quiz_question_id),
             text=entity.text,

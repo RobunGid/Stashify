@@ -3,7 +3,7 @@ from uuid import UUID
 
 from domain.entities.quiz_question import QuizQuestionEntity, QuizQuestionUpdateEntity
 from domain.filters.quiz_question import QuizQuestionFilters
-from infrastructure.repositories.base import BaseRepository
+from domain.repositories.base import BaseRepository
 
 
 class BaseQuizQuestionRepository(

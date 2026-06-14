@@ -260,7 +260,7 @@ async def new_resource_links_choose(message: Message, state: FSMContext, i18n: I
     await state.set_state(CreateResourceState.images)
 
 
-@router.message(F.media_group_id)
+@router.message(F.media_group_id, CreateResourceState.images)
 @media_group_handler
 async def new_resource_image_choose(messages: List[Message], state: FSMContext, i18n: I18nContext):
     if not messages[0].from_user or not messages[0].from_user.language_code:

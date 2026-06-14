@@ -4,21 +4,22 @@ from uuid import UUID
 from domain.entities.base import GetManyResult
 from domain.entities.quiz_item import QuizItemEntity, QuizItemUpdateEntity
 from domain.filters.quiz_item import QuizItemFilters
-from infrastructure.models.category_item import CategoryItemModel
+from domain.repositories.quiz_item import BaseQuizItemRepository
+from infrastructure.mappers.quiz_item import QuizItemMapper
 from infrastructure.models.quiz_item import QuizItemModel
-from infrastructure.repositories.base import BaseSQLAlchemyRepository
+from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
 from sqlalchemy import func, select, update
 
 
 @dataclass
-class SQLQuizItemRepository(BaseSQLAlchemyRepository[QuizItemEntity, QuizItemUpdateEntity, QuizItemFilters]):
+class SQLQuizItemRepository(BaseQuizItemRepository, SQLAlchemyRepositoryMixin):
     async def create(self, quiz_item: QuizItemEntity) -> None:
         item = QuizItemModel(quiz_item)
         self.session.add(item)
         await self.session.commit()
 
     async def get_one(self, quiz_item_id: UUID) -> QuizItemEntity | None:
-        statement = select(CategoryItemModel).where(
+        statement = select(QuizItemModel).where(
             QuizItemModel.quiz_item_id == quiz_item_id,
         )
 
@@ -40,21 +41,33 @@ class SQLQuizItemRepository(BaseSQLAlchemyRepository[QuizItemEntity, QuizItemUpd
         if filters.count is not None:
             statement = statement.limit(filters.count)
 
-        quiz_items = (await self.session.execute(statement)).scalars().all()
-        quiz_items_entities = [QuizItemEntity(**category) for category in quiz_items]
+        quiz_item_models = (await self.session.execute(statement)).scalars().all()
+        quiz_items_entities = [QuizItemMapper.to_entity(quiz_item_model) for quiz_item_model in quiz_item_models]
         return GetManyResult(items=quiz_items_entities, total=total)
 
     async def delete_by_id(self, quiz_item_id: UUID) -> None:
-        statement = select(CategoryItemModel).where(CategoryItemModel.quiz_item_id == quiz_item_id)
-        category = (await self.session.execute(statement)).scalars().first()
-        await self.session.delete(category)
+        statement = select(QuizItemModel).where(QuizItemModel.quiz_item_id == quiz_item_id)
+        quiz_item_model = (await self.session.execute(statement)).scalars().first()
+        await self.session.delete(quiz_item_model)
         await self.session.commit()
 
     async def update(self, quiz_item_id: UUID, quiz_item: QuizItemUpdateEntity) -> None:
         statement = (
-            update(CategoryItemModel)
-            .where(CategoryItemModel.quiz_item_id == quiz_item_id)
+            update(QuizItemModel)
+            .where(QuizItemModel.quiz_item_id == quiz_item_id)
             .values(**{k: v for k, v in asdict(quiz_item).items() if v is not None})
         )
         await self.session.execute(statement)
         await self.session.commit()
+
+    async def get_one_by_resource_item_id(self, resource_item_id: UUID) -> QuizItemEntity | None:
+        statement = select(QuizItemModel).where(
+            QuizItemModel.resource_item_id == resource_item_id,
+        )
+
+        quiz_item_model = (await self.session.execute(statement)).scalars().first()
+
+        if quiz_item_model is None:
+            return None
+
+        return QuizItemMapper.to_entity(quiz_item_model)

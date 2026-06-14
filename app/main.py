@@ -37,6 +37,7 @@ async def main():
 
     dp.message.middleware(i18n_middleware)
     dp.message.outer_middleware(create_user_middleware)
+    dp.callback_query.outer_middleware(create_user_middleware)
     dp.update.middleware()
     i18n_middleware.setup(dispatcher=dp)
 

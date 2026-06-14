@@ -4,20 +4,19 @@ from uuid import UUID
 from domain.entities.base import GetManyResult
 from domain.entities.category_item import CategoryItemEntity, CategoryItemUpdateEntity
 from domain.filters.category_item import CategoryItemFilters
+from domain.repositories.category_item import BaseCategoryItemRepository
 from infrastructure.mappers.category_item import CategoryItemMapper
 from infrastructure.models.category_item import CategoryItemModel
 from infrastructure.models.quiz_item import QuizItemModel
 from infrastructure.models.resource_favorite import ResourceFavoriteModel
 from infrastructure.models.resource_item import ResourceItemModel
-from infrastructure.repositories.base import BaseSQLAlchemyRepository
+from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import selectinload
 
 
 @dataclass
-class SQLCategoryItemRepository(
-    BaseSQLAlchemyRepository[CategoryItemEntity, CategoryItemUpdateEntity, CategoryItemFilters],
-):
+class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepositoryMixin):
     async def create(self, category_item: CategoryItemEntity) -> None:
         model = CategoryItemModel.from_entity(category_item)
         self.session.add(model)
@@ -28,12 +27,12 @@ class SQLCategoryItemRepository(
             CategoryItemModel.category_item_id == category_item_id,
         )
 
-        item = (await self.session.execute(statement)).scalars().first()
+        category_item_model = (await self.session.execute(statement)).scalars().first()
 
-        if item is None:
+        if category_item_model is None:
             return None
 
-        return CategoryItemEntity(**item)
+        return CategoryItemMapper.to_entity(category_item_model)
 
     async def get_many(self, filters: CategoryItemFilters) -> GetManyResult[CategoryItemEntity]:
 
@@ -94,8 +93,10 @@ class SQLCategoryItemRepository(
         if filters.count is not None:
             statement = statement.limit(filters.count)
 
-        categories = (await self.session.execute(statement)).scalars().all()
-        categories_entities = [CategoryItemMapper.to_entity(model=category) for category in categories]
+        category_item_models = (await self.session.execute(statement)).scalars().all()
+        categories_entities = [
+            CategoryItemMapper.to_entity(model=category_item_model) for category_item_model in category_item_models
+        ]
         return GetManyResult(items=categories_entities, total=total)
 
     async def delete_by_id(self, category_item_id: UUID) -> None:

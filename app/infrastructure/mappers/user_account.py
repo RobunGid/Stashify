@@ -7,9 +7,10 @@ from infrastructure.models.user_account import UserAccountModel
 
 
 class UserAccountMapper(BaseMapper[UserAccountEntity, UserAccountModel]):
-    def to_entity(self, model: UserAccountModel) -> UserAccountEntity:
+    @staticmethod
+    def to_entity(model: UserAccountModel) -> UserAccountEntity:
         return UserAccountEntity(
-            user_account_id=UUID(model.user_account_id),
+            user_account_id=UUID(str(model.user_account_id)),
             user_telegram_id=model.user_telegram_id,
             username=model.username,
             role=Role(model.role),
@@ -17,7 +18,8 @@ class UserAccountMapper(BaseMapper[UserAccountEntity, UserAccountModel]):
             updated_at=model.updated_at,
         )
 
-    def to_model(self, entity: UserAccountEntity) -> UserAccountModel:
+    @staticmethod
+    def to_model(entity: UserAccountEntity) -> UserAccountModel:
         return UserAccountModel(
             user_account_id=str(entity.user_account_id),
             user_telegram_id=entity.user_telegram_id,

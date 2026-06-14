@@ -6,17 +6,19 @@ from infrastructure.models.resource_rating import ResourceRatingModel
 
 
 class ResourceRatingMapper(BaseMapper[ResourceRatingEntity, ResourceRatingModel]):
-    def to_entity(self, model: ResourceRatingModel) -> ResourceRatingEntity:
+    @staticmethod
+    def to_entity(model: ResourceRatingModel) -> ResourceRatingEntity:
         return ResourceRatingEntity(
-            resource_rating_id=UUID(model.resource_rating_id),
-            resource_item_id=UUID(model.resource_item_id),
-            user_account_id=UUID(model.user_account_id),
+            resource_rating_id=UUID(str(model.resource_rating_id)),
+            resource_item_id=UUID(str(model.resource_item_id)),
+            user_account_id=UUID(str(model.user_account_id)),
             rating=model.rating,
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
 
-    def to_model(self, entity: ResourceRatingEntity) -> ResourceRatingModel:
+    @staticmethod
+    def to_model(entity: ResourceRatingEntity) -> ResourceRatingModel:
         return ResourceRatingModel(
             resource_rating_id=entity.resource_rating_id,
             resource_item_id=entity.resource_item_id,

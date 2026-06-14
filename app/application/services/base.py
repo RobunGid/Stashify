@@ -5,7 +5,7 @@ from uuid import UUID
 
 from domain.entities.base import BaseEntity, BaseUpdateEntity, GetManyResult
 from domain.filters.base import BaseFilters
-from infrastructure.repositories.base import BaseRepository
+from domain.repositories.base import BaseRepository
 
 Ent = TypeVar("Ent", bound=BaseEntity)
 UpdEnt = TypeVar("UpdEnt", bound=BaseUpdateEntity)

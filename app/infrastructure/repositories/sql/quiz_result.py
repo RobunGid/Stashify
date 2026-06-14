@@ -4,14 +4,15 @@ from uuid import UUID
 from domain.entities.base import GetManyResult
 from domain.entities.quiz_result import QuizResultEntity, QuizResultUpdateEntity
 from domain.filters.quiz_result import QuizResultFilters
+from domain.repositories.quiz_result import BaseQuizResultRepository
 from infrastructure.models.category_item import CategoryItemModel
 from infrastructure.models.quiz_result import QuizResultModel
-from infrastructure.repositories.base import BaseSQLAlchemyRepository
+from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
 from sqlalchemy import func, select, update
 
 
 @dataclass
-class SQLQuizResultRepository(BaseSQLAlchemyRepository[QuizResultEntity, QuizResultUpdateEntity, QuizResultFilters]):
+class SQLQuizResultRepository(BaseQuizResultRepository, SQLAlchemyRepositoryMixin):
     async def create(self, quiz_result: QuizResultEntity) -> None:
         item = QuizResultModel(quiz_result)
         self.session.add(item)

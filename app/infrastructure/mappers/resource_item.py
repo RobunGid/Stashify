@@ -9,13 +9,13 @@ class ResourceItemMapper(BaseMapper[ResourceItemEntity, ResourceItemModel]):
     @staticmethod
     def to_entity(model: ResourceItemModel) -> ResourceItemEntity:
         return ResourceItemEntity(
-            resource_item_id=UUID(model.resource_item_id),
+            resource_item_id=UUID(str(model.resource_item_id)),
             name=model.name,
             description=model.description,
             links=model.links,
             tags=model.tags,
             verified=model.verified,
-            category_item_id=UUID(model.category_item_id),
+            category_item_id=UUID(str(model.category_item_id)),
             created_at=model.created_at,
             updated_at=model.updated_at,
         )

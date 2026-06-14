@@ -386,15 +386,14 @@ async def list_resource_resource_change_page(
             media=list(media_group.build()),
             reply_markup=keyboard,
         )
-    else:
-        await callback.message.answer(
-            text=ResourceItemFormatter.translate_resource_item(
-                resource_item=resource_item,
-                category_item=category_item,
-                i18n=i18n,
-            ),
-            reply_markup=keyboard,
-        )
+    await callback.message.answer(
+        text=ResourceItemFormatter.translate_resource_item(
+            resource_item=resource_item,
+            category_item=category_item,
+            i18n=i18n,
+        ),
+        reply_markup=keyboard,
+    )
 
 
 # FAVORITES

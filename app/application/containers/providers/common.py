@@ -13,7 +13,6 @@ class CommonProvider(Provider):
 
     @provide(scope=Scope.APP)
     async def get_engine(self, config: Config) -> AsyncEngine:
-        print(config.database_url, 1284934)
         return create_async_engine(config.database_url)
 
     @provide(scope=Scope.APP)

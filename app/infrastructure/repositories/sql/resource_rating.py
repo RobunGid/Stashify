@@ -4,32 +4,31 @@ from uuid import UUID
 from domain.entities.base import GetManyResult
 from domain.entities.resource_rating import ResourceRatingEntity, ResourceRatingUpdateEntity
 from domain.filters.resource_rating import ResourceRatingFilters
-from infrastructure.models.category_item import CategoryItemModel
+from domain.repositories.resource_rating import BaseResourceRatingRepository
+from infrastructure.mappers.resource_rating import ResourceRatingMapper
 from infrastructure.models.resource_rating import ResourceRatingModel
-from infrastructure.repositories.base import BaseSQLAlchemyRepository
-from sqlalchemy import func, select, update
+from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
+from sqlalchemy import and_, func, select, update
 
 
 @dataclass
-class SQLResourceRatingRepository(
-    BaseSQLAlchemyRepository[ResourceRatingEntity, ResourceRatingUpdateEntity, ResourceRatingFilters],
-):
+class SQLResourceRatingRepository(BaseResourceRatingRepository, SQLAlchemyRepositoryMixin):
     async def create(self, resource_rating: ResourceRatingEntity) -> None:
         item = ResourceRatingModel(resource_rating)
         self.session.add(item)
         await self.session.commit()
 
     async def get_one(self, resource_rating_id: UUID) -> ResourceRatingEntity | None:
-        statement = select(CategoryItemModel).where(
+        statement = select(ResourceRatingModel).where(
             ResourceRatingModel.resource_rating_id == resource_rating_id,
         )
 
-        item = (await self.session.execute(statement)).scalars().first()
+        resource_rating_model = (await self.session.execute(statement)).scalars().first()
 
-        if item is None:
+        if resource_rating_model is None:
             return None
 
-        return ResourceRatingEntity(**item)
+        return ResourceRatingMapper.to_entity(resource_rating_model)
 
     async def get_many(self, filters: ResourceRatingFilters) -> GetManyResult[ResourceRatingEntity]:
 
@@ -42,21 +41,57 @@ class SQLResourceRatingRepository(
         if filters.count is not None:
             statement = statement.limit(filters.count)
 
-        resource_ratings = (await self.session.execute(statement)).scalars().all()
-        resource_ratings_entities = [ResourceRatingEntity(**category) for category in resource_ratings]
+        resource_rating_models = (await self.session.execute(statement)).scalars().all()
+        resource_ratings_entities = [
+            ResourceRatingMapper.to_entity(resource_rating_model) for resource_rating_model in resource_rating_models
+        ]
         return GetManyResult(items=resource_ratings_entities, total=total)
 
     async def delete_by_id(self, resource_rating_id: UUID) -> None:
-        statement = select(CategoryItemModel).where(CategoryItemModel.resource_rating_id == resource_rating_id)
-        category = (await self.session.execute(statement)).scalars().first()
-        await self.session.delete(category)
+        statement = select(ResourceRatingModel).where(ResourceRatingModel.resource_rating_id == resource_rating_id)
+        resource_rating_model = (await self.session.execute(statement)).scalars().first()
+        await self.session.delete(resource_rating_model)
         await self.session.commit()
 
     async def update(self, resource_rating_id: UUID, resource_rating: ResourceRatingUpdateEntity) -> None:
         statement = (
-            update(CategoryItemModel)
-            .where(CategoryItemModel.resource_rating_id == resource_rating_id)
+            update(ResourceRatingModel)
+            .where(ResourceRatingModel.resource_rating_id == resource_rating_id)
             .values(**{k: v for k, v in asdict(resource_rating).items() if v is not None})
         )
         await self.session.execute(statement)
         await self.session.commit()
+
+    async def delete_by_user_account_id_and_resource_item_id(
+        self,
+        user_account_id: UUID,
+        resource_item_id: UUID,
+    ) -> None:
+        statement = select(ResourceRatingModel).where(
+            and_(
+                ResourceRatingModel.user_account_id == user_account_id,
+                ResourceRatingModel.resource_item_id == resource_item_id,
+            ),
+        )
+        resource_rating_model = (await self.session.execute(statement)).scalars().first()
+        await self.session.delete(resource_rating_model)
+        await self.session.commit()
+
+    async def get_one_by_user_account_id_and_resource_item_id(
+        self,
+        user_account_id: UUID,
+        resource_item_id: UUID,
+    ) -> ResourceRatingEntity | None:
+        statement = select(ResourceRatingModel).where(
+            and_(
+                ResourceRatingModel.user_account_id == user_account_id,
+                ResourceRatingModel.resource_item_id == resource_item_id,
+            ),
+        )
+
+        resource_rating_model = (await self.session.execute(statement)).scalars().first()
+
+        if resource_rating_model is None:
+            return None
+
+        return ResourceRatingMapper.to_entity(resource_rating_model)

@@ -6,17 +6,19 @@ from infrastructure.models.quiz_result import QuizResultModel
 
 
 class QuizResultMapper(BaseMapper[QuizResultEntity, QuizResultModel]):
-    def to_entity(self, model: QuizResultModel) -> QuizResultEntity:
+    @staticmethod
+    def to_entity(model: QuizResultModel) -> QuizResultEntity:
         return QuizResultEntity(
-            quiz_result_id=UUID(model.quiz_result_id),
-            quiz_item_id=UUID(model.quiz_item_id),
-            user_account_id=UUID(model.user_account_id),
+            quiz_result_id=UUID(str(model.quiz_result_id)),
+            quiz_item_id=UUID(str(model.quiz_item_id)),
+            user_account_id=UUID(str(model.user_account_id)),
             percent=model.percent,
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
 
-    def to_model(self, entity: QuizResultEntity) -> QuizResultModel:
+    @staticmethod
+    def to_model(entity: QuizResultEntity) -> QuizResultModel:
         return QuizResultModel(
             quiz_result_id=entity.quiz_result_id,
             quiz_item_id=entity.quiz_item_id,
