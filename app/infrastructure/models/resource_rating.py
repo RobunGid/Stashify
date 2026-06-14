@@ -1,16 +1,13 @@
+from datetime import datetime
 from uuid import uuid4
 
 from sqlalchemy import (
     CheckConstraint,
-    Column,
-    DateTime,
     ForeignKey,
-    Integer,
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship, validates
-from sqlalchemy.sql import func
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from database.base import Base
 
@@ -18,22 +15,22 @@ from database.base import Base
 class ResourceRatingModel(Base):
     __tablename__ = "resource_rating"
 
-    resource_rating_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    resource_rating_id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
 
-    resource_item_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("resource_item.resource_item_id"),
-        nullable=False,
+    resource_item_id: Mapped[UUID] = mapped_column(ForeignKey("resource_item.resource_item_id"))
+    resource_item: Mapped["ResourceItemModel"] = relationship(  # noqa: F821 # pyright: ignore
+        back_populates="resource_ratings",
     )
-    resource_item = relationship("ResourceItemModel", back_populates="resource_ratings")
 
-    user_account_id = Column(UUID, ForeignKey("user_account.user_account_id"), nullable=False)
-    user_account = relationship("UserAccountModel", back_populates="resource_ratings")
+    user_account_id: Mapped[UUID] = mapped_column(ForeignKey("user_account.user_account_id"))
+    user_account: Mapped["UserAccountModel"] = relationship(  # noqa: F821 # pyright: ignore
+        back_populates="resource_ratings",
+    )
 
-    rating = Column(Integer)
+    rating: Mapped[int | None]
 
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now)
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.now, onupdate=datetime.now)
 
     __table_args__ = (
         UniqueConstraint("user_account_id", "resource_item_id", name="resource_rating_uix"),

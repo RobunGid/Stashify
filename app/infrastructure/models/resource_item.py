@@ -24,27 +24,27 @@ class ResourceItemModel(Base):
         nullable=False,
     )
 
-    category_item: Mapped["CategoryItemModel"] = relationship(  # noqa: F821
+    category_item: Mapped["CategoryItemModel"] = relationship(  # noqa: F821 # pyright: ignore
         "CategoryItemModel",
         back_populates="resource_items",
         lazy="joined",
     )
 
-    quiz_item: Mapped["QuizItemModel"] = relationship(  # noqa: F821
+    quiz_item: Mapped["QuizItemModel"] = relationship(  # noqa: F821 # pyright: ignore
         "QuizItemModel",
         back_populates="resource_item",
         uselist=False,
         lazy="joined",
     )
 
-    resource_ratings: Mapped[list["ResourceRatingModel"]] = relationship(  # noqa: F821
+    resource_ratings: Mapped[list["ResourceRatingModel"]] = relationship(  # noqa: F821 # pyright: ignore
         "ResourceRatingModel",
         back_populates="resource_item",
         cascade="all, delete-orphan",
         lazy="joined",
     )
 
-    resource_images: Mapped[list["ResourceImageModel"]] = relationship(  # noqa: F821
+    resource_images: Mapped[list["ResourceImageModel"]] = relationship(  # noqa: F821 # pyright: ignore
         "ResourceImageModel",
         back_populates="resource_item",
         cascade="all, delete-orphan",

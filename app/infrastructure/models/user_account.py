@@ -1,9 +1,10 @@
+from datetime import datetime
 from uuid import uuid4
 
 from domain.enums import Role
-from sqlalchemy import BigInteger, Column, DateTime, Enum, func, String
+from sqlalchemy import BigInteger, Enum
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.base import Base
 
@@ -11,16 +12,24 @@ from database.base import Base
 class UserAccountModel(Base):
     __tablename__ = "user_account"
 
-    user_account_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    user_telegram_id = Column(BigInteger)
-    username = Column(String)
+    user_account_id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    user_telegram_id: Mapped[int] = mapped_column(BigInteger)
+    username: Mapped[str | None]
 
-    role = Column(Enum(Role))
+    role: Mapped[Role | None] = mapped_column(Enum(Role))
 
-    quiz_results = relationship("QuizResultModel", back_populates="user_account")
-    quiz_ratings = relationship("QuizRatingModel", back_populates="user_account")
-    resource_ratings = relationship("ResourceRatingModel", back_populates="user_account")
-    resource_favorites = relationship("ResourceFavoriteModel", back_populates="user_account")
+    quiz_results: Mapped[list["QuizResultModel"]] = relationship(  # noqa: F821 # pyright: ignore
+        back_populates="user_account",
+    )
+    quiz_ratings: Mapped[list["QuizRatingModel"]] = relationship(  # noqa: F821 # pyright: ignore
+        back_populates="user_account",
+    )
+    resource_ratings: Mapped[list["ResourceRatingModel"]] = relationship(  # noqa: F821 # pyright: ignore
+        back_populates="user_account",
+    )
+    resource_favorites: Mapped[list["ResourceFavoriteModel"]] = relationship(  # noqa: F821 # pyright: ignore
+        back_populates="user_account",
+    )
 
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now)
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.now, onupdate=datetime.now)
