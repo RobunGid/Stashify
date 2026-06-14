@@ -1,9 +1,8 @@
 from datetime import datetime
-from uuid import uuid4
+from uuid import UUID as PyUUID, uuid4
 
 from domain.enums import Role
 from sqlalchemy import BigInteger, Enum
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.base import Base
@@ -12,7 +11,7 @@ from database.base import Base
 class UserAccountModel(Base):
     __tablename__ = "user_account"
 
-    user_account_id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    user_account_id: Mapped[PyUUID] = mapped_column(primary_key=True, default=uuid4)
     user_telegram_id: Mapped[int] = mapped_column(BigInteger)
     username: Mapped[str | None]
 

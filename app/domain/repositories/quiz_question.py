@@ -15,7 +15,11 @@ class BaseQuizQuestionRepository(
         pass
 
     @abstractmethod
-    async def get_one_by_question_number(self, resource_item_id: UUID, quiz_question_number: int) -> None:
+    async def get_one_by_question_number(
+        self,
+        resource_item_id: UUID,
+        quiz_question_number: int,
+    ) -> QuizQuestionEntity | None:
         pass
 
     @abstractmethod

@@ -66,7 +66,6 @@ class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceItem
             action="change_page",
             page=self.page,
             resource_item_id=self.item.resource_item_id,
-            category_item_id=None,
         )
 
 
@@ -86,6 +85,5 @@ class ResourceQuizQuestionKeyboardBuilder(
         return ListResourcesChooseResourceCallbackFactory(
             action="change_page",
             resource_item_id=self.item.resource_item_id,
-            category_item_id=None,
             page=self.page,
         )

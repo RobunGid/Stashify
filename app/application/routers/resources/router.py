@@ -170,14 +170,14 @@ async def list_resource_resource_page(
     callback: CallbackQuery,
     callback_data: ListResourcesChooseResourceCallbackFactory,
     i18n: I18nContext,
-    service: FromDishka[ResourceItemService],
+    resource_item_service: FromDishka[ResourceItemService],
 ):
     if (
         not callback.from_user
         or not callback.from_user.language_code
         or not callback.message
         or not callback.data
-        or not callback_data.category_item_id
+        or not callback_data.resource_item_id
     ):
         return
     await bot.delete_message(
@@ -185,10 +185,16 @@ async def list_resource_resource_page(
         message_id=callback.message.message_id,
     )
     current_page = callback_data.page
+    resource_item_id = callback_data.resource_item_id
+    resource_item_entity = await resource_item_service.get_one(resource_item_id)
+    if not resource_item_entity:
+        raise ResourceItemNotFoundException(resource_item_id)
 
-    category_item_id = callback_data.category_item_id
-    filters = ResourceItemFiltersSchema(count=LIST_RESOURCES_RESOURCES_ON_PAGE, category_item_id=category_item_id)
-    resource_item_entities, count = await service.get_many(filters.to_entity())
+    filters = ResourceItemFiltersSchema(
+        count=LIST_RESOURCES_RESOURCES_ON_PAGE,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+    resource_item_entities, count = await resource_item_service.get_many(filters.to_entity())
     total_resources_pages = ceil(count / LIST_RESOURCES_RESOURCES_ON_PAGE)
 
     keyboard_builder = ResourceListKeyboardBuilder(
@@ -196,7 +202,7 @@ async def list_resource_resource_page(
         items=resource_item_entities,
         current_page=current_page,
         total_pages=total_resources_pages,
-        category_item_id=category_item_id,
+        category_item_id=resource_item_entity.category_item_id,
     )
     keyboard = keyboard_builder.build()
 
@@ -358,7 +364,7 @@ async def list_resource_resource_change_page(
         resource_item_id,
         resource_item_entity.category_item_id,
     )
-    if not resource_item_index_in_category:
+    if resource_item_index_in_category is None:
         raise ResourceItemNotFoundException(resource_item_id)
 
     keyboard_builder = ResourceItemKeyboardBuilder(

@@ -1,12 +1,11 @@
 from datetime import datetime
-from uuid import uuid4
+from uuid import UUID as PyUUID, uuid4
 
 from sqlalchemy import (
     CheckConstraint,
     ForeignKey,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from database.base import Base
@@ -15,14 +14,14 @@ from database.base import Base
 class ResourceRatingModel(Base):
     __tablename__ = "resource_rating"
 
-    resource_rating_id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    resource_rating_id: Mapped[PyUUID] = mapped_column(primary_key=True, default=uuid4)
 
-    resource_item_id: Mapped[UUID] = mapped_column(ForeignKey("resource_item.resource_item_id"))
+    resource_item_id: Mapped[PyUUID] = mapped_column(ForeignKey("resource_item.resource_item_id"))
     resource_item: Mapped["ResourceItemModel"] = relationship(  # noqa: F821 # pyright: ignore
         back_populates="resource_ratings",
     )
 
-    user_account_id: Mapped[UUID] = mapped_column(ForeignKey("user_account.user_account_id"))
+    user_account_id: Mapped[PyUUID] = mapped_column(ForeignKey("user_account.user_account_id"))
     user_account: Mapped["UserAccountModel"] = relationship(  # noqa: F821 # pyright: ignore
         back_populates="resource_ratings",
     )

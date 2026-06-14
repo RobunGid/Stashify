@@ -1,9 +1,8 @@
 from datetime import datetime
-from uuid import uuid4
+from uuid import UUID as PyUUID, uuid4
 
 from domain.entities.category_item import CategoryItemEntity
-from sqlalchemy import DateTime, func, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import DateTime, func, String, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.base import Base
@@ -12,7 +11,7 @@ from database.base import Base
 class CategoryItemModel(Base):
     __tablename__ = "category_item"
 
-    category_item_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    category_item_id: Mapped[PyUUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     resource_items: Mapped[list["ResourceItemModel"]] = relationship(  # noqa: F821 # pyright: ignore
         "ResourceItemModel",

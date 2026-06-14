@@ -1,5 +1,5 @@
 from datetime import datetime
-from uuid import uuid4
+from uuid import UUID as PyUUID, uuid4
 
 from sqlalchemy import (
     CheckConstraint,
@@ -15,12 +15,12 @@ from database.base import Base
 class QuizRatingModel(Base):
     __tablename__ = "quiz_rating"
 
-    quiz_rating_id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    quiz_rating_id: Mapped[PyUUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
-    quiz_item_id: Mapped[UUID] = mapped_column(ForeignKey("quiz_item.quiz_item_id"))
+    quiz_item_id: Mapped[PyUUID] = mapped_column(UUID(as_uuid=True), ForeignKey("quiz_item.quiz_item_id"))
     quiz_item: Mapped["QuizItemModel"] = relationship(back_populates="quiz_ratings")  # noqa: F821 # pyright: ignore
 
-    user_account_id: Mapped[UUID] = mapped_column(ForeignKey("user_account.user_account_id"))
+    user_account_id: Mapped[PyUUID] = mapped_column(ForeignKey("user_account.user_account_id"))
     user_account: Mapped["UserAccountModel"] = relationship(  # noqa: F821 # pyright: ignore
         back_populates="quiz_ratings",
     )

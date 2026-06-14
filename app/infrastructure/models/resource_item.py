@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import UUID as PyUUID, uuid4
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, func, String
 from sqlalchemy.dialects.postgresql import UUID
@@ -10,7 +10,7 @@ from database.base import Base
 class ResourceItemModel(Base):
     __tablename__ = "resource_item"
 
-    resource_item_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    resource_item_id: Mapped[PyUUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=False)
@@ -18,7 +18,7 @@ class ResourceItemModel(Base):
     tags: Mapped[str] = mapped_column(String, nullable=False)
     verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
-    category_item_id: Mapped[UUID] = mapped_column(
+    category_item_id: Mapped[PyUUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("category_item.category_item_id"),
         nullable=False,

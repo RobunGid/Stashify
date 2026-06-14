@@ -113,3 +113,21 @@ class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepository
         )
         await self.session.execute(statement)
         await self.session.commit()
+
+    async def get_resource_item_index_in_category(self, resource_item_id: UUID, category_item_id: UUID) -> int | None:
+
+        subquery = (
+            select(
+                ResourceItemModel.resource_item_id,
+                (func.row_number().over(order_by=ResourceItemModel.resource_item_id) - 1).label("position"),
+            )
+            .where(ResourceItemModel.category_item_id == category_item_id)
+            .subquery()
+        )
+
+        statement = select(subquery.c.position).where(subquery.c.resource_item_id == resource_item_id)
+
+        result = await self.session.execute(statement)
+        index = result.scalar_one_or_none()
+
+        return int(index) if index is not None else None

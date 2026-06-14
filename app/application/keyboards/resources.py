@@ -22,7 +22,6 @@ from domain.entities.resource_item import ResourceItemEntity
 class ListResourcesChooseResourceCallbackFactory(CallbackData, prefix="lst_rsc_rsc"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
     resource_item_id: UUID | None
-    category_item_id: UUID | None
     page: int
 
 
@@ -40,7 +39,6 @@ class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
                 action="select",
                 resource_item_id=item.resource_item_id,
                 page=0,
-                category_item_id=item.category_item_id,
             ),
         }
 
@@ -49,7 +47,6 @@ class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
             action="change_page",
             resource_item_id=None,
             page=page,
-            category_item_id=self.category_item_id,
         )
 
 
@@ -103,9 +100,9 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemEntity]):
     def _get_item_id(self, item: ResourceItemEntity) -> UUID:
         return item.resource_item_id
 
-    def _navigation_callback(self, item: ResourceItemEntity) -> CallbackData:
+    def _navigation_callback(self, item_id: UUID) -> CallbackData:
         return ListResourcesItemCallbackFactory(
-            resource_item_id=item.resource_item_id,
+            resource_item_id=item_id,
             action="change_page",
             rating=None,
         )

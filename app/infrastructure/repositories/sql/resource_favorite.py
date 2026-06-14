@@ -8,7 +8,7 @@ from domain.repositories.resource_favorite import BaseResourceFavoriteRepository
 from infrastructure.mappers.resource_favorite import ResourceFavoriteMapper
 from infrastructure.models.resource_favorite import ResourceFavoriteModel
 from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
-from sqlalchemy import and_, func, select, update
+from sqlalchemy import and_, exists, func, select, update
 
 
 @dataclass
@@ -79,3 +79,19 @@ class SQLResourceFavoriteRepository(BaseResourceFavoriteRepository, SQLAlchemyRe
         category = (await self.session.execute(statement)).scalars().first()
         await self.session.delete(category)
         await self.session.commit()
+
+    async def check_exits_by_user_account_id_and_resource_item_id(
+        self,
+        user_account_id: UUID,
+        resource_item_id: UUID,
+    ) -> bool:
+        statement = select(
+            exists().where(
+                ResourceFavoriteModel.user_account_id == user_account_id,
+                ResourceFavoriteModel.resource_item_id == resource_item_id,
+            ),
+        )
+
+        is_exists = (await self.session.execute(statement)).scalars().first()
+
+        return bool(is_exists)

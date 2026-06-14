@@ -1,8 +1,7 @@
 from datetime import datetime
-from uuid import uuid4
+from uuid import UUID as PyUUID, uuid4
 
 from sqlalchemy import ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.base import Base
@@ -11,9 +10,9 @@ from database.base import Base
 class QuizItemModel(Base):
     __tablename__ = "quiz_item"
 
-    quiz_item_id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    quiz_item_id: Mapped[PyUUID] = mapped_column(primary_key=True, default=uuid4)
 
-    resource_item_id: Mapped[UUID] = mapped_column(
+    resource_item_id: Mapped[PyUUID] = mapped_column(
         ForeignKey("resource_item.resource_item_id"),
         unique=True,
     )

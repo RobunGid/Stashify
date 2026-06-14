@@ -170,7 +170,7 @@ class BaseItemKeyboardBuilder(
                 {
                     "text": self.i18n.get("items-back"),
                     "callback_data": self._navigation_callback(
-                        self.item_ids[self.current_item_index - 1],
+                        self.item_ids[1],
                     ).pack(),
                 },
             ]
@@ -180,7 +180,7 @@ class BaseItemKeyboardBuilder(
                 {
                     "text": self.i18n.get("items-forward"),
                     "callback_data": self._navigation_callback(
-                        self.item_ids[self.current_item_index + 1],
+                        self.item_ids[-2],
                     ).pack(),
                 },
                 {

@@ -8,7 +8,7 @@ from domain.repositories.quiz_item import BaseQuizItemRepository
 from infrastructure.mappers.quiz_item import QuizItemMapper
 from infrastructure.models.quiz_item import QuizItemModel
 from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
-from sqlalchemy import func, select, update
+from sqlalchemy import exists, func, select, update
 
 
 @dataclass
@@ -71,3 +71,14 @@ class SQLQuizItemRepository(BaseQuizItemRepository, SQLAlchemyRepositoryMixin):
             return None
 
         return QuizItemMapper.to_entity(quiz_item_model)
+
+    async def check_exists_by_resource_item_id(self, resource_item_id: UUID) -> bool:
+        statement = select(
+            exists().where(
+                QuizItemModel.resource_item_id == resource_item_id,
+            ),
+        )
+
+        is_exists = (await self.session.execute(statement)).scalars().first()
+
+        return bool(is_exists)
