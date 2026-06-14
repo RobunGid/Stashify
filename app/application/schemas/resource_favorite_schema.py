@@ -21,8 +21,8 @@ class BaseResourceFavoriteSchema(BaseSchema[ResourceFavoriteEntity]):
 
 
 class ResourceFavoriteSchema(BaseResourceFavoriteSchema):
-    user: UserAccountSchema
-    resource: ResourceItemSchema
+    user_account: UserAccountSchema
+    resource_item: ResourceItemSchema
 
 
 from application.schemas.resource_schema import ResourceItemSchema  # noqa

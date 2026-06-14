@@ -13,3 +13,7 @@ class BaseQuizQuestionRepository(
     @abstractmethod
     async def delete_by_question_number(self, resource_item_id: UUID, quiz_question_number: int) -> None:
         pass
+
+    @abstractmethod
+    async def get_one_by_question_number(self, resource_item_id: UUID, quiz_question_number: int) -> None:
+        pass

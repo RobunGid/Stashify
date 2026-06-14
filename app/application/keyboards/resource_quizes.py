@@ -12,8 +12,8 @@ from application.keyboards.resources import (
     ListResourcesChooseResourceCallbackFactory,
     ListResourcesItemCallbackFactory,
 )
-from application.schemas.quiz_question_schema import BaseQuizQuestionSchema
-from application.schemas.resource_schema import ResourceItemSchema
+from domain.entities.quiz_question import QuizQuestionEntity
+from domain.entities.resource_item import ResourceItemEntity
 
 
 class ListResourcesQuizQuestionCallbackFactory(CallbackData, prefix="lst_rsc_qstn"):  # type: ignore[call-arg]
@@ -45,7 +45,7 @@ class ResourceQuizManageEntryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
 
 
 @dataclass
-class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceItemSchema]):
+class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceItemEntity]):
     def _build_retry_buttons(self) -> list[dict]:
         return [
             {
@@ -68,7 +68,7 @@ class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceItem
 
 @dataclass
 class ResourceQuizQuestionKeyboardBuilder(
-    BaseQuizQuestionKeyboardBuilder[ResourceItemSchema, BaseQuizQuestionSchema],
+    BaseQuizQuestionKeyboardBuilder[ResourceItemEntity, QuizQuestionEntity],
 ):
     def _build_quiz_callback(self, option_number: int, question_number: int) -> CallbackData:
         return ListResourcesQuizQuestionCallbackFactory(

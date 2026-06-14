@@ -15,8 +15,6 @@ from application.keyboards.base import (
     BaseManageEntryKeyboardBuilder,
     BaseQuizConfirmKeyboardBuilder,
 )
-from application.schemas.category_item_schema import CategoryItemSchema
-from application.schemas.resource_schema import ResourceItemSchema
 from domain.entities.category_item import CategoryItemEntity
 from domain.entities.resource_item import ResourceItemEntity
 
@@ -60,11 +58,11 @@ class ListResourcesChooseCategoryCallbackFactory(
 
 
 @dataclass
-class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemSchema]):
+class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
     def _back_callback(self) -> str:
         return "menu"
 
-    def _item_button(self, item: CategoryItemSchema) -> dict:
+    def _item_button(self, item: CategoryItemEntity) -> dict:
         return {
             "text": item.name,
             "callback_data": ListResourcesChooseCategoryCallbackFactory(
@@ -96,32 +94,32 @@ class ListResourcesItemCallbackFactory(CallbackData, prefix="lst_rsc_itm"):  # t
 
 
 @dataclass
-class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemSchema]):
-    def _get_item_id(self, item: ResourceItemSchema) -> UUID:
+class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemEntity]):
+    def _get_item_id(self, item: ResourceItemEntity) -> UUID:
         return item.resource_item_id
 
-    def _navigation_callback(self, item: ResourceItemSchema) -> CallbackData:
+    def _navigation_callback(self, item: ResourceItemEntity) -> CallbackData:
         return ListResourcesItemCallbackFactory(
             resource_item_id=item.resource_item_id,
             action="change_page",
             rating=None,
         )
 
-    def _remove_favorite_callback(self, item: ResourceItemSchema) -> CallbackData:
+    def _remove_favorite_callback(self, item: ResourceItemEntity) -> CallbackData:
         return ListResourcesItemCallbackFactory(
             resource_item_id=item.resource_item_id,
             action="remove_favorite",
             rating=None,
         )
 
-    def _add_favorite_callback(self, item: ResourceItemSchema) -> CallbackData:
+    def _add_favorite_callback(self, item: ResourceItemEntity) -> CallbackData:
         return ListResourcesItemCallbackFactory(
             resource_item_id=item.resource_item_id,
             action="add_favorite",
             rating=None,
         )
 
-    def _rating_callback(self, item: ResourceItemSchema, rating: int) -> CallbackData:
+    def _rating_callback(self, item: ResourceItemEntity, rating: int) -> CallbackData:
         return ListResourcesItemCallbackFactory(
             resource_item_id=item.resource_item_id,
             action="rate",
@@ -165,8 +163,8 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemSchema]):
 
 
 @dataclass
-class ResourceQuizConfirmKeyboardBuilder(BaseQuizConfirmKeyboardBuilder[ResourceItemSchema]):
-    def _navigation_callback(self, item: ResourceItemSchema) -> CallbackData:
+class ResourceQuizConfirmKeyboardBuilder(BaseQuizConfirmKeyboardBuilder[ResourceItemEntity]):
+    def _navigation_callback(self, item: ResourceItemEntity) -> CallbackData:
         return ListResourcesItemCallbackFactory(
             resource_item_id=item.resource_item_id,
             action="change_page",

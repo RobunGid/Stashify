@@ -1,4 +1,3 @@
-from datetime import datetime
 from uuid import UUID
 
 from application.schemas.base_schema import BaseSchema
@@ -10,9 +9,8 @@ class BaseQuizResultSchema(BaseSchema[QuizResultEntity]):
 
     quiz_item_id: UUID
 
-    user_account_id: str
+    user_account_id: UUID
 
-    completed_at: datetime
     percent: int
 
     def to_entity(self) -> QuizResultEntity:

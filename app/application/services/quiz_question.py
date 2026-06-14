@@ -13,3 +13,10 @@ class QuizQuestionService(BaseService[QuizQuestionEntity, QuizQuestionUpdateEnti
 
     async def delete_by_question_number(self, resource_item_id: UUID, quiz_question_number: int) -> None:
         return await self.repository.delete_by_question_number(resource_item_id, quiz_question_number)
+
+    async def get_one_by_question_number(
+        self,
+        resource_item_id: UUID,
+        quiz_question_number: int,
+    ) -> QuizQuestionEntity | None:
+        return await self.repository.get_one_by_question_number(resource_item_id, quiz_question_number)

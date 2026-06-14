@@ -15,8 +15,8 @@ class BaseQuizRatingSchema(BaseSchema):
 
 
 class QuizRatingSchema(BaseQuizRatingSchema):
-    user: UserAccountSchema
-    quiz: QuizSchema
+    user_account: UserAccountSchema
+    quiz_item: QuizSchema
 
 
 from application.schemas.user_account_schema import UserAccountSchema  # noqa

@@ -8,7 +8,7 @@ from pydantic import ConfigDict
 class BaseResourceRatingSchema(BaseSchema[ResourceRatingEntity]):
     resource_rating_id: UUID
     resource_item_id: UUID
-    user_account_id: str
+    user_account_id: UUID
     rating: int
 
     model_config = ConfigDict(from_attributes=True)
