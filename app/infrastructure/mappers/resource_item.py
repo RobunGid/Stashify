@@ -6,7 +6,8 @@ from infrastructure.models.resource_item import ResourceItemModel
 
 
 class ResourceItemMapper(BaseMapper[ResourceItemEntity, ResourceItemModel]):
-    def to_entity(self, model: ResourceItemModel) -> ResourceItemEntity:
+    @staticmethod
+    def to_entity(model: ResourceItemModel) -> ResourceItemEntity:
         return ResourceItemEntity(
             resource_item_id=UUID(model.resource_item_id),
             name=model.name,
@@ -19,7 +20,8 @@ class ResourceItemMapper(BaseMapper[ResourceItemEntity, ResourceItemModel]):
             updated_at=model.updated_at,
         )
 
-    def to_model(self, entity: ResourceItemEntity) -> ResourceItemModel:
+    @staticmethod
+    def to_model(entity: ResourceItemEntity) -> ResourceItemModel:
         return ResourceItemModel(
             resource_item_id=entity.resource_item_id,
             name=entity.name,

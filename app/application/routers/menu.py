@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 from aiogram_i18n import I18nContext
-from app.application.exceptions.user_account import UserAccountNotFoundException
+from application.exceptions.user_account import UserAccountNotFoundException
 from application.routers.constants import ROLE_MENU_KEYBOARD_BUILDER_MAP
 from application.services.user_account import UserAccountService
 from dishka import FromDishka

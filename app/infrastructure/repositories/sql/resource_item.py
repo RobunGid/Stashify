@@ -4,6 +4,7 @@ from uuid import UUID
 from domain.entities.base import GetManyResult
 from domain.entities.resource_item import ResourceItemEntity, ResourceItemUpdateEntity
 from domain.filters.resource_item import ResourceItemFilters
+from infrastructure.mappers.resource_item import ResourceItemMapper
 from infrastructure.models.category_item import CategoryItemModel
 from infrastructure.models.resource_item import ResourceItemModel
 from infrastructure.repositories.base import BaseSQLAlchemyRepository
@@ -15,7 +16,7 @@ class SQLResourceItemRepository(
     BaseSQLAlchemyRepository[ResourceItemEntity, ResourceItemUpdateEntity, ResourceItemFilters],
 ):
     async def create(self, resource_item: ResourceItemEntity) -> None:
-        item = ResourceItemModel(resource_item)
+        item = ResourceItemMapper.to_model(resource_item)
         self.session.add(item)
         await self.session.commit()
 

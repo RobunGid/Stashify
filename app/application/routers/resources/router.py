@@ -30,6 +30,7 @@ from application.keyboards.resources import (
     ResourceListKeyboardBuilder,
     ResourceQuizConfirmKeyboardBuilder,
 )
+from application.routers.constants import LIST_RESOURCES_CATEGORIES_ON_PAGE, LIST_RESOURCES_RESOURCES_ON_PAGE
 from application.schemas.quiz_result_schema import BaseQuizResultSchema
 from application.schemas.resource_favorite_schema import BaseResourceFavoriteSchema
 from application.schemas.resource_rating_schema import BaseResourceRatingSchema
@@ -42,10 +43,6 @@ from application.services.resource_favorite import ResourceFavoriteService
 from application.services.resource_image import ResourceImageService
 from application.services.resource_item import ResourceItemService
 from application.services.resource_rating import ResourceRatingService
-from constants import (
-    LIST_RESOURCES_CATEGORIES_ON_PAGE,
-    LIST_RESOURCES_RESOURCES_ON_PAGE,
-)
 from dishka import FromDishka
 
 from settings.aiogram import bot
