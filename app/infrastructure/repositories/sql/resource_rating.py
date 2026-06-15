@@ -95,3 +95,11 @@ class SQLResourceRatingRepository(BaseResourceRatingRepository, SQLAlchemyReposi
             return None
 
         return ResourceRatingMapper.to_entity(resource_rating_model)
+
+    async def get_count(self, filters: ResourceRatingFilters) -> int:
+
+        statement = select(ResourceRatingModel)
+        count_statement = select(func.count()).select_from(statement.subquery())
+        total = (await self.session.execute(count_statement)).scalar_one()
+
+        return total

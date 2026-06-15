@@ -5,7 +5,7 @@ from aiogram.types import Message
 
 from application.containers.factories import get_container
 from application.services.user_account import UserAccountService
-from domain.enums import Role
+from domain.entities.user_account import Role
 
 
 class UserRoleFilter(BaseFilter):

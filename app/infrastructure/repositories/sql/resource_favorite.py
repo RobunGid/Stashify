@@ -95,3 +95,11 @@ class SQLResourceFavoriteRepository(BaseResourceFavoriteRepository, SQLAlchemyRe
         is_exists = (await self.session.execute(statement)).scalars().first()
 
         return bool(is_exists)
+
+    async def get_count(self, filters: ResourceFavoriteFilters) -> int:
+
+        statement = select(ResourceFavoriteModel)
+        count_statement = select(func.count()).select_from(statement.subquery())
+        total = (await self.session.execute(count_statement)).scalar_one()
+
+        return total

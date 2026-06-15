@@ -1,7 +1,6 @@
 from uuid import UUID
 
-from domain.entities.user_account import UserAccountEntity
-from domain.enums import Role
+from domain.entities.user_account import Role, UserAccountEntity
 from infrastructure.mappers.base import BaseMapper
 from infrastructure.models.user_account import UserAccountModel
 

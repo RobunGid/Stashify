@@ -14,7 +14,7 @@ class ResourceItemFormatter(BaseFormatter):
         category_item: CategoryItemEntity,
         i18n: I18nContext,
     ):
-        created_at = resource_item.created_at
+        created_at = resource_item.created_at.strftime("%d.%m.%Y %H:%M")
 
         return i18n.get(
             "list-resources-item",

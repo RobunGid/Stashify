@@ -98,3 +98,11 @@ class SQLQuizQuestionRepository(BaseQuizQuestionRepository, SQLAlchemyRepository
 
         total = (await self.session.execute(count_statement)).scalar_one()
         return total
+
+    async def get_count(self, filters: QuizQuestionFilters) -> int:
+
+        statement = select(QuizQuestionModel)
+        count_statement = select(func.count()).select_from(statement.subquery())
+        total = (await self.session.execute(count_statement)).scalar_one()
+
+        return total

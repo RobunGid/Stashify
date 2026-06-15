@@ -1,8 +1,8 @@
 from dataclasses import dataclass
+from enum import Enum
 from uuid import UUID
 
 from domain.entities.base import BaseEntity, BaseUpdateEntity
-from domain.enums import Role
 
 
 @dataclass
@@ -20,3 +20,9 @@ class UserAccountUpdateEntity(BaseUpdateEntity):
     username: str | None
 
     role: Role | None
+
+
+class Role(Enum):
+    user = "user"
+    manager = "manager"
+    admin = "admin"

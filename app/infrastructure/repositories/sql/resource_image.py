@@ -36,6 +36,8 @@ class SQLResourceImageRepository(BaseResourceImageRepository, SQLAlchemyReposito
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()
 
+        if filters.resource_item_id is not None:
+            statement = statement.where(ResourceImageModel.resource_item_id == filters.resource_item_id)
         if filters.offset is not None:
             statement = statement.offset(filters.offset)
         if filters.count is not None:
@@ -61,3 +63,11 @@ class SQLResourceImageRepository(BaseResourceImageRepository, SQLAlchemyReposito
         )
         await self.session.execute(statement)
         await self.session.commit()
+
+    async def get_count(self, filters: ResourceImageFilters) -> int:
+
+        statement = select(ResourceImageModel)
+        count_statement = select(func.count()).select_from(statement.subquery())
+        total = (await self.session.execute(count_statement)).scalar_one()
+
+        return total

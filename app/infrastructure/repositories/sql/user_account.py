@@ -2,9 +2,10 @@ from dataclasses import asdict, dataclass
 from uuid import UUID
 
 from domain.entities.base import GetManyResult
-from domain.entities.user_account import UserAccountEntity, UserAccountUpdateEntity
+from domain.entities.user_account import Role, UserAccountEntity, UserAccountUpdateEntity
 from domain.filters.user_account import UserAccountFilters
 from domain.repositories.user_account import BaseUserAccountRepository
+from infrastructure.mappers.user_account import UserAccountMapper
 from infrastructure.models.category_item import CategoryItemModel
 from infrastructure.models.user_account import UserAccountModel
 from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
@@ -14,7 +15,7 @@ from sqlalchemy import func, select, update
 @dataclass
 class SQLUserAccountRepository(BaseUserAccountRepository, SQLAlchemyRepositoryMixin):
     async def create(self, user_account: UserAccountEntity) -> None:
-        item = UserAccountModel(**user_account.__dict__)
+        item = UserAccountMapper.to_model(user_account)
         self.session.add(item)
         await self.session.commit()
 
@@ -74,5 +75,12 @@ class SQLUserAccountRepository(BaseUserAccountRepository, SQLAlchemyRepositoryMi
             user_account_id=item.user_account_id,
             username=item.username,
             user_telegram_id=item.user_telegram_id,
-            role=item.role,
+            role=Role(item.role),
         )
+
+    async def get_count(self, filters: UserAccountFilters) -> int:
+        statement = select(UserAccountModel)
+        count_statement = select(func.count()).select_from(statement.subquery())
+        total = (await self.session.execute(count_statement)).scalar_one()
+
+        return total

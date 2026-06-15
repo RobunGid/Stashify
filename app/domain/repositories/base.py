@@ -30,3 +30,7 @@ class BaseRepository(ABC, Generic[Ent, UpdEnt, Fils]):
     @abstractmethod
     async def update(self, item_id: UUID, item: UpdEnt) -> None:
         pass
+
+    @abstractmethod
+    async def get_count(self, filters: Fils) -> int:
+        pass

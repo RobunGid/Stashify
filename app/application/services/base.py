@@ -30,3 +30,6 @@ class BaseService(ABC, Generic[Ent, UpdEnt, Fils]):
 
     async def update(self, item_id: UUID, item: UpdEnt) -> None:
         return await self.repository.update(item_id, item)
+
+    async def get_count(self, filters: Fils) -> int:
+        return await self.repository.get_count(filters)

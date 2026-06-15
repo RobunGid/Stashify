@@ -136,7 +136,7 @@ class BaseItemKeyboardBuilder(
     BackKeyboardBuilderMixin,
     Generic[It],
 ):
-    item_ids: tuple[UUID, ...]
+    item_ids: tuple[UUID | None, UUID | None, UUID | None, UUID | None]
     current_item: It
     current_item_index: int
     total_items: int
@@ -156,17 +156,17 @@ class BaseItemKeyboardBuilder(
         return builder.as_markup()
 
     def _build_navigation_buttons(self) -> list[dict]:
-        is_at_start = self.current_item_index == 0
-        is_at_end = self.current_item_index == self.total_items - 1
-
         buttons: list[dict] = []
 
-        if not is_at_start:
+        if self.item_ids[0] is not None:
             buttons += [
                 {
                     "text": self.i18n.get("items-start"),
                     "callback_data": self._navigation_callback(self.item_ids[0]).pack(),
                 },
+            ]
+        if self.item_ids[1] is not None:
+            buttons += [
                 {
                     "text": self.i18n.get("items-back"),
                     "callback_data": self._navigation_callback(
@@ -175,17 +175,20 @@ class BaseItemKeyboardBuilder(
                 },
             ]
         buttons.append({"text": f"{self.current_item_index + 1}/{self.total_items}", "callback_data": " "})
-        if not is_at_end:
+        if self.item_ids[2] is not None:
             buttons += [
                 {
                     "text": self.i18n.get("items-forward"),
                     "callback_data": self._navigation_callback(
-                        self.item_ids[-2],
+                        self.item_ids[2],
                     ).pack(),
                 },
+            ]
+        if self.item_ids[3] is not None:
+            buttons += [
                 {
                     "text": self.i18n.get("items-end"),
-                    "callback_data": self._navigation_callback(self.item_ids[-1]).pack(),
+                    "callback_data": self._navigation_callback(self.item_ids[3]).pack(),
                 },
             ]
         return buttons

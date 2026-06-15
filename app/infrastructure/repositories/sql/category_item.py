@@ -114,20 +114,62 @@ class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepository
         await self.session.execute(statement)
         await self.session.commit()
 
-    async def get_resource_item_index_in_category(self, resource_item_id: UUID, category_item_id: UUID) -> int | None:
-
-        subquery = (
-            select(
-                ResourceItemModel.resource_item_id,
-                (func.row_number().over(order_by=ResourceItemModel.resource_item_id) - 1).label("position"),
-            )
-            .where(ResourceItemModel.category_item_id == category_item_id)
-            .subquery()
+    async def get_count(self, filters: CategoryItemFilters) -> int:
+        statement = select(CategoryItemModel).options(
+            selectinload(CategoryItemModel.resource_items)
+            .selectinload(ResourceItemModel.quiz_item)
+            .selectinload(QuizItemModel.quiz_questions),
         )
+        if filters.has_quiz_items:
+            subquery = (
+                select(ResourceItemModel.category_item_id)
+                .select_from(QuizItemModel)
+                .outerjoin(
+                    ResourceItemModel,
+                    ResourceItemModel.resource_item_id == QuizItemModel.resource_item_id,
+                )
+                .join(
+                    CategoryItemModel,
+                    CategoryItemModel.category_item_id == ResourceItemModel.category_item_id,
+                )
+            )
+            statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))
 
-        statement = select(subquery.c.position).where(subquery.c.resource_item_id == resource_item_id)
+        if filters.has_resource_items:
+            subquery = (
+                select(ResourceItemModel.category_item_id)
+                .select_from(CategoryItemModel)
+                .outerjoin(
+                    ResourceItemModel,
+                    ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
+                )
+            )
+            statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))
 
-        result = await self.session.execute(statement)
-        index = result.scalar_one_or_none()
+        if filters.favorite_user_id:
+            subquery = (
+                select(ResourceItemModel.category_item_id)
+                .select_from(CategoryItemModel)
+                .outerjoin(
+                    ResourceItemModel,
+                    ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
+                )
+                .outerjoin(
+                    ResourceFavoriteModel,
+                    ResourceFavoriteModel.resource_item_id == ResourceItemModel.resource_item_id,
+                )
+                .where(
+                    ResourceFavoriteModel.user_account_id == filters.favorite_user_id,
+                )
+            )
+            statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))
 
-        return int(index) if index is not None else None
+        count_statement = select(func.count()).select_from(statement.subquery())
+        total = (await self.session.execute(count_statement)).scalar_one()
+
+        if filters.offset is not None:
+            statement = statement.offset(filters.offset)
+        if filters.count is not None:
+            statement = statement.limit(filters.count)
+
+        return total

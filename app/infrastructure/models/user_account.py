@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID as PyUUID, uuid4
 
-from domain.enums import Role
+from domain.entities.user_account import Role
 from sqlalchemy import BigInteger, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

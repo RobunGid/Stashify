@@ -59,3 +59,11 @@ class SQLQuizRatingRepository(BaseQuizRatingRepository, SQLAlchemyRepositoryMixi
         )
         await self.session.execute(statement)
         await self.session.commit()
+
+    async def get_count(self, filters: QuizRatingFilters) -> int:
+
+        statement = select(QuizRatingModel)
+        count_statement = select(func.count()).select_from(statement.subquery())
+        total = (await self.session.execute(count_statement)).scalar_one()
+
+        return total

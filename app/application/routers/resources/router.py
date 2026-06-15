@@ -1,5 +1,6 @@
 from math import ceil
-from uuid import uuid4
+from typing import cast
+from uuid import UUID, uuid4
 
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
@@ -44,6 +45,7 @@ from application.services.resource_image import ResourceImageService
 from application.services.resource_item import ResourceItemService
 from application.services.resource_rating import ResourceRatingService
 from dishka import FromDishka
+from domain.filters.base import SortOrder
 
 from settings.aiogram import bot
 
@@ -246,11 +248,6 @@ async def list_resource_resource_select(
     is_quiz_exists = await quiz_item_service.check_exists_by_resource_item_id(resource_item_id)
     quiz_result_entity = await quiz_result_service.get_one(resource_item_id)
 
-    resource_entities_filters = ResourceItemFiltersSchema(
-        category_item_id=resource_item_entity.category_item_id,
-        count=4,
-    )
-    resource_item_entities, count = await resource_item_service.get_many(resource_entities_filters.to_entity())
     category_item_entity = await category_item_service.get_one(resource_item_entity.category_item_id)
     if not category_item_entity:
         raise CategoryItemNotFoundException(resource_item_entity.category_item_id)
@@ -268,18 +265,80 @@ async def list_resource_resource_select(
     )
     resource_rating_number = resource_rating.rating if resource_rating else None
     quiz_result_percent = quiz_result_entity.percent if quiz_result_entity else None
-    resource_item_index_in_category = await category_item_service.get_resource_item_index_in_category(
-        resource_item_id,
-        resource_item_entity.category_item_id,
+
+    current_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
     )
-    if not resource_item_index_in_category:
+
+    resource_item_index_in_category = await resource_item_service.get_resource_item_index_in_category(
+        resource_item_id,
+        current_resource_item_filter_schema.to_entity(),
+    )
+    if resource_item_index_in_category is None:
         raise ResourceItemNotFoundException(resource_item_id)
 
+    first_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    previous_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        offset=resource_item_index_in_category - 1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    next_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        offset=resource_item_index_in_category + 1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    last_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
+        order=SortOrder.asc if first_resource_item_filter_schema.order == SortOrder.desc else SortOrder.desc,
+    )
+
+    first_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=first_resource_item_filter_schema.to_entity(),
+    )
+    previous_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=previous_resource_item_filter_schema.to_entity(),
+    )
+    next_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=next_resource_item_filter_schema.to_entity(),
+    )
+
+    last_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=last_resource_item_filter_schema.to_entity(),
+    )
+
+    resource_item_entities_navigation_tuple = (
+        first_resource_item_entity,
+        previous_resource_item_entity,
+        next_resource_item_entity,
+        last_resource_item_entity,
+    )
+    resource_item_entities_navigation_ids_tuple = cast(
+        tuple[UUID | None, UUID | None, UUID | None, UUID | None],
+        tuple(
+            getattr(resource_item_entity, "resource_item_id", None)
+            for resource_item_entity in resource_item_entities_navigation_tuple
+        ),
+    )
+
+    resource_item_count_filters = ResourceItemFiltersSchema(
+        category_item_id=resource_item_entity.category_item_id,
+        count=0,
+    )
+    total_resource_item_count = await resource_item_service.get_count(resource_item_count_filters.to_entity())
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
-        item_ids=tuple(resource_item_entity.resource_item_id for resource_item_entity in resource_item_entities),
+        item_ids=resource_item_entities_navigation_ids_tuple,
         current_item=resource_item_entity,
-        total_items=count,
+        total_items=total_resource_item_count,
         is_favorite=is_favorite,
         has_quiz=is_quiz_exists,
         rating=resource_rating_number,
@@ -338,11 +397,6 @@ async def list_resource_resource_change_page(
     is_quiz_exists = await quiz_item_service.check_exists_by_resource_item_id(resource_item_id)
     quiz_result_entity = await quiz_result_service.get_one(resource_item_id)
 
-    resource_entities_filters = ResourceItemFiltersSchema(
-        category_item_id=resource_item_entity.category_item_id,
-        count=4,
-    )
-    resource_item_entities, count = await resource_item_service.get_many(resource_entities_filters.to_entity())
     category_item_entity = await category_item_service.get_one(resource_item_entity.category_item_id)
     if not category_item_entity:
         raise CategoryItemNotFoundException(resource_item_entity.category_item_id)
@@ -360,18 +414,81 @@ async def list_resource_resource_change_page(
     )
     resource_rating_number = resource_rating.rating if resource_rating else None
     quiz_result_percent = quiz_result_entity.percent if quiz_result_entity else None
-    resource_item_index_in_category = await category_item_service.get_resource_item_index_in_category(
+
+    current_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    resource_item_index_in_category = await resource_item_service.get_resource_item_index_in_category(
         resource_item_id,
-        resource_item_entity.category_item_id,
+        current_resource_item_filter_schema.to_entity(),
     )
     if resource_item_index_in_category is None:
         raise ResourceItemNotFoundException(resource_item_id)
 
+    first_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    previous_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        offset=resource_item_index_in_category - 1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    next_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        offset=resource_item_index_in_category + 1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    last_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
+        order=SortOrder.asc if first_resource_item_filter_schema.order == SortOrder.desc else SortOrder.desc,
+    )
+
+    first_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=first_resource_item_filter_schema.to_entity(),
+    )
+    previous_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=previous_resource_item_filter_schema.to_entity(),
+    )
+    next_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=next_resource_item_filter_schema.to_entity(),
+    )
+
+    last_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=last_resource_item_filter_schema.to_entity(),
+    )
+
+    resource_item_entities_navigation_tuple = (
+        first_resource_item_entity,
+        previous_resource_item_entity,
+        next_resource_item_entity,
+        last_resource_item_entity,
+    )
+    resource_item_entities_navigation_ids_tuple = cast(
+        tuple[UUID | None, UUID | None, UUID | None, UUID | None],
+        tuple(
+            getattr(resource_item_entity, "resource_item_id", None)
+            for resource_item_entity in resource_item_entities_navigation_tuple
+        ),
+    )
+
+    resource_item_count_filters = ResourceItemFiltersSchema(
+        category_item_id=resource_item_entity.category_item_id,
+        count=0,
+    )
+    total_resource_item_count = await resource_item_service.get_count(resource_item_count_filters.to_entity())
+
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
-        item_ids=tuple(resource_item_entity.resource_item_id for resource_item_entity in resource_item_entities),
+        item_ids=resource_item_entities_navigation_ids_tuple,
         current_item=resource_item_entity,
-        total_items=count,
+        total_items=total_resource_item_count,
         is_favorite=is_favorite,
         has_quiz=is_quiz_exists,
         rating=resource_rating_number,
@@ -434,11 +551,6 @@ async def list_resource_resource_add_favorite(
     is_quiz_exists = await quiz_item_service.check_exists_by_resource_item_id(resource_item_id)
     quiz_result_entity = await quiz_result_service.get_one(resource_item_id)
 
-    resource_entities_filters = ResourceItemFiltersSchema(
-        category_item_id=resource_item_entity.category_item_id,
-        count=4,
-    )
-    resource_item_entities, count = await resource_item_service.get_many(resource_entities_filters.to_entity())
     category_item_entity = await category_item_service.get_one(resource_item_entity.category_item_id)
     if not category_item_entity:
         raise CategoryItemNotFoundException(resource_item_entity.category_item_id)
@@ -457,18 +569,58 @@ async def list_resource_resource_add_favorite(
     )
     resource_rating_number = resource_rating.rating if resource_rating else None
     quiz_result_percent = quiz_result_entity.percent if quiz_result_entity else None
-    resource_item_index_in_category = await category_item_service.get_resource_item_index_in_category(
-        resource_item_id,
-        resource_item_entity.category_item_id,
+
+    default_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=0,
+        category_item_id=category_item_entity.category_item_id,
     )
-    if not resource_item_index_in_category:
+
+    resource_item_index_in_category = await resource_item_service.get_resource_item_index_in_category(
+        resource_item_id,
+        default_resource_item_filter_schema.to_entity(),
+    )
+    if resource_item_index_in_category is None:
         raise ResourceItemNotFoundException(resource_item_id)
+
+    first_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=default_resource_item_filter_schema.to_entity(),
+    )
+    previous_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=default_resource_item_filter_schema.to_entity(),
+    )
+    next_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=default_resource_item_filter_schema.to_entity(),
+    )
+
+    last_resource_item_entity = await resource_item_service.get_last_by_filters(
+        filters=default_resource_item_filter_schema.to_entity(),
+    )
+
+    resource_item_entities_navigation_tuple = (
+        first_resource_item_entity,
+        previous_resource_item_entity,
+        next_resource_item_entity,
+        last_resource_item_entity,
+    )
+    resource_item_entities_navigation_ids_tuple = cast(
+        tuple[UUID | None, UUID | None, UUID | None, UUID | None],
+        tuple(
+            getattr(resource_item_entity, "resource_item_id", None)
+            for resource_item_entity in resource_item_entities_navigation_tuple
+        ),
+    )
+
+    resource_item_count_filters = ResourceItemFiltersSchema(
+        category_item_id=resource_item_entity.category_item_id,
+        count=0,
+    )
+    total_resource_item_count = await resource_item_service.get_count(resource_item_count_filters.to_entity())
 
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
-        item_ids=tuple(resource_item_entity.resource_item_id for resource_item_entity in resource_item_entities),
+        item_ids=resource_item_entities_navigation_ids_tuple,
         current_item=resource_item_entity,
-        total_items=count,
+        total_items=total_resource_item_count,
         is_favorite=True,
         has_quiz=is_quiz_exists,
         rating=resource_rating_number,
@@ -553,7 +705,7 @@ async def list_resource_resource_remove_favorite(
     )
     resource_rating_number = resource_rating.rating if resource_rating else None
     quiz_result_percent = quiz_result_entity.percent if quiz_result_entity else None
-    resource_item_index_in_category = await category_item_service.get_resource_item_index_in_category(
+    resource_item_index_in_category = await resource_item_service.get_resource_item_index_in_category(
         resource_item_id,
         resource_item_entity.category_item_id,
     )
@@ -655,7 +807,7 @@ async def list_resource_resource_rate(
     )
     await resource_rating_service.create(new_rating.to_entity())
     quiz_result_percent = quiz_result_entity.percent if quiz_result_entity else None
-    resource_item_index_in_category = await category_item_service.get_resource_item_index_in_category(
+    resource_item_index_in_category = await resource_item_service.get_resource_item_index_in_category(
         resource_item_id,
         resource_item_entity.category_item_id,
     )
@@ -847,14 +999,16 @@ async def list_resource_quiz_question_answer(
             quiz_item=quiz_item_entity,
         )
         keyboard = keyboard_builder.build()
-        if quiz_question_entities[question_number + 1].image is not None:
+        image = quiz_question_entities[question_number + 1].image
+
+        if image is None:
+            await callback.message.answer(text=quiz_question_entities[question_number + 1].text, reply_markup=keyboard)
+        else:
             await callback.message.answer_photo(
-                photo=quiz_question_entities[question_number + 1].image,
+                photo=image,
                 text=quiz_question_entities[question_number + 1].text,
                 reply_markup=keyboard,
             )
-        else:
-            await callback.message.answer(text=quiz_question_entities[question_number + 1].text, reply_markup=keyboard)
     else:
         state_data = await state.get_data()
         current_quiz_answers = state_data["current_quiz_answers"]
