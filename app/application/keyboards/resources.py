@@ -50,10 +50,7 @@ class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
         )
 
 
-class ListResourcesChooseCategoryCallbackFactory(
-    CallbackData,
-    prefix="list_resources_ctg",  # type: ignore[call-arg]
-):
+class ListResourcesChooseCategoryCallbackFactory(CallbackData, prefix="lst_rsc_ctg"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
     category_item_id: UUID | None
     page: int
@@ -223,7 +220,7 @@ class ResourceManageBackKeyboardBuilder(BaseBackKeyboardBuilder):
         return "manage_resources"
 
 
-class CreateResourceCallbackFactory(CallbackData, prefix="create_resource"):  # type: ignore[call-arg]
+class CreateResourceCallbackFactory(CallbackData, prefix="crt_rsc"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
     category_item_id: UUID | None
     page: int
@@ -258,10 +255,7 @@ class ManageResourcesBackKeyboardBuilder(BaseBackKeyboardBuilder):
         return "manage_resources"
 
 
-class DeleteResourceChooseCategoryCallbackFactory(
-    CallbackData,
-    prefix="delete_resource_ctg",  # type: ignore[call-arg]
-):
+class DeleteResourceChooseCategoryCallbackFactory(CallbackData, prefix="dlt_rsc_ctg_lst"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
     category_item_id: UUID | None
     page: int
@@ -290,10 +284,7 @@ class DeleteResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Category
         }
 
 
-class DeleteResourceChooseResourceCallbackFactory(
-    CallbackData,
-    prefix="delete_resource_rsc",  # type: ignore[call-arg]
-):
+class DeleteResourceChooseResourceCallbackFactory(CallbackData, prefix="dlt_rsc_lst"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
     resource_item_id: UUID | None
     page: int
@@ -338,10 +329,7 @@ class DeleteResourceConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
         return "manage_resources"
 
 
-class EditResourceChooseCategoryCallbackFactory(
-    CallbackData,
-    prefix="edit_resource_ctg",  # type: ignore[call-arg]
-):
+class EditResourceChooseCategoryCallbackFactory(CallbackData, prefix="edt_rsc_ctg_lst"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
     category_item_id: UUID | None
     page: int
@@ -370,10 +358,7 @@ class EditResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryIt
         }
 
 
-class EditResourceChooseResourceCallbackFactory(
-    CallbackData,
-    prefix="edit_resource_rsc",  # type: ignore[call-arg]
-):
+class EditResourceChooseResourceCallbackFactory(CallbackData, prefix="edt_rsc_lst"):  # type: ignore[call-arg]
     action: Union[Literal["select"], Literal["change_page"]]
     resource_item_id: UUID | None
     page: int

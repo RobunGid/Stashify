@@ -570,30 +570,53 @@ async def list_resource_resource_add_favorite(
     resource_rating_number = resource_rating.rating if resource_rating else None
     quiz_result_percent = quiz_result_entity.percent if quiz_result_entity else None
 
-    default_resource_item_filter_schema = ResourceItemFiltersSchema(
-        count=0,
-        category_item_id=category_item_entity.category_item_id,
+    current_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
     )
 
     resource_item_index_in_category = await resource_item_service.get_resource_item_index_in_category(
         resource_item_id,
-        default_resource_item_filter_schema.to_entity(),
+        current_resource_item_filter_schema.to_entity(),
     )
     if resource_item_index_in_category is None:
         raise ResourceItemNotFoundException(resource_item_id)
 
-    first_resource_item_entity = await resource_item_service.get_one_by_filters(
-        filters=default_resource_item_filter_schema.to_entity(),
-    )
-    previous_resource_item_entity = await resource_item_service.get_one_by_filters(
-        filters=default_resource_item_filter_schema.to_entity(),
-    )
-    next_resource_item_entity = await resource_item_service.get_one_by_filters(
-        filters=default_resource_item_filter_schema.to_entity(),
+    first_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
     )
 
-    last_resource_item_entity = await resource_item_service.get_last_by_filters(
-        filters=default_resource_item_filter_schema.to_entity(),
+    previous_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        offset=resource_item_index_in_category - 1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    next_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        offset=resource_item_index_in_category + 1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    last_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
+        order=SortOrder.asc if first_resource_item_filter_schema.order == SortOrder.desc else SortOrder.desc,
+    )
+
+    first_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=first_resource_item_filter_schema.to_entity(),
+    )
+    previous_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=previous_resource_item_filter_schema.to_entity(),
+    )
+    next_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=next_resource_item_filter_schema.to_entity(),
+    )
+
+    last_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=last_resource_item_filter_schema.to_entity(),
     )
 
     resource_item_entities_navigation_tuple = (
@@ -705,19 +728,81 @@ async def list_resource_resource_remove_favorite(
     )
     resource_rating_number = resource_rating.rating if resource_rating else None
     quiz_result_percent = quiz_result_entity.percent if quiz_result_entity else None
+    current_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
     resource_item_index_in_category = await resource_item_service.get_resource_item_index_in_category(
         resource_item_id,
-        resource_item_entity.category_item_id,
+        current_resource_item_filter_schema.to_entity(),
     )
-    if not resource_item_index_in_category:
+    if resource_item_index_in_category is None:
         raise ResourceItemNotFoundException(resource_item_id)
+
+    first_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    previous_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        offset=resource_item_index_in_category - 1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    next_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        offset=resource_item_index_in_category + 1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    last_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
+        order=SortOrder.asc if first_resource_item_filter_schema.order == SortOrder.desc else SortOrder.desc,
+    )
+
+    first_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=first_resource_item_filter_schema.to_entity(),
+    )
+    previous_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=previous_resource_item_filter_schema.to_entity(),
+    )
+    next_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=next_resource_item_filter_schema.to_entity(),
+    )
+
+    last_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=last_resource_item_filter_schema.to_entity(),
+    )
+
+    resource_item_entities_navigation_tuple = (
+        first_resource_item_entity,
+        previous_resource_item_entity,
+        next_resource_item_entity,
+        last_resource_item_entity,
+    )
+    resource_item_entities_navigation_ids_tuple = cast(
+        tuple[UUID | None, UUID | None, UUID | None, UUID | None],
+        tuple(
+            getattr(resource_item_entity, "resource_item_id", None)
+            for resource_item_entity in resource_item_entities_navigation_tuple
+        ),
+    )
+
+    resource_item_count_filters = ResourceItemFiltersSchema(
+        category_item_id=resource_item_entity.category_item_id,
+        count=0,
+    )
+    total_resource_item_count = await resource_item_service.get_count(resource_item_count_filters.to_entity())
 
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
-        item_ids=tuple(resource_item_entity.resource_item_id for resource_item_entity in resource_item_entities),
+        item_ids=resource_item_entities_navigation_ids_tuple,
         current_item=resource_item_entity,
-        total_items=count,
-        is_favorite=False,
+        total_items=total_resource_item_count,
+        is_favorite=True,
         has_quiz=is_quiz_exists,
         rating=resource_rating_number,
         current_item_index=resource_item_index_in_category,
@@ -807,16 +892,78 @@ async def list_resource_resource_rate(
     )
     await resource_rating_service.create(new_rating.to_entity())
     quiz_result_percent = quiz_result_entity.percent if quiz_result_entity else None
+    current_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
     resource_item_index_in_category = await resource_item_service.get_resource_item_index_in_category(
         resource_item_id,
-        resource_item_entity.category_item_id,
+        current_resource_item_filter_schema.to_entity(),
     )
-    if not resource_item_index_in_category:
+    if resource_item_index_in_category is None:
         raise ResourceItemNotFoundException(resource_item_id)
+
+    first_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    previous_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        offset=resource_item_index_in_category - 1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    next_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        offset=resource_item_index_in_category + 1,
+        category_item_id=resource_item_entity.category_item_id,
+    )
+
+    last_resource_item_filter_schema = ResourceItemFiltersSchema(
+        count=1,
+        category_item_id=resource_item_entity.category_item_id,
+        order=SortOrder.asc if first_resource_item_filter_schema.order == SortOrder.desc else SortOrder.desc,
+    )
+
+    first_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=first_resource_item_filter_schema.to_entity(),
+    )
+    previous_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=previous_resource_item_filter_schema.to_entity(),
+    )
+    next_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=next_resource_item_filter_schema.to_entity(),
+    )
+
+    last_resource_item_entity = await resource_item_service.get_one_by_filters(
+        filters=last_resource_item_filter_schema.to_entity(),
+    )
+
+    resource_item_entities_navigation_tuple = (
+        first_resource_item_entity,
+        previous_resource_item_entity,
+        next_resource_item_entity,
+        last_resource_item_entity,
+    )
+    resource_item_entities_navigation_ids_tuple = cast(
+        tuple[UUID | None, UUID | None, UUID | None, UUID | None],
+        tuple(
+            getattr(resource_item_entity, "resource_item_id", None)
+            for resource_item_entity in resource_item_entities_navigation_tuple
+        ),
+    )
+
+    resource_item_count_filters = ResourceItemFiltersSchema(
+        category_item_id=resource_item_entity.category_item_id,
+        count=0,
+    )
+    await resource_item_service.get_count(resource_item_count_filters.to_entity())
 
     keyboard_builder = ResourceItemKeyboardBuilder(
         i18n=i18n,
-        item_ids=tuple(resource_item_entity.resource_item_id for resource_item_entity in resource_item_entities),
+        item_ids=resource_item_entities_navigation_ids_tuple,
         current_item=resource_item_entity,
         total_items=count,
         is_favorite=is_favorite,
