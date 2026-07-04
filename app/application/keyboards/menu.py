@@ -5,6 +5,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from application.keyboards.base import BackToMenuKeyboardBuilderMixin, BaseBackKeyboardBuilder, BaseKeyboardBuilder
+from application.keyboards.resources import ListCategoriesItemCallbackFactory
 
 
 @dataclass
@@ -25,7 +26,9 @@ class BaseMenuKeyboardBuilder(BaseKeyboardBuilder, ABC):
             [
                 InlineKeyboardButton(
                     text=self.i18n.get("main-menu-keyboard-resources"),
-                    callback_data="resources",
+                    callback_data=ListCategoriesItemCallbackFactory(
+                        action="change_page", page=0, context="menu"
+                    ).pack(),
                 ),
             ],
             [

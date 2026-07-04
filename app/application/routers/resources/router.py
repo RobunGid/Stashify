@@ -50,38 +50,6 @@ from settings.aiogram import bot
 router = Router()
 
 
-@router.callback_query(F.data == "resources")
-async def list_resources_category_page_init(
-    callback: CallbackQuery,
-    i18n: I18nContext,
-    service: FromDishka[CategoryItemService],
-):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
-        return
-    await bot.delete_message(
-        chat_id=callback.message.chat.id,
-        message_id=callback.message.message_id,
-    )
-    filters = CategoryItemFiltersSchema(count=LIST_RESOURCES_CATEGORIES_ON_PAGE, has_resource_items=True)
-    category_item_entities, count = await service.get_many(filters.to_entity())
-    total_category_items_pages = ceil(count / LIST_RESOURCES_CATEGORIES_ON_PAGE)
-
-    keyboard_builder = CategoryListKeyboardBuilder(
-        i18n,
-        items=category_item_entities,
-        current_page=0,
-        total_pages=total_category_items_pages,
-    )
-    keyboard = keyboard_builder.build()
-
-    await callback.message.answer(
-        text=i18n.get(
-            "list-resources-choose-category",
-        ),
-        reply_markup=keyboard,
-    )
-
-
 @router.callback_query(
     ListCategoriesItemCallbackFactory.filter(F.action == "change_page"),
 )
@@ -145,6 +113,7 @@ async def list_resource_resource_page(
     filters = ResourceItemFiltersSchema(
         count=LIST_RESOURCES_RESOURCES_ON_PAGE,
         category_item_id=category_item_id,
+        offset=current_page * LIST_RESOURCES_RESOURCES_ON_PAGE,
     )
     resource_item_entities, count = await resource_item_service.get_many(filters.to_entity())
     total_resources_pages = ceil(count / LIST_RESOURCES_RESOURCES_ON_PAGE)

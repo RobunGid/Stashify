@@ -23,7 +23,7 @@ class ListCategoriesItemCallbackFactory(CallbackData, prefix="ctg_lst"):  # type
     action: Literal["change_page"]
     page: int
     context: Union[
-        Literal["view"],
+        Literal["menu"],
         Literal["crt_rsc"],
         Literal["edt_rsc"],
         Literal["dlt_rsc"],
@@ -64,8 +64,8 @@ class ResourceItemDetailsCallbackFactory(CallbackData, prefix="rsc_itm"):
 class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
     category_item_id: UUID
 
-    def _back_callback(self) -> str:
-        return "resources"
+    def _back_callback(self) -> CallbackData:
+        return ListCategoriesItemCallbackFactory(action="change_page", context="menu", page=0)
 
     def _item_button(self, item: ResourceItemEntity) -> dict:
         return {
@@ -75,7 +75,7 @@ class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
                 action="select",
                 context="view",
                 rating=None,
-            ),
+            ).pack(),
         }
 
     def _pagination_callback(self, page: int) -> CallbackData:
@@ -98,14 +98,14 @@ class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
                 category_item_id=item.category_item_id,
                 page=0,
                 context="view",
-            ),
+            ).pack(),
         }
 
     def _pagination_callback(self, page: int) -> CallbackData:
         return ListCategoriesItemCallbackFactory(
             action="change_page",
             page=page,
-            context="view",
+            context="menu",
         )
 
 
@@ -177,8 +177,8 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemEntity]):
         }
 
     def _back_callback(self) -> CallbackData:
-        return ListCategoriesItemCallbackFactory(
-            action="change_page",
+        return ListResourcesItemCallbackFactory(
+            category_item_id=self.current_item.category_item_id,
             context="view",
             page=0,
         )
@@ -288,7 +288,7 @@ class DeleteResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Category
                 action="change_page",
                 page=0,
                 context="dlt_rsc",
-            ),
+            ).pack(),
         }
 
 
@@ -313,7 +313,7 @@ class DeleteResourceResourceListKeyboardBuilder(BaseListKeyboardBuilder[Resource
                 category_item_id=item.category_item_id,
                 page=0,
                 context="delete",
-            ),
+            ).pack(),
         }
 
 
@@ -352,7 +352,7 @@ class EditResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryIt
                 action="change_page",
                 page=0,
                 context="edt_rsc",
-            ),
+            ).pack(),
         }
 
 
@@ -377,7 +377,7 @@ class EditResourceResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceIt
                 category_item_id=self.category_item_id,
                 page=0,
                 context="edit",
-            ),
+            ).pack(),
         }
 
 

@@ -57,7 +57,7 @@ class EditQuizChooseResourceCallbackFactory(CallbackData, prefix="edit_quiz_rsc"
 
 
 class EditQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
-    def _back_callback(self) -> str | CallbackData | None:
+    def _back_callback(self) -> CallbackData:
         return EditQuizChooseResourceCallbackFactory(
             action="change_page",
             resource_item_id=None,

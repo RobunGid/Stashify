@@ -12,17 +12,30 @@ from domain.entities.base import BaseEntity
 
 
 @dataclass
-class BackKeyboardBuilderMixin:
+class CallbackDataResolverMixin(ABC):
+    @staticmethod
+    def _resolve_callback_data(
+        callback: str | None | CallbackData,
+    ) -> str | None:
+        if isinstance(callback, CallbackData):
+            return callback.pack()
+        return callback
+
+
+@dataclass
+class BackKeyboardBuilderMixin(CallbackDataResolverMixin, ABC):
     i18n: I18nContext
 
     def _append_back_button(self, builder: InlineKeyboardBuilder):
-        builder.button(
-            text=self.i18n.get("common-back"),
-            callback_data=self._back_callback(),
+        builder.row(
+            InlineKeyboardButton(
+                text=self.i18n.get("common-back"),
+                callback_data=self._resolve_callback_data(self._back_callback()),
+            ),
         )
 
     @abstractmethod
-    def _back_callback(self) -> str | CallbackData | None:
+    def _back_callback(self) -> str | None | CallbackData:
         """callback_data for 'Back' button"""
 
 
@@ -67,25 +80,22 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
     def build(self) -> InlineKeyboardMarkup:
         builder = InlineKeyboardBuilder()
         for item in self.items:
-            builder.button(**self._item_button(item))
-        builder.adjust(1)
-        nav_buttons = self._build_pagination_buttons()
-        builder.row(*[InlineKeyboardButton(**btn) for btn in nav_buttons])
-        builder.adjust(len(nav_buttons))
+            builder.row(InlineKeyboardButton(**self._item_button(item)))
+        nav_buttons = [InlineKeyboardButton(**btn) for btn in self._build_pagination_buttons()]
+        builder.row(*nav_buttons)
 
         self._append_back_button(builder)
-        builder.adjust(1)
         return builder.as_markup()
 
     def _build_pagination_buttons(self) -> list[dict]:
-        pages, total_pages = self.current_page, self.total_pages
+        current_page, total_pages = self.current_page, self.total_pages
 
         if total_pages <= 1:
-            return [{"text": f"{pages}/{total_pages}", "callback_data": " "}]
+            return [{"text": f"{current_page + 1}/{total_pages}", "callback_data": " "}]
 
         buttons = []
 
-        if pages > 1:
+        if current_page > 0:
             buttons += [
                 {
                     "text": self.i18n.get("items-start"),
@@ -93,17 +103,17 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
                 },
                 {
                     "text": self.i18n.get("items-back"),
-                    "callback_data": self._pagination_callback(pages - 1).pack(),
+                    "callback_data": self._pagination_callback(current_page - 1).pack(),
                 },
             ]
 
-        buttons.append({"text": f"{pages}/{total_pages}", "callback_data": " "})
+        buttons.append({"text": f"{current_page + 1}/{total_pages}", "callback_data": " "})
 
-        if pages < total_pages:
+        if current_page < (total_pages - 1):
             buttons += [
                 {
                     "text": self.i18n.get("items-forward"),
-                    "callback_data": self._pagination_callback(pages + 1).pack(),
+                    "callback_data": self._pagination_callback(current_page + 1).pack(),
                 },
                 {
                     "text": self.i18n.get("items-end"),
@@ -157,7 +167,6 @@ class BaseItemKeyboardBuilder(
 
     def _build_navigation_buttons(self) -> list[dict]:
         buttons: list[dict] = []
-
         if self.item_ids[0] is not None:
             buttons += [
                 {
