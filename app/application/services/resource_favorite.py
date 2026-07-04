@@ -20,12 +20,12 @@ class ResourceFavoriteService(
     ) -> None:
         await self.repository.delete_by_user_account_id_and_resource_item_id(user_account_id, resource_item_id)
 
-    async def check_exits_by_user_account_id_and_resource_item_id(
+    async def check_exists_by_user_account_id_and_resource_item_id(
         self,
         user_account_id: UUID,
         resource_item_id: UUID,
     ) -> bool:
-        return await self.repository.check_exits_by_user_account_id_and_resource_item_id(
+        return await self.repository.check_exists_by_user_account_id_and_resource_item_id(
             user_account_id,
             resource_item_id,
         )
