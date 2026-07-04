@@ -27,7 +27,9 @@ class BaseMenuKeyboardBuilder(BaseKeyboardBuilder, ABC):
                 InlineKeyboardButton(
                     text=self.i18n.get("main-menu-keyboard-resources"),
                     callback_data=ListCategoriesItemCallbackFactory(
-                        action="change_page", page=0, context="menu"
+                        action="change_page",
+                        page=0,
+                        context="menu",
                     ).pack(),
                 ),
             ],

@@ -36,13 +36,13 @@ class ListResourcesItemCallbackFactory(CallbackData, prefix="rsc_lst"):  # type:
     category_item_id: UUID | None
     page: int
     context: Union[
-        Literal["view"],
-        Literal["edit"],
-        Literal["delete"],
+        Literal["menu"],
+        Literal["edt_rsc"],
+        Literal["dlt_rsc"],
     ]
 
 
-class ResourceItemDetailsCallbackFactory(CallbackData, prefix="rsc_itm"):
+class ResourceItemDetailsCallbackFactory(CallbackData, prefix="rsc_itm"):  # type: ignore[call-arg]
     resource_item_id: UUID | None
     action: Union[
         Literal["select"],
@@ -53,9 +53,8 @@ class ResourceItemDetailsCallbackFactory(CallbackData, prefix="rsc_itm"):
         Literal["start_quiz_cnfrm"],
     ]
     context: Union[
-        Literal["view"],
-        Literal["edit"],
-        Literal["delete"],
+        Literal["menu"],
+        Literal["..."],
     ]
     rating: int | None
 
@@ -73,7 +72,7 @@ class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
             "callback_data": ResourceItemDetailsCallbackFactory(
                 resource_item_id=item.resource_item_id,
                 action="select",
-                context="view",
+                context="menu",
                 rating=None,
             ).pack(),
         }
@@ -82,22 +81,19 @@ class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
         return ListResourcesItemCallbackFactory(
             page=page,
             category_item_id=self.category_item_id,
-            context="view",
+            context="menu",
         )
 
 
 @dataclass
-class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
-    def _back_callback(self) -> str:
-        return "menu"
-
+class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity], BackToMenuKeyboardBuilderMixin):
     def _item_button(self, item: CategoryItemEntity) -> dict:
         return {
             "text": item.name,
             "callback_data": ListResourcesItemCallbackFactory(
                 category_item_id=item.category_item_id,
                 page=0,
-                context="view",
+                context="menu",
             ).pack(),
         }
 
@@ -118,7 +114,7 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemEntity]):
         return ResourceItemDetailsCallbackFactory(
             resource_item_id=item_id,
             action="select",
-            context="view",
+            context="menu",
             rating=None,
         )
 
@@ -126,7 +122,7 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemEntity]):
         return ResourceItemDetailsCallbackFactory(
             resource_item_id=item.resource_item_id,
             action="remove_favorite",
-            context="view",
+            context="menu",
             rating=None,
         )
 
@@ -134,7 +130,7 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemEntity]):
         return ResourceItemDetailsCallbackFactory(
             resource_item_id=item.resource_item_id,
             action="add_favorite",
-            context="view",
+            context="menu",
             rating=None,
         )
 
@@ -142,7 +138,7 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemEntity]):
         return ResourceItemDetailsCallbackFactory(
             resource_item_id=item.resource_item_id,
             action="rate",
-            context="view",
+            context="menu",
             rating=rating,
         )
 
@@ -160,7 +156,7 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemEntity]):
                     action="start_quiz",
                     rating=None,
                     resource_item_id=self.current_item.resource_item_id,
-                    context="view",
+                    context="menu",
                 ),
             },
         ]
@@ -171,7 +167,7 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemEntity]):
                 resource_item_id=self.current_item.resource_item_id,
                 action="start_quiz_cnfrm",
                 rating=None,
-                context="view",
+                context="menu",
             ),
             "text": self.i18n.get("list-resources-start-quiz-confirm"),
         }
@@ -179,7 +175,7 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemEntity]):
     def _back_callback(self) -> CallbackData:
         return ListResourcesItemCallbackFactory(
             category_item_id=self.current_item.category_item_id,
-            context="view",
+            context="menu",
             page=0,
         )
 
@@ -190,7 +186,7 @@ class ResourceQuizConfirmKeyboardBuilder(BaseQuizConfirmKeyboardBuilder[Resource
         return ListResourcesItemCallbackFactory(
             category_item_id=item.category_item_id,
             page=0,
-            context="view",
+            context="menu",
         )
 
     def _build_confirm_buttons(
@@ -202,7 +198,7 @@ class ResourceQuizConfirmKeyboardBuilder(BaseQuizConfirmKeyboardBuilder[Resource
                     action="start_quiz_cnfrm",
                     resource_item_id=self.current_item.resource_item_id,
                     rating=None,
-                    context="view",
+                    context="menu",
                 ),
                 "text": self.i18n.get("ist-resources-start_quiz-confirm"),
             },
@@ -212,36 +208,37 @@ class ResourceQuizConfirmKeyboardBuilder(BaseQuizConfirmKeyboardBuilder[Resource
         return ListResourcesItemCallbackFactory(
             category_item_id=self.current_item.category_item_id,
             page=0,
-            context="view",
+            context="menu",
         )
 
 
 @dataclass
-class ResourceManageEntryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
+class ResourceManageEntryKeyboardBuilder(BaseManageEntryKeyboardBuilder, BackToMenuKeyboardBuilderMixin):
     def _build_entry_buttons(self) -> list[dict]:
         return [
             {
                 "text": self.i18n.get("manage-resources-keyboard-create"),
-                "callback_data": "create_resource",
+                "callback_data": ListCategoriesItemCallbackFactory(action="change_page", context="crt_rsc", page=0),
             },
             {
                 "text": self.i18n.get("manage-resources-keyboard-edit"),
-                "callback_data": "edit_resource",
+                "callback_data": ListCategoriesItemCallbackFactory(action="change_page", context="edt_rsc", page=0),
             },
             {
                 "text": self.i18n.get("manage-resources-keyboard-delete"),
-                "callback_data": "delete_resource",
+                "callback_data": ListCategoriesItemCallbackFactory(action="change_page", context="dlt_rsc", page=0),
             },
         ]
-
-    def _back_callback(self) -> str:
-        return "menu"
 
 
 @dataclass
 class ResourceManageBackKeyboardBuilder(BaseBackKeyboardBuilder):
     def _back_callback(self) -> str | CallbackData | None:
         return "manage_resources"
+
+
+class CreateResourceCallbackFactory(CallbackData, prefix="crt_rsc"):  # type: ignore[call-arg]
+    category_item_id: UUID
 
 
 @dataclass
@@ -259,7 +256,7 @@ class CreateResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Category
     def _item_button(self, item: CategoryItemEntity) -> dict:
         return {
             "text": item.name,
-            "callback_data": "create_resource",
+            "callback_data": CreateResourceCallbackFactory(category_item_id=item.category_item_id).pack(),
         }
 
 
@@ -284,12 +281,20 @@ class DeleteResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[Category
     def _item_button(self, item: CategoryItemEntity) -> dict:
         return {
             "text": item.name,
-            "callback_data": ListCategoriesItemCallbackFactory(
-                action="change_page",
+            "callback_data": ListResourcesItemCallbackFactory(
                 page=0,
                 context="dlt_rsc",
+                category_item_id=item.category_item_id,
             ).pack(),
         }
+
+
+class DeleteResourceChooseResourceCallbackFactory(CallbackData, prefix="dlt_rsc"):  # type: ignore[call-arg]
+    resource_item_id: UUID
+
+
+class EditResourceChooseResourceCallbackFactory(CallbackData, prefix="edt_rsc"):  # type: ignore[call-arg]
+    resource_item_id: UUID
 
 
 @dataclass
@@ -300,7 +305,7 @@ class DeleteResourceResourceListKeyboardBuilder(BaseListKeyboardBuilder[Resource
         return ListResourcesItemCallbackFactory(
             category_item_id=None,
             page=page,
-            context="delete",
+            context="dlt_rsc",
         )
 
     def _back_callback(self) -> str:
@@ -309,23 +314,27 @@ class DeleteResourceResourceListKeyboardBuilder(BaseListKeyboardBuilder[Resource
     def _item_button(self, item: ResourceItemEntity) -> dict:
         return {
             "text": item.name,
-            "callback_data": ListResourcesItemCallbackFactory(
-                category_item_id=item.category_item_id,
-                page=0,
-                context="delete",
+            "callback_data": DeleteResourceChooseResourceCallbackFactory(
+                resource_item_id=item.resource_item_id,
             ).pack(),
         }
 
 
+class DeleteResourceConfirmCallbackFactory(CallbackData, prefix="dlt_rsc_cnfrm"):  # type: ignore[call-arg]
+    resource_item_id: UUID
+
+
 @dataclass
 class DeleteResourceConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
+    resource_item_id: UUID
+
     def _build_confirm_buttons(self) -> list[dict]:
         return [
             {
                 "text": self.i18n(
                     "manage-resources-delete-confirm",
                 ),
-                "callback_data": "delete_resource_confirm",
+                "callback_data": DeleteResourceConfirmCallbackFactory(resource_item_id=self.resource_item_id),
             },
         ]
 
@@ -363,7 +372,7 @@ class EditResourceResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceIt
     def _pagination_callback(self, page: int) -> CallbackData:
         return ListResourcesItemCallbackFactory(
             page=page,
-            context="edit",
+            context="edt_rsc",
             category_item_id=self.category_item_id,
         )
 
@@ -373,10 +382,8 @@ class EditResourceResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceIt
     def _item_button(self, item: ResourceItemEntity) -> dict:
         return {
             "text": item.name,
-            "callback_data": ListResourcesItemCallbackFactory(
-                category_item_id=self.category_item_id,
-                page=0,
-                context="edit",
+            "callback_data": EditResourceChooseResourceCallbackFactory(
+                resource_item_id=item.resource_item_id,
             ).pack(),
         }
 

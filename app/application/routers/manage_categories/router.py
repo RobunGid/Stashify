@@ -10,7 +10,7 @@ from application.filters.user_role_filter import UserRoleFilter
 from application.filters_schemas.category_item import CategoryItemFiltersSchema
 from application.keyboards.categories import (
     DeleteCategoryIdCallbackFactory,
-    DeleteCategoryKeyboardBuilder,
+    DeleteCategoryListKeyboardBuilder,
     EditCategoryIdCallbackFactory,
     EditCategoryListKeyboardBuilder,
     EntryEditCategoryKeyboardBuilder,
@@ -222,7 +222,7 @@ async def delete_category_callback_handler(
     total_pages = ceil(count / DELETE_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, category_items=category_entities)
 
-    keyboard_builder = DeleteCategoryKeyboardBuilder(
+    keyboard_builder = DeleteCategoryListKeyboardBuilder(
         i18n=i18n,
         total_pages=total_pages,
         current_page=1,
@@ -265,7 +265,7 @@ async def delete_category_page(
     ]
     total_pages = categories_data["total_pages"]
 
-    keyboard_builder = DeleteCategoryKeyboardBuilder(
+    keyboard_builder = DeleteCategoryListKeyboardBuilder(
         i18n=i18n,
         total_pages=total_pages,
         current_page=current_page,

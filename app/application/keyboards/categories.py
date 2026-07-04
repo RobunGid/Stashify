@@ -42,7 +42,7 @@ class DeleteCategoryIdCallbackFactory(CallbackData, prefix="delete_category_id")
     page: int
 
 
-class DeleteCategoryKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
+class DeleteCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
     def _back_callback(self) -> str:
         return DeleteCategoryIdCallbackFactory(
             action="change_page",

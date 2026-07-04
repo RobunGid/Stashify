@@ -22,15 +22,18 @@ from application.keyboards.resource_quizes import (
     ResourceQuizQuestionKeyboardBuilder,
 )
 from application.keyboards.resources import (
-    CategoryListKeyboardBuilder,
     ListCategoriesItemCallbackFactory,
     ListResourcesItemCallbackFactory,
     ResourceItemDetailsCallbackFactory,
     ResourceItemKeyboardBuilder,
-    ResourceListKeyboardBuilder,
     ResourceQuizConfirmKeyboardBuilder,
 )
-from application.routers.constants import LIST_RESOURCES_CATEGORIES_ON_PAGE, LIST_RESOURCES_RESOURCES_ON_PAGE
+from application.routers.constants import (
+    CATEGORY_LIST_KEYBOARD_BUILDER_MAP,
+    LIST_RESOURCES_CATEGORIES_ON_PAGE,
+    LIST_RESOURCES_RESOURCES_ON_PAGE,
+    RESOURCE_LIST_KEYBOARD_BUILDER_MAP,
+)
 from application.schemas.quiz_result_schema import BaseQuizResultSchema
 from application.schemas.resource_favorite_schema import BaseResourceFavoriteSchema
 from application.schemas.resource_rating_schema import BaseResourceRatingSchema
@@ -51,7 +54,7 @@ router = Router()
 
 
 @router.callback_query(
-    ListCategoriesItemCallbackFactory.filter(F.action == "change_page"),
+    ListCategoriesItemCallbackFactory.filter(),
 )
 async def list_resources_category_page(
     callback: CallbackQuery,
@@ -70,7 +73,9 @@ async def list_resources_category_page(
     category_item_entities, count = await service.get_many(filters.to_entity())
     total_category_items_pages = ceil(count / LIST_RESOURCES_CATEGORIES_ON_PAGE)
 
-    keyboard_builder = CategoryListKeyboardBuilder(
+    keyboard_builder_class = CATEGORY_LIST_KEYBOARD_BUILDER_MAP[callback_data.context]
+
+    keyboard_builder = keyboard_builder_class(
         i18n,
         items=category_item_entities,
         current_page=current_page,
@@ -118,7 +123,9 @@ async def list_resource_resource_page(
     resource_item_entities, count = await resource_item_service.get_many(filters.to_entity())
     total_resources_pages = ceil(count / LIST_RESOURCES_RESOURCES_ON_PAGE)
 
-    keyboard_builder = ResourceListKeyboardBuilder(
+    keyboard_builder_class = RESOURCE_LIST_KEYBOARD_BUILDER_MAP[callback_data.context]
+
+    keyboard_builder = keyboard_builder_class(
         i18n,
         items=resource_item_entities,
         current_page=current_page,
