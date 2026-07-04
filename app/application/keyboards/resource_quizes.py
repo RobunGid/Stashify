@@ -10,7 +10,6 @@ from application.keyboards.base import (
     BaseQuizQuestionKeyboardBuilder,
 )
 from application.keyboards.resources import (
-    ListResourcesChooseResourceCallbackFactory,
     ListResourcesItemCallbackFactory,
 )
 from domain.entities.quiz_item import QuizItemEntity
@@ -57,15 +56,19 @@ class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceItem
                     action="start_quiz",
                     resource_item_id=self.item.resource_item_id,
                     rating=0,
+                    page=0,
+                    context="view",
                 ),
             },
         ]
 
     def _back_callback(self) -> CallbackData:
-        return ListResourcesChooseResourceCallbackFactory(
+        return ListResourcesItemCallbackFactory(
             action="change_page",
             page=self.page,
             resource_item_id=self.item.resource_item_id,
+            rating=None,
+            context="view",
         )
 
 
@@ -82,8 +85,10 @@ class ResourceQuizQuestionKeyboardBuilder(
         )
 
     def _back_callback(self) -> str | CallbackData | None:
-        return ListResourcesChooseResourceCallbackFactory(
+        return ListResourcesItemCallbackFactory(
             action="change_page",
             resource_item_id=self.item.resource_item_id,
             page=self.page,
+            context="view",
+            rating=None,
         )
