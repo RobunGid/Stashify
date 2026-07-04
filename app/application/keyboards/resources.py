@@ -331,7 +331,7 @@ class DeleteResourceConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
     def _build_confirm_buttons(self) -> list[dict]:
         return [
             {
-                "text": self.i18n(
+                "text": self.i18n.get(
                     "manage-resources-delete-confirm",
                 ),
                 "callback_data": DeleteResourceConfirmCallbackFactory(resource_item_id=self.resource_item_id),
@@ -354,13 +354,13 @@ class EditResourceCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryIt
     def _back_callback(self) -> str:
         return "manage_resources"
 
-    def _item_button(self, item: ResourceItemEntity) -> dict:
+    def _item_button(self, item: CategoryItemEntity) -> dict:
         return {
             "text": item.name,
-            "callback_data": ListCategoriesItemCallbackFactory(
-                action="change_page",
+            "callback_data": ListResourcesItemCallbackFactory(
                 page=0,
                 context="edt_rsc",
+                category_item_id=item.category_item_id,
             ).pack(),
         }
 

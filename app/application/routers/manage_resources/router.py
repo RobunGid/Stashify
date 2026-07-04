@@ -246,14 +246,6 @@ async def new_resource_tags_choose(
     )
 
 
-class DeleteResourceState(StatesGroup):
-    total_pages = State()
-    resources = State()
-    categories = State()
-    resource_item_id = State()
-    confirm = State()
-
-
 @router.callback_query(
     DeleteResourceChooseResourceCallbackFactory.filter(),
     UserRoleFilter([Role.admin, Role.manager]),
@@ -316,9 +308,6 @@ async def delete_resource_name_confirm(
 
 
 class EditResourceState(StatesGroup):
-    total_pages = State()
-    resources = State()
-    categories = State()
     resource_item_id = State()
     name = State()
     description = State()

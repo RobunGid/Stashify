@@ -1,21 +1,23 @@
 from dataclasses import dataclass
-from typing import Literal, Union
 from uuid import UUID
 
 from aiogram.filters.callback_data import CallbackData
 
 from application.keyboards.base import (
     BackKeyboardBuilderMixin,
+    BackToMenuKeyboardBuilderMixin,
     BaseBackKeyboardBuilder,
+    BaseConfirmKeyboardBuilder,
     BaseListKeyboardBuilder,
     BaseManageEntryKeyboardBuilder,
 )
+from application.keyboards.resources import ListCategoriesItemCallbackFactory
 from application.schemas.category_item_schema import CategoryItemSchema
 from domain.entities.category_item import CategoryItemEntity
 
 
 @dataclass
-class EntryEditCategoryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
+class EntryEditCategoryKeyboardBuilder(BaseManageEntryKeyboardBuilder, BackToMenuKeyboardBuilderMixin):
     def _build_entry_buttons(self) -> list[dict]:
         return [
             {
@@ -32,46 +34,34 @@ class EntryEditCategoryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
             },
         ]
 
-    def _back_callback(self) -> str:
-        return "menu"
+
+class DeleteCategoryChooseCategoryCallbackFactory(CallbackData, prefix="delete_category_id"):  # type: ignore[call-arg]
+    category_item_id: UUID
 
 
-class DeleteCategoryIdCallbackFactory(CallbackData, prefix="delete_category_id"):  # type: ignore[call-arg]
-    action: Union[Literal["select"], Literal["change_page"]]
-    category_item_id: UUID | None
-    page: int
-
-
+@dataclass
 class DeleteCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
     def _back_callback(self) -> str:
-        return DeleteCategoryIdCallbackFactory(
-            action="change_page",
-            category_item_id=None,
-            page=self.current_page - 1,
-        ).pack()
+        return "manage_categories"
 
     def _pagination_callback(self, page: int) -> CallbackData:
-        return DeleteCategoryIdCallbackFactory(
+        return ListCategoriesItemCallbackFactory(
             action="change_page",
-            category_item_id=None,
             page=page,
+            context="dlt_ctg",
         )
 
     def _item_button(self, item: CategoryItemSchema) -> dict:
         return {
             "text": item.name,
-            "callback_data": DeleteCategoryIdCallbackFactory(
-                action="select",
+            "callback_data": DeleteCategoryChooseCategoryCallbackFactory(
                 category_item_id=item.category_item_id,
-                page=0,
             ),
         }
 
 
-class EditCategoryIdCallbackFactory(CallbackData, prefix="edit_category_id"):  # type: ignore[call-arg]
-    action: Union[Literal["select"], Literal["change_page"]]
+class EditCategoryChooseCategoryCallbackFactory(CallbackData, prefix="edit_category_id"):  # type: ignore[call-arg]
     category_item_id: UUID | None
-    page: int
 
 
 @dataclass
@@ -92,18 +82,38 @@ class EditCategoryListKeyboardBuilder(
     ManageCategoriesBackKeyboardBuilderMixin,
 ):
     def _pagination_callback(self, page: int) -> CallbackData:
-        return EditCategoryIdCallbackFactory(
+        return ListCategoriesItemCallbackFactory(
             action="change_page",
-            category_item_id=None,
             page=page,
+            context="edt_ctg",
         )
 
     def _item_button(self, item: CategoryItemSchema) -> dict:
         return {
             "text": item.name,
-            "callback_data": EditCategoryIdCallbackFactory(
-                action="select",
+            "callback_data": EditCategoryChooseCategoryCallbackFactory(
                 category_item_id=item.category_item_id,
-                page=0,
             ),
         }
+
+
+class DeleteCategoryConfirmCallbackFactory(CallbackData, prefix="dlt_ctg_cnfrm"):  # type: ignore[call-arg]
+    category_item_id: UUID
+
+
+@dataclass
+class DeleteCategoryConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
+    category_item_id: UUID
+
+    def _build_confirm_buttons(self) -> list[dict]:
+        return [
+            {
+                "text": self.i18n.get(
+                    "manage-category-delete-confirm",
+                ),
+                "callback_data": DeleteCategoryConfirmCallbackFactory(category_item_id=self.category_item_id),
+            },
+        ]
+
+    def _back_callback(self) -> str:
+        return "manage_resources"
