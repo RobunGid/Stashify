@@ -54,7 +54,7 @@ router = Router()
 
 
 @router.callback_query(
-    ListCategoriesItemCallbackFactory.filter(),
+    ListCategoriesItemCallbackFactory.filter(F.action == "change_page"),
 )
 async def list_resources_category_page(
     callback: CallbackQuery,

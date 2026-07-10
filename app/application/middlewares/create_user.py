@@ -1,9 +1,9 @@
 from typing import Any, Awaitable, Callable, Dict
 
 from aiogram import BaseMiddleware
-from aiogram.types import TelegramObject
+from aiogram.types import Message
 
-from application.schemas.user_account_schema import UserAccountSchema
+from application.schemas.user_account_schema import BaseUserAccountSchema
 from application.services.user_account import UserAccountService
 from dishka import AsyncContainer
 
@@ -14,8 +14,8 @@ class CreateUserMiddleware(BaseMiddleware):
 
     async def __call__(
         self,
-        handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
-        event: TelegramObject,
+        handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
+        event: Message,
         data: Dict[str, Any],
     ):
         user = event.from_user
@@ -27,7 +27,7 @@ class CreateUserMiddleware(BaseMiddleware):
             user_account = await user_account_service.get_one_by_telegram_id(user.id)
 
             if user_account is None:
-                user_account_schema = UserAccountSchema(username=user.username, user_telegram_id=user.id)
+                user_account_schema = BaseUserAccountSchema(username=user.username, user_telegram_id=user.id)
 
                 await user_account_service.create(item=user_account_schema.to_entity())
 
