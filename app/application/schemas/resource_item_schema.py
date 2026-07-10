@@ -1,7 +1,7 @@
 from uuid import UUID
 
-from application.schemas.base_schema import BaseSchema
-from domain.entities.resource_item import ResourceItemEntity
+from application.schemas.base_schema import BaseSchema, BaseUpdateSchema
+from domain.entities.resource_item import ResourceItemEntity, ResourceItemUpdateEntity
 from pydantic import ConfigDict, Field
 
 
@@ -15,7 +15,6 @@ class BaseResourceItemSchema(BaseSchema[ResourceItemEntity]):
     verified: bool
 
     category_item_id: UUID
-    quiz: "BaseQuizItemSchema | None" = Field(default=None)
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -36,12 +35,33 @@ class ResourceItemSchema(BaseResourceItemSchema):
     ratings: list["BaseResourceRatingSchema"] = Field(
         default_factory=list,
     )
-    images: list["BsaeResourceImageSchema"] = Field(default_factory=list)
+    images: list["BaseResourceImageSchema"] = Field(default_factory=list)
+    quiz: "BaseQuizItemSchema | None" = Field(default=None)
+
+
+class ResourceItemUpdateSchema(BaseUpdateSchema[ResourceItemUpdateEntity]):
+    name: str | None = None
+    description: str | None = None
+    links: str | None = None
+    tags: str | None = None
+    verified: bool | None = None
+
+    category_item_id: UUID | None = None
+
+    def to_entity(self) -> ResourceItemUpdateEntity:
+        return ResourceItemUpdateEntity(
+            name=self.name,
+            description=self.description,
+            links=self.links,
+            tags=self.tags,
+            verified=self.verified,
+            category_item_id=self.category_item_id,
+        )
 
 
 from application.schemas.category_item_schema import BaseCategoryItemSchema  # noqa
 from application.schemas.quiz_item_schema import BaseQuizItemSchema  # noqa
-from application.schemas.resource_image_schema import BsaeResourceImageSchema  # noqa
+from application.schemas.resource_image_schema import BaseResourceImageSchema  # noqa
 from application.schemas.resource_rating_schema import (  # noqa
     BaseResourceRatingSchema,
 )

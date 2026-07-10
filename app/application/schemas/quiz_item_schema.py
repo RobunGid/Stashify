@@ -24,4 +24,4 @@ class QuizSchema(BaseQuizItemSchema):
 
 
 from application.schemas.quiz_question_schema import BaseQuizQuestionSchema  # noqa
-from application.schemas.resource_schema import ResourceItemSchema  # noqa
+from application.schemas.resource_item_schema import ResourceItemSchema  # noqa

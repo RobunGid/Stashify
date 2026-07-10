@@ -7,7 +7,7 @@ from domain.entities.resource_image import ResourceImageEntity
 from pydantic import ConfigDict
 
 
-class BsaeResourceImageSchema(BaseSchema[ResourceImageEntity]):
+class BaseResourceImageSchema(BaseSchema[ResourceImageEntity]):
     resource_image_id: UUID
 
     resource_item_id: UUID
@@ -23,8 +23,8 @@ class BsaeResourceImageSchema(BaseSchema[ResourceImageEntity]):
         )
 
 
-class ResourceImageSchema(BsaeResourceImageSchema):
+class ResourceImageSchema(BaseResourceImageSchema):
     resource: ResourceItemSchema
 
 
-from application.schemas.resource_schema import ResourceItemSchema  # noqa
+from application.schemas.resource_item_schema import ResourceItemSchema  # noqa

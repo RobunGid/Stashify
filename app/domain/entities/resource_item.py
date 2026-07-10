@@ -19,10 +19,10 @@ class ResourceItemEntity(BaseEntity):
 
 @dataclass
 class ResourceItemUpdateEntity(BaseUpdateEntity):
-    name: str | None
-    description: str | None
-    links: str | None
-    tags: str | None
-    verified: bool
+    name: str | None = None
+    description: str | None = None
+    links: str | None = None
+    tags: str | None = None
+    verified: bool | None = None
 
-    category_item_id: UUID | None
+    category_item_id: UUID | None = None

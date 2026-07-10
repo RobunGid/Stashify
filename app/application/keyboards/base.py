@@ -278,7 +278,7 @@ class BaseManageEntryKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMix
         btns = self._build_entry_buttons()
         for btn in btns:
             builder.button(**btn)
-            builder.adjust(1)
+        builder.adjust(1)
 
         self._append_back_button(builder)
 
@@ -352,6 +352,7 @@ class BaseEditKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, ABC
         btns = self._build_edit_buttons()
         for btn in btns:
             builder.button(**btn)
+        builder.adjust(1)
         self._append_back_button(builder)
         return builder.as_markup()
 

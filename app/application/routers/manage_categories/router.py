@@ -247,7 +247,7 @@ async def create_category_callback_handler(callback: CallbackQuery, state: FSMCo
 async def create_category_final(message: Message, i18n: I18nContext, service: FromDishka[CategoryItemService]):
     if not message.from_user:
         return
-    category_schema = BaseCategoryItemSchema(name=message.html_text)
+    category_schema = BaseCategoryItemSchema(name=message.html_text, resource_item_count=0)
 
     keyboard_builder = ManageCategoriesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()

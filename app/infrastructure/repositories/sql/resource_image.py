@@ -8,7 +8,7 @@ from domain.repositories.resource_image import BaseResourceImageRepository
 from infrastructure.mappers.resource_image import ResourceImageMapper
 from infrastructure.models.resource_image import ResourceImageModel
 from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
-from sqlalchemy import func, select, update
+from sqlalchemy import delete, func, select, update
 
 
 @dataclass
@@ -50,9 +50,9 @@ class SQLResourceImageRepository(BaseResourceImageRepository, SQLAlchemyReposito
         return GetManyResult(items=resource_images_entities, total=total)
 
     async def delete_by_id(self, resource_image_id: UUID) -> None:
-        statement = select(ResourceImageModel).where(ResourceImageModel.resource_image_id == resource_image_id)
-        resource_image_model = (await self.session.execute(statement)).scalars().first()
-        await self.session.delete(resource_image_model)
+        statement = delete(ResourceImageModel).where(ResourceImageModel.resource_image_id == resource_image_id)
+
+        await self.session.execute(statement)
         await self.session.commit()
 
     async def update(self, resource_image_id: UUID, resource_image: ResourceImageUpdateEntity) -> None:

@@ -27,5 +27,5 @@ class ResourceRatingSchema(BaseResourceRatingSchema):
     resource: ResourceItemSchema
 
 
-from application.schemas.resource_schema import ResourceItemSchema  # noqa
+from application.schemas.resource_item_schema import ResourceItemSchema  # noqa
 from application.schemas.user_account_schema import BaseUserAccountSchema  # noqa

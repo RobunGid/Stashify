@@ -2,16 +2,18 @@ from typing import List
 from uuid import uuid4
 
 from aiogram import F, Router
+from aiogram.filters import or_f
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery, Message, PhotoSize
+from aiogram.types import CallbackQuery, Message
 from aiogram.utils.media_group import MediaGroupBuilder
 
 from aiogram_i18n import I18nContext
-from aiogram_media_group import media_group_handler
+from aiogram_media_group import media_group_handler, MediaGroupFilter
 from application.exceptions.category_item import CategoryItemNotFoundException
 from application.exceptions.resource_item import ResourceItemNotFoundException
 from application.filters.user_role_filter import UserRoleFilter
+from application.filters_schemas.resource_image import ResourceImageFiltersSchema
 from application.keyboards.resources import (
     CreateResourceCallbackFactory,
     DeleteResourceChooseResourceCallbackFactory,
@@ -22,14 +24,13 @@ from application.keyboards.resources import (
     ManageResourcesBackKeyboardBuilder,
     ResourceManageEntryKeyboardBuilder,
 )
-from application.schemas.resource_image_schema import BsaeResourceImageSchema
-from application.schemas.resource_schema import BaseResourceItemSchema
+from application.schemas.resource_image_schema import BaseResourceImageSchema
+from application.schemas.resource_item_schema import BaseResourceItemSchema, ResourceItemUpdateSchema
 from application.services.category_item import CategoryItemService
 from application.services.resource_image import ResourceImageService
 from application.services.resource_item import ResourceItemService
 from dishka import FromDishka
 from infrastructure.models.user_account import Role
-from sqlalchemy.exc import IntegrityError
 
 from settings.aiogram import bot
 
@@ -213,7 +214,7 @@ async def new_resource_tags_choose(
 
     await resource_item_service.create(resource_data.to_entity())
     for resource_image in state_data["images"]:
-        image = BsaeResourceImageSchema(
+        image = BaseResourceImageSchema(
             resource_image_id=uuid4(),
             resource_item_id=resource_data.resource_item_id,
             image=resource_image,
@@ -311,7 +312,7 @@ class EditResourceState(StatesGroup):
     resource_item_id = State()
     name = State()
     description = State()
-    image = State()
+    images = State()
     tags = State()
 
 
@@ -349,7 +350,12 @@ async def edit_resource_choose(
     F.data == "edit_resource_name",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def edit_resource_name(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
+async def edit_resource_name(
+    callback: CallbackQuery,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[ResourceItemService],
+):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
     await bot.delete_message(
@@ -357,20 +363,16 @@ async def edit_resource_name(callback: CallbackQuery, state: FSMContext, i18n: I
         message_id=callback.message.message_id,
     )
     state_data = await state.get_data()
-    resource_name = next(
-        (
-            resource.name
-            for resource in state_data["resources"]
-            if resource.resource_item_id == state_data["resource_item_id"]
-        ),
-        "Unknown",
-    )
+    resource_item_id = state_data["resource_item_id"]
+    resource_item = await service.get_one(resource_item_id)
+    if resource_item is None:
+        raise ResourceItemNotFoundException(resource_item_id)
 
-    keyboard_builder = EditResourceChooseFieldKeyboardBuilder(i18n=i18n)
+    keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
     await callback.message.answer(
-        text=i18n.get("manage-resources-edit-name-text", name=resource_name),
+        text=i18n.get("manage-resources-edit-name-text", name=resource_item.name),
         reply_markup=keyboard,
     )
     await state.set_state(EditResourceState.name)
@@ -390,32 +392,32 @@ async def edit_resource_name_success(
     if not message.from_user or not message.from_user.language_code:
         return
 
-    resource_item_data = await state.get_data()
+    state_data = await state.get_data()
+    resource_item_id = state_data["resource_item_id"]
+
+    resource_item_update_schema = ResourceItemUpdateSchema(name=message.html_text)
 
     keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    try:
-        resource_item_data["name"] = message.html_text
-        await service.update(**resource_item_data)
-    except IntegrityError, ValueError:
-        await message.answer(
-            text=i18n.get("manage-resources-edit-name-fail", name=message.html_text),
-            reply_markup=keyboard,
-        )
-        await state.set_state(EditResourceState.name)
-    else:
-        await message.answer(
-            text=i18n.get("manage-resources-edit-name-success", name=message.html_text),
-            reply_markup=keyboard,
-        )
+    await service.update(item_id=resource_item_id, item=resource_item_update_schema.to_entity())
+    await message.answer(
+        text=i18n.get("manage-resources-edit-name-success", name=message.html_text),
+        reply_markup=keyboard,
+    )
+    await state.clear()
 
 
 @router.callback_query(
     F.data == "edit_resource_description",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def edit_resource_description(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
+async def edit_resource_description(
+    callback: CallbackQuery,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[ResourceItemService],
+):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
     await bot.delete_message(
@@ -423,20 +425,16 @@ async def edit_resource_description(callback: CallbackQuery, state: FSMContext, 
         message_id=callback.message.message_id,
     )
     state_data = await state.get_data()
-    resource_description = next(
-        (
-            resource.description
-            for resource in state_data["resources"]
-            if resource.resource_item_id == state_data["resource_item_id"]
-        ),
-        "Unknown",
-    )
+    resource_item_id = state_data["resource_item_id"]
+    resource_item = await service.get_one(resource_item_id)
+    if resource_item is None:
+        raise ResourceItemNotFoundException(resource_item_id)
 
     keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
     await callback.message.answer(
-        text=i18n.get("manage-resources-edit-description-text", description=resource_description),
+        text=i18n.get("manage-resources-edit-description-text", description=resource_item.description),
         reply_markup=keyboard,
     )
     await state.set_state(EditResourceState.description)
@@ -455,32 +453,33 @@ async def edit_resource_description_success(
 ):
     if not message.from_user or not message.from_user.language_code:
         return
-    resource_data = await state.get_data()
+
+    state_data = await state.get_data()
+    resource_item_id = state_data["resource_item_id"]
+
+    resource_item_update_schema = ResourceItemUpdateSchema(description=message.html_text)
 
     keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    try:
-        resource_data["description"] = message.html_text
-        await service.update(**resource_data)
-    except IntegrityError, ValueError:
-        await message.answer(
-            text=i18n.get("manage-resources-edit-description-fail", description=message.html_text),
-            reply_markup=keyboard,
-        )
-        await state.set_state(EditResourceState.description)
-    else:
-        await message.answer(
-            text=i18n.get("manage-resources-edit-description-success", description=message.html_text),
-            reply_markup=keyboard,
-        )
+    await service.update(item_id=resource_item_id, item=resource_item_update_schema.to_entity())
+    await message.answer(
+        text=i18n.get("manage-resources-edit-description-success", description=message.html_text),
+        reply_markup=keyboard,
+    )
+    await state.clear()
 
 
 @router.callback_query(
     F.data == "edit_resource_tags",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def edit_resource_tags(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
+async def edit_resource_tags(
+    callback: CallbackQuery,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[ResourceItemService],
+):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
     await bot.delete_message(
@@ -488,23 +487,16 @@ async def edit_resource_tags(callback: CallbackQuery, state: FSMContext, i18n: I
         message_id=callback.message.message_id,
     )
     state_data = await state.get_data()
-    resource_tags = next(
-        (
-            resource.tags
-            for resource in state_data["resources"]
-            if resource.resource_item_id == state_data["resource_item_id"]
-        ),
-        "Unknown",
-    )
+    resource_item_id = state_data["resource_item_id"]
+    resource_item = await service.get_one(resource_item_id)
+    if resource_item is None:
+        raise ResourceItemNotFoundException(resource_item_id)
 
     keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
     await callback.message.answer(
-        text=i18n.get(
-            "manage-resources-edit-tags-text",
-            tags=resource_tags,
-        ),
+        text=i18n.get("manage-resources-edit-tags-text", tags=resource_item.tags),
         reply_markup=keyboard,
     )
     await state.set_state(EditResourceState.tags)
@@ -523,38 +515,33 @@ async def edit_resource_tags_success(
 ):
     if not message.from_user or not message.from_user.language_code:
         return
-    resource_data = await state.get_data()
-    resource_data["tags"] = message.html_text
+
+    state_data = await state.get_data()
+    resource_item_id = state_data["resource_item_id"]
+
+    resource_item_update_schema = ResourceItemUpdateSchema(tags=message.html_text)
 
     keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    try:
-        await service.update(**resource_data)
-    except IntegrityError, ValueError:
-        await message.answer(
-            text=i18n.get(
-                "manage-resources-edit-tags-fail",
-                tags=message.html_text,
-            ),
-            reply_markup=keyboard,
-        )
-        await state.set_state(EditResourceState.tags)
-    else:
-        await message.answer(
-            text=i18n.get(
-                "manage-resources-edit-tags-success",
-                tags=message.html_text,
-            ),
-            reply_markup=keyboard,
-        )
+    await service.update(item_id=resource_item_id, item=resource_item_update_schema.to_entity())
+    await message.answer(
+        text=i18n.get("manage-resources-edit-tags-success", tags=message.html_text),
+        reply_markup=keyboard,
+    )
+    await state.clear()
 
 
 @router.callback_query(
     F.data == "edit_resource_image",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def edit_resource_image(callback: CallbackQuery, state: FSMContext, i18n: I18nContext):
+async def edit_resource_image(
+    callback: CallbackQuery,
+    state: FSMContext,
+    i18n: I18nContext,
+    resource_image_service: FromDishka[ResourceImageService],
+):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
     await bot.delete_message(
@@ -562,62 +549,90 @@ async def edit_resource_image(callback: CallbackQuery, state: FSMContext, i18n: 
         message_id=callback.message.message_id,
     )
     state_data = await state.get_data()
-    resource_image = next(
-        (
-            resource.image
-            for resource in state_data["resources"]
-            if resource.resource_item_id == state_data["resource_item_id"]
-        ),
-        "Unknown",
-    )
+    resource_item_id = state_data["resource_item_id"]
+    filters = ResourceImageFiltersSchema(resource_item_id=resource_item_id, count=10)
+    resource_image_entities, count = await resource_image_service.get_many(filters.to_entity())
 
     keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    await callback.message.answer_photo(
-        photo=resource_image,
-        caption=i18n.get("manage-resources-edit-image-text"),
+    if count > 1:
+        media_group = MediaGroupBuilder()
+
+        for resource_image_entity in resource_image_entities:
+            media_group.add_photo(type="photo", media=resource_image_entity.image)
+
+        await callback.message.answer_media_group(
+            media=list(media_group.build()),
+        )
+    else:
+        await callback.message.answer_photo(
+            photo=resource_image_entities[0].image,
+        )
+
+    await callback.message.answer(
+        text=i18n.get("manage-resources-edit-image-text"),
         reply_markup=keyboard,
     )
-    await state.set_state(EditResourceState.image)
+    await state.set_state(EditResourceState.images)
 
 
-@router.message(
-    EditResourceState.image,
-    UserRoleFilter([Role.admin, Role.manager]),
-    F.photo[-1].as_("resource_image"),
-)
+@router.message(EditResourceState.images, UserRoleFilter([Role.admin, Role.manager]), or_f(MediaGroupFilter(), F.photo))
 async def edit_resource_image_success(
     message: Message,
     state: FSMContext,
-    resource_image: PhotoSize,
     i18n: I18nContext,
-    service: FromDishka[ResourceItemService],
+    service: FromDishka[ResourceImageService],
 ):
     if not message.from_user or not message.from_user.language_code:
         return
-    resource_data = await state.get_data()
-    resource_data["image"] = resource_image.file_id
+    state_data = await state.get_data()
+    resource_item_id = state_data["resource_item_id"]
 
     keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    try:
-        await service.update(**resource_data)
-    except IntegrityError, ValueError:
-        await message.answer_photo(
-            photo=resource_image.file_id,
-            caption=i18n.get(
+    images = message.photo
+    if not images:
+        await message.answer(
+            text=i18n.get(
                 "manage-resources-edit-image-fail",
             ),
             reply_markup=keyboard,
         )
-        await state.set_state(EditResourceState.image)
+        return
+
+    filters = ResourceImageFiltersSchema(resource_item_id=resource_item_id, count=10)
+    existing_resource_image_entities, count = await service.get_many(filters.to_entity())
+
+    for existing_resource_image_entity in existing_resource_image_entities:
+        await service.delete_by_id(existing_resource_image_entity.resource_image_id)
+
+    for resource_image in images:
+        resource_image_schema = BaseResourceImageSchema(
+            resource_image_id=uuid4(),
+            resource_item_id=resource_item_id,
+            image=resource_image.file_id,
+        )
+        await service.create(resource_image_schema.to_entity())
+
+    if count > 1:
+        media_group = MediaGroupBuilder()
+
+        for resource_image in images:
+            media_group.add_photo(type="photo", media=resource_image.file_id)
+
+        await message.answer_media_group(
+            media=list(media_group.build()),
+        )
     else:
         await message.answer_photo(
-            photo=resource_image.file_id,
-            caption=i18n.get(
-                "manage-resources-edit-image-success",
-            ),
-            reply_markup=keyboard,
+            photo=images[0].file_id,
         )
+
+    await message.answer(
+        text=i18n.get(
+            "manage-resources-edit-image-success",
+        ),
+        reply_markup=keyboard,
+    )

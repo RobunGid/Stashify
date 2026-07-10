@@ -30,4 +30,4 @@ class CategoryItemSchema(BaseCategoryItemSchema):
     resources: list[BaseResourceItemSchema] = Field(default_factory=list)
 
 
-from application.schemas.resource_schema import BaseResourceItemSchema  # noqa
+from application.schemas.resource_item_schema import BaseResourceItemSchema  # noqa

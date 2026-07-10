@@ -70,7 +70,7 @@ manage-resources-edit-choose-category = 📤 Select resource category
 manage-resources-edit-choose-to-change = 📤 Choose what to edit
 manage-resources-edit-name-choose = ✏️ Edit name
 manage-resources-edit-description-choose = 📝 Edit description
-manage-resources-edit-image-choose = 🖼️ Edit image
+manage-resources-edit-image-choose = 🖼️ Edit images
 manage-resources-edit-tags-choose = 🏷️ Edit tags
 
 manage-resources-edit-name-text =
