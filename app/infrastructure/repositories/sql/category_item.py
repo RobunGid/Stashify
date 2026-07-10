@@ -23,8 +23,12 @@ class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepository
         await self.session.commit()
 
     async def get_one(self, category_item_id: UUID) -> CategoryItemEntity | None:
-        statement = select(CategoryItemModel).where(
-            CategoryItemModel.category_item_id == category_item_id,
+        statement = (
+            select(CategoryItemModel)
+            .options(selectinload(CategoryItemModel.resource_items))
+            .where(
+                CategoryItemModel.category_item_id == category_item_id,
+            )
         )
 
         category_item_model = (await self.session.execute(statement)).scalars().first()

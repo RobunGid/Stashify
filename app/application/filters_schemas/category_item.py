@@ -5,8 +5,8 @@ from domain.filters.category_item import CategoryItemFilters
 
 
 class CategoryItemFiltersSchema(BaseFiltersSchema[CategoryItemFilters]):
-    has_quiz_items: bool = False
-    has_resource_items: bool = False
+    has_quiz_items: bool | None = False
+    has_resource_items: bool | None = False
     favorite_user_id: UUID | None = None
     entity_cls: type[CategoryItemFilters] = CategoryItemFilters
 

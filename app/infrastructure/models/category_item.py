@@ -2,7 +2,9 @@ from datetime import datetime
 from uuid import UUID as PyUUID, uuid4
 
 from domain.entities.category_item import CategoryItemEntity
-from sqlalchemy import DateTime, func, String, UUID
+from infrastructure.models.resource_item import ResourceItemModel
+from sqlalchemy import DateTime, func, select, String, UUID
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.base import Base
@@ -28,3 +30,11 @@ class CategoryItemModel(Base):
             created_at=entity.created_at,
             updated_at=entity.updated_at,
         )
+
+    @hybrid_property
+    def resource_item_count(self):  # type: ignore[no-redef]
+        return len(self.resource_items)
+
+    @resource_item_count.expression  # type: ignore[no-redef]
+    def resource_item_count(cls):  # type: ignore[no-redef]
+        return select(func.count(ResourceItemModel.id)).where(ResourceItemModel.category_id == cls.id).scalar_subquery()

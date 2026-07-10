@@ -18,7 +18,7 @@ from application.keyboards.categories import (
     EntryEditCategoryKeyboardBuilder,
     ManageCategoriesBackKeyboardBuilder,
 )
-from application.routers.constants import DELETE_CATEGORIES_ON_PAGE
+from application.routers.constants import DELETE_CATEGORY_CATEGORIES_ON_PAGE
 from application.schemas.category_item_schema import BaseCategoryItemSchema, CategoryItemUpdateSchema
 from application.services.category_item import CategoryItemService
 from dishka import FromDishka
@@ -54,7 +54,7 @@ class EditCategoryState(StatesGroup):
 
 
 @router.callback_query(
-    EditCategoryChooseCategoryCallbackFactory,
+    EditCategoryChooseCategoryCallbackFactory.filter(),
     UserRoleFilter([Role.admin]),
 )
 async def edit_category_choose(
@@ -133,10 +133,10 @@ async def delete_category_callback_handler(
         message_id=callback.message.message_id,
     )
     filters = CategoryItemFiltersSchema(
-        count=DELETE_CATEGORIES_ON_PAGE,
+        count=DELETE_CATEGORY_CATEGORIES_ON_PAGE,
     )
     category_entities, count = await service.get_many(filters.to_entity())
-    total_pages = ceil(count / DELETE_CATEGORIES_ON_PAGE)
+    total_pages = ceil(count / DELETE_CATEGORY_CATEGORIES_ON_PAGE)
     await state.update_data(total_pages=total_pages, category_items=category_entities)
 
     keyboard_builder = DeleteCategoryListKeyboardBuilder(

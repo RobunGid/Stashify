@@ -13,6 +13,7 @@ class CategoryItemMapper(BaseMapper[CategoryItemEntity, CategoryItemModel]):
             name=model.name,
             created_at=model.created_at,
             updated_at=model.updated_at,
+            resource_item_count=model.resource_item_count,
         )
 
     @staticmethod

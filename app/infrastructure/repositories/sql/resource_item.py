@@ -33,7 +33,12 @@ class SQLResourceItemRepository(BaseResourceItemRepository, SQLAlchemyRepository
     async def get_many(self, filters: ResourceItemFilters) -> GetManyResult[ResourceItemEntity]:
 
         statement = select(ResourceItemModel)
+
+        if filters.category_item_id is not None:
+            statement = statement.where(ResourceItemModel.category_item_id == filters.category_item_id)
+
         count_statement = select(func.count()).select_from(statement.subquery())
+
         total = (await self.session.execute(count_statement)).scalar_one()
 
         if filters.offset is not None:
@@ -104,6 +109,10 @@ class SQLResourceItemRepository(BaseResourceItemRepository, SQLAlchemyRepository
     async def get_count(self, filters: ResourceItemFilters) -> int:
 
         statement = select(ResourceItemModel)
+
+        if filters.category_item_id is not None:
+            statement = statement.where(ResourceItemModel.category_item_id == filters.category_item_id)
+
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()
 

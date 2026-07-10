@@ -69,7 +69,14 @@ async def list_resources_category_page(
         message_id=callback.message.message_id,
     )
     current_page = callback_data.page
-    filters = CategoryItemFiltersSchema(count=LIST_RESOURCES_CATEGORIES_ON_PAGE, has_resource_items=True)
+    has_resource_items: bool | None = True
+    if callback_data.context == "crt_rsc":
+        has_resource_items = None
+    filters = CategoryItemFiltersSchema(
+        count=LIST_RESOURCES_CATEGORIES_ON_PAGE,
+        has_resource_items=has_resource_items,
+        offset=current_page * LIST_RESOURCES_CATEGORIES_ON_PAGE,
+    )
     category_item_entities, count = await service.get_many(filters.to_entity())
     total_category_items_pages = ceil(count / LIST_RESOURCES_CATEGORIES_ON_PAGE)
 

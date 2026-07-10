@@ -89,7 +89,7 @@ class ResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
 class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity], BackToMenuKeyboardBuilderMixin):
     def _item_button(self, item: CategoryItemEntity) -> dict:
         return {
-            "text": item.name,
+            "text": f"{item.name} ({item.resource_item_count})",
             "callback_data": ListResourcesItemCallbackFactory(
                 category_item_id=item.category_item_id,
                 page=0,

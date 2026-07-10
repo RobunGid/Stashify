@@ -8,6 +8,7 @@ from domain.entities.base import BaseEntity, BaseUpdateEntity
 class CategoryItemEntity(BaseEntity):
     category_item_id: UUID
     name: str
+    resource_item_count: int
 
 
 @dataclass

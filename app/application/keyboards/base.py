@@ -99,7 +99,7 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
             buttons += [
                 {
                     "text": self.i18n.get("items-start"),
-                    "callback_data": self._pagination_callback(1).pack(),
+                    "callback_data": self._pagination_callback(0).pack(),
                 },
                 {
                     "text": self.i18n.get("items-back"),
@@ -117,7 +117,7 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Gen
                 },
                 {
                     "text": self.i18n.get("items-end"),
-                    "callback_data": self._pagination_callback(total_pages).pack(),
+                    "callback_data": self._pagination_callback(total_pages - 1).pack(),
                 },
             ]
 

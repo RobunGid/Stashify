@@ -8,10 +8,15 @@ from pydantic import Field
 class BaseCategoryItemSchema(BaseSchema[CategoryItemEntity]):
     category_item_id: UUID = Field(default_factory=uuid4)
 
+    resource_item_count: int
     name: str
 
     def to_entity(self) -> CategoryItemEntity:
-        return CategoryItemEntity(category_item_id=self.category_item_id, name=self.name)
+        return CategoryItemEntity(
+            category_item_id=self.category_item_id,
+            name=self.name,
+            resource_item_count=self.resource_item_count,
+        )
 
 
 class CategoryItemUpdateSchema(BaseUpdateSchema[CategoryItemUpdateEntity]):
