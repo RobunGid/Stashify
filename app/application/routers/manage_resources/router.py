@@ -2,14 +2,14 @@ from typing import List
 from uuid import uuid4
 
 from aiogram import F, Router
-from aiogram.filters import or_f
+from aiogram.exceptions import TelegramAPIError
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.media_group import MediaGroupBuilder
 
 from aiogram_i18n import I18nContext
-from aiogram_media_group import media_group_handler, MediaGroupFilter
+from aiogram_media_group import media_group_handler
 from application.exceptions.category_item import CategoryItemNotFoundException
 from application.exceptions.resource_item import ResourceItemNotFoundException
 from application.filters.user_role_filter import UserRoleFilter
@@ -41,7 +41,10 @@ router = Router()
     F.data == "manage_resources",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def manage_resources(callback: CallbackQuery, i18n: I18nContext):
+async def manage_resources(
+    callback: CallbackQuery,
+    i18n: I18nContext,
+):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
     keyboard_builder = ResourceManageEntryKeyboardBuilder(i18n)
@@ -169,7 +172,6 @@ async def new_resource_links_choose(message: Message, state: FSMContext, i18n: I
 async def new_resource_image_choose(messages: List[Message], state: FSMContext, i18n: I18nContext):
     if not messages[0].from_user or not messages[0].from_user.language_code:
         return
-    await state.update_data(images=[message.photo[-1].file_id for message in messages if message.photo])
 
     keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
@@ -562,39 +564,56 @@ async def edit_resource_image(
         for resource_image_entity in resource_image_entities:
             media_group.add_photo(type="photo", media=resource_image_entity.image)
 
-        await callback.message.answer_media_group(
+        answer_photos = await callback.message.answer_media_group(
             media=list(media_group.build()),
         )
+        bot_photo_ids = [m.message_id for m in answer_photos]
     else:
-        await callback.message.answer_photo(
+        answer_photo = await callback.message.answer_photo(
             photo=resource_image_entities[0].image,
         )
+        bot_photo_ids = [answer_photo.message_id]
 
-    await callback.message.answer(
+    answer_text_message = await callback.message.answer(
         text=i18n.get("manage-resources-edit-image-text"),
         reply_markup=keyboard,
+    )
+
+    await state.update_data(
+        message_ids_to_delete=bot_photo_ids + [answer_text_message.message_id],
     )
     await state.set_state(EditResourceState.images)
 
 
-@router.message(EditResourceState.images, UserRoleFilter([Role.admin, Role.manager]), or_f(MediaGroupFilter(), F.photo))
+@router.message(
+    EditResourceState.images,
+    UserRoleFilter([Role.admin, Role.manager]),
+    F.media_group_id,
+    F.content_type.in_({"photo"}),
+)
+@media_group_handler
 async def edit_resource_image_success(
-    message: Message,
+    messages: list[Message],
     state: FSMContext,
     i18n: I18nContext,
     service: FromDishka[ResourceImageService],
 ):
-    if not message.from_user or not message.from_user.language_code:
-        return
     state_data = await state.get_data()
+    resource_item_id = state_data["resource_item_id"]
+
+    for message in messages:
+        try:
+            await message.delete()
+        except TelegramAPIError:
+            pass
     resource_item_id = state_data["resource_item_id"]
 
     keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    images = message.photo
-    if not images:
-        await message.answer(
+    new_images = [m.photo[-1].file_id for m in messages if m.photo]
+    if not new_images:
+        await messages[0].answer(
             text=i18n.get(
                 "manage-resources-edit-image-fail",
             ),
@@ -603,36 +622,102 @@ async def edit_resource_image_success(
         return
 
     filters = ResourceImageFiltersSchema(resource_item_id=resource_item_id, count=10)
+    existing_resource_image_entities, _ = await service.get_many(filters.to_entity())
+
+    for existing_resource_image_entity in existing_resource_image_entities:
+        await service.delete_by_id(existing_resource_image_entity.resource_image_id)
+
+    for resource_image in new_images:
+        resource_image_schema = BaseResourceImageSchema(
+            resource_image_id=uuid4(),
+            resource_item_id=resource_item_id,
+            image=resource_image,
+        )
+        await service.create(resource_image_schema.to_entity())
+
+    if len(new_images) > 1:
+        media_group = MediaGroupBuilder()
+
+        for resource_image in new_images:
+            media_group.add_photo(type="photo", media=resource_image)
+
+        answer_image_messages = await messages[0].answer_media_group(
+            media=list(media_group.build()),
+        )
+    else:
+        answer_image_message = await messages[0].answer_photo(
+            photo=new_images[0],
+        )
+        answer_image_messages = [answer_image_message]
+
+    answer_image_message_ids = [message.message_id for message in answer_image_messages]
+    print(f"{answer_image_message_ids=}")
+    await messages[0].answer(
+        text=i18n.get(
+            "manage-resources-edit-image-success",
+        ),
+        reply_markup=keyboard,
+    )
+    await state.clear()
+    await state.update_data(
+        message_ids_to_delete=answer_image_message_ids,
+    )
+
+
+@router.message(
+    EditResourceState.images,
+    UserRoleFilter([Role.admin, Role.manager]),
+    ~F.media_group_id,
+    F.content_type.in_({"photo"}),
+)
+async def edit_resource_image_single_success(
+    message: Message,
+    state: FSMContext,
+    i18n: I18nContext,
+    service: FromDishka[ResourceImageService],
+):
+    await message.delete()
+    state_data = await state.get_data()
+    resource_item_id = state_data["resource_item_id"]
+
+    keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
+    keyboard = keyboard_builder.build()
+
+    if not message.photo:
+        await message.answer(
+            text=i18n.get(
+                "manage-resources-edit-image-fail",
+            ),
+            reply_markup=keyboard,
+        )
+        return
+
+    new_image = message.photo[-1].file_id
+
+    filters = ResourceImageFiltersSchema(resource_item_id=resource_item_id, count=10)
     existing_resource_image_entities, count = await service.get_many(filters.to_entity())
 
     for existing_resource_image_entity in existing_resource_image_entities:
         await service.delete_by_id(existing_resource_image_entity.resource_image_id)
 
-    for resource_image in images:
-        resource_image_schema = BaseResourceImageSchema(
-            resource_image_id=uuid4(),
-            resource_item_id=resource_item_id,
-            image=resource_image.file_id,
-        )
-        await service.create(resource_image_schema.to_entity())
+    resource_image_schema = BaseResourceImageSchema(
+        resource_image_id=uuid4(),
+        resource_item_id=resource_item_id,
+        image=new_image,
+    )
+    await service.create(resource_image_schema.to_entity())
 
-    if count > 1:
-        media_group = MediaGroupBuilder()
-
-        for resource_image in images:
-            media_group.add_photo(type="photo", media=resource_image.file_id)
-
-        await message.answer_media_group(
-            media=list(media_group.build()),
-        )
-    else:
-        await message.answer_photo(
-            photo=images[0].file_id,
-        )
+    answer_image_message = await message.answer_photo(
+        photo=new_image,
+    )
 
     await message.answer(
         text=i18n.get(
             "manage-resources-edit-image-success",
         ),
         reply_markup=keyboard,
+    )
+    await state.clear()
+    await state.update_data(
+        message_ids_to_delete=[answer_image_message.message_id],
     )

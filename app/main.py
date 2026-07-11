@@ -4,6 +4,7 @@ from aiogram_i18n import I18nMiddleware
 from aiogram_i18n.cores import FluentRuntimeCore
 from application.containers.factories import get_container
 from application.middlewares.create_user import CreateUserMiddleware
+from application.middlewares.delete_message import DeleteOldMessagesMiddleware
 from application.routers import common, menu
 from application.routers.manage_categories.router import router as manage_categories_router
 from application.routers.manage_quizes.router import router as manage_quizes_router
@@ -34,10 +35,13 @@ async def main():
 
     i18n_middleware = I18nMiddleware(core=FluentRuntimeCore(path="domain/locales/{locale}"))
     create_user_middleware = CreateUserMiddleware(container)
+    delete_old_messages_middleware = DeleteOldMessagesMiddleware()
 
     dp.message.middleware(i18n_middleware)
     dp.message.outer_middleware(create_user_middleware)
     dp.callback_query.outer_middleware(create_user_middleware)
+    dp.message.middleware(delete_old_messages_middleware)
+    dp.callback_query.outer_middleware(delete_old_messages_middleware)
     dp.update.middleware()
     i18n_middleware.setup(dispatcher=dp)
 
