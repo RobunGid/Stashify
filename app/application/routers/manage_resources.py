@@ -373,9 +373,12 @@ async def edit_resource_name(
     keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    await callback.message.answer(
+    answer_message = await callback.message.answer(
         text=i18n.get("manage-resources-edit-name-text", name=resource_item.name),
         reply_markup=keyboard,
+    )
+    await state.update_data(
+        message_ids_to_delete=[answer_message.message_id],
     )
     await state.set_state(EditResourceState.name)
 
@@ -393,6 +396,8 @@ async def edit_resource_name_success(
 ):
     if not message.from_user or not message.from_user.language_code:
         return
+
+    await message.delete()
 
     state_data = await state.get_data()
     resource_item_id = state_data["resource_item_id"]
@@ -435,9 +440,12 @@ async def edit_resource_description(
     keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    await callback.message.answer(
+    answer_message = await callback.message.answer(
         text=i18n.get("manage-resources-edit-description-text", description=resource_item.description),
         reply_markup=keyboard,
+    )
+    await state.update_data(
+        message_ids_to_delete=[answer_message.message_id],
     )
     await state.set_state(EditResourceState.description)
 
@@ -455,6 +463,8 @@ async def edit_resource_description_success(
 ):
     if not message.from_user or not message.from_user.language_code:
         return
+
+    await message.delete()
 
     state_data = await state.get_data()
     resource_item_id = state_data["resource_item_id"]
@@ -497,9 +507,12 @@ async def edit_resource_tags(
     keyboard_builder = ManageResourcesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    await callback.message.answer(
+    answer_message = await callback.message.answer(
         text=i18n.get("manage-resources-edit-tags-text", tags=resource_item.tags),
         reply_markup=keyboard,
+    )
+    await state.update_data(
+        message_ids_to_delete=[answer_message.message_id],
     )
     await state.set_state(EditResourceState.tags)
 
@@ -517,6 +530,8 @@ async def edit_resource_tags_success(
 ):
     if not message.from_user or not message.from_user.language_code:
         return
+
+    await message.delete()
 
     state_data = await state.get_data()
     resource_item_id = state_data["resource_item_id"]
@@ -651,7 +666,6 @@ async def edit_resource_image_success(
         answer_image_messages = [answer_image_message]
 
     answer_image_message_ids = [message.message_id for message in answer_image_messages]
-    print(f"{answer_image_message_ids=}")
     await messages[0].answer(
         text=i18n.get(
             "manage-resources-edit-image-success",

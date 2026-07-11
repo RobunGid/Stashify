@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, Message
 from aiogram.utils.media_group import MediaGroupBuilder
 
 from aiogram_i18n import I18nContext
@@ -11,6 +11,7 @@ from application.exceptions.category_item import CategoryItemNotFoundException
 from application.exceptions.quiz_item import QuizItemNotFoundException
 from application.exceptions.quiz_question import QuizQuestionNotFoundException
 from application.exceptions.resource_item import ResourceItemNotFoundException
+from application.filters.valid_callback_filter import ValidCallbackFilter
 from application.filters_schemas.category_item import CategoryItemFiltersSchema
 from application.filters_schemas.quiz_question import QuizQuestionFiltersSchema
 from application.filters_schemas.resource_image import ResourceImageFiltersSchema
@@ -51,6 +52,7 @@ from dishka import FromDishka
 from settings.aiogram import bot
 
 router = Router()
+router.callback_query.filter(ValidCallbackFilter())
 
 
 @router.callback_query(
@@ -60,13 +62,12 @@ async def list_resources_category_page(
     callback: CallbackQuery,
     callback_data: ListCategoriesItemCallbackFactory,
     i18n: I18nContext,
-    service: FromDishka[CategoryItemService],
+    message: Message,
+    category_item_service: FromDishka[CategoryItemService],
 ):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
-        return
     await bot.delete_message(
-        chat_id=callback.message.chat.id,
-        message_id=callback.message.message_id,
+        chat_id=message.chat.id,
+        message_id=message.message_id,
     )
     current_page = callback_data.page
     has_resource_items: bool | None = True
@@ -77,7 +78,7 @@ async def list_resources_category_page(
         has_resource_items=has_resource_items,
         offset=current_page * LIST_RESOURCES_CATEGORIES_ON_PAGE,
     )
-    category_item_entities, count = await service.get_many(filters.to_entity())
+    category_item_entities, count = await category_item_service.get_many(filters.to_entity())
     total_category_items_pages = ceil(count / LIST_RESOURCES_CATEGORIES_ON_PAGE)
 
     keyboard_builder_class = CATEGORY_LIST_KEYBOARD_BUILDER_MAP[callback_data.context]
@@ -90,7 +91,7 @@ async def list_resources_category_page(
     )
     keyboard = keyboard_builder.build()
 
-    await callback.message.answer(
+    await message.answer(
         text=i18n.get(
             "list-resources-choose-category",
         ),
@@ -106,18 +107,12 @@ async def list_resource_resource_page(
     callback_data: ListResourcesItemCallbackFactory,
     i18n: I18nContext,
     resource_item_service: FromDishka[ResourceItemService],
+    message: Message,
 ):
-    if (
-        not callback.from_user
-        or not callback.from_user.language_code
-        or not callback.message
-        or not callback.data
-        or not callback_data.category_item_id
-    ):
-        return
+
     await bot.delete_message(
-        chat_id=callback.message.chat.id,
-        message_id=callback.message.message_id,
+        chat_id=message.chat.id,
+        message_id=message.message_id,
     )
     current_page = callback_data.page
     category_item_id = callback_data.category_item_id
@@ -141,7 +136,7 @@ async def list_resource_resource_page(
     )
     keyboard = keyboard_builder.build()
 
-    await callback.message.answer(
+    await message.answer(
         text=i18n.get(
             "list-resources-change-page",
         ),
@@ -275,27 +270,21 @@ async def list_resource_start_quiz(
     quiz_item_service: FromDishka[QuizItemService],
     resource_item_service: FromDishka[ResourceItemService],
     quiz_question_service: FromDishka[QuizQuestionService],
+    message: Message,
 ):
-    if (
-        not callback.from_user
-        or not callback.from_user.language_code
-        or not callback.message
-        or not callback.data
-        or not callback_data.resource_item_id
-    ):
-        return
     await bot.delete_message(
-        chat_id=callback.message.chat.id,
-        message_id=callback.message.message_id,
+        chat_id=message.chat.id,
+        message_id=message.message_id,
     )
 
     resource_item_id = callback_data.resource_item_id
 
+    if not resource_item_id:
+        return
+
     resource_item_entity = await resource_item_service.get_one(resource_item_id)
     if not resource_item_entity:
         raise ResourceItemNotFoundException(resource_item_id)
-
-    resource_item_id = callback_data.resource_item_id
 
     resource_item_entity = await resource_item_service.get_one(resource_item_id)
     if not resource_item_entity:
@@ -310,7 +299,7 @@ async def list_resource_start_quiz(
     keyboard_builder = ResourceQuizConfirmKeyboardBuilder(i18n=i18n, current_item=resource_item_entity)
     keyboard = keyboard_builder.build()
 
-    await callback.message.answer(
+    await message.answer(
         text=i18n.get(
             "list-resources-start-quiz-question",
             question_count=quiz_question_count,
@@ -330,20 +319,16 @@ async def list_resource_start_quiz_confirm(
     quiz_item_service: FromDishka[QuizItemService],
     resource_item_service: FromDishka[ResourceItemService],
     quiz_question_service: FromDishka[QuizQuestionService],
+    message: Message,
 ):
-    if (
-        not callback.from_user
-        or not callback.from_user.language_code
-        or not callback.message
-        or not callback.data
-        or not callback_data.resource_item_id
-    ):
-        return
+
     await bot.delete_message(
-        chat_id=callback.message.chat.id,
-        message_id=callback.message.message_id,
+        chat_id=message.chat.id,
+        message_id=message.message_id,
     )
     resource_item_id = callback_data.resource_item_id
+    if not resource_item_id:
+        return
 
     resource_item_entity = await resource_item_service.get_one(resource_item_id)
     if not resource_item_entity:
@@ -364,20 +349,20 @@ async def list_resource_start_quiz_confirm(
         i18n=i18n,
         item=resource_item_entity,
         question=quiz_question_entity,
-        page=1,
+        page=0,
         question_number=0,
         quiz_item=quiz_item,
     )
     keyboard = keyboard_builder.build()
 
     if quiz_question_entity.image:
-        await callback.message.answer_photo(
+        await message.answer_photo(
             photo=quiz_question_entity.image,
             text=quiz_question_entity.text,
             reply_markup=keyboard,
         )
     else:
-        await callback.message.answer(text=quiz_question_entity.text, reply_markup=keyboard)
+        await message.answer(text=quiz_question_entity.text, reply_markup=keyboard)
 
 
 @router.callback_query(

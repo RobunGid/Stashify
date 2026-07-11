@@ -18,6 +18,7 @@ class CategoryItemModel(Base):
     resource_items: Mapped[list["ResourceItemModel"]] = relationship(  # noqa: F821 # pyright: ignore
         "ResourceItemModel",
         back_populates="category_item",
+        cascade="all, delete-orphan",
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now())

@@ -26,7 +26,7 @@ class EntryEditCategoryKeyboardBuilder(BaseManageEntryKeyboardBuilder, BackToMen
             },
             {
                 "text": self.i18n.get("manage-categories-keyboard-edit"),
-                "callback_data": "edit_category",
+                "callback_data": ListCategoriesItemCallbackFactory(action="change_page", context="edt_ctg", page=0),
             },
             {
                 "text": self.i18n.get("manage-categories-keyboard-delete"),
@@ -56,12 +56,12 @@ class DeleteCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEnti
             "text": item.name,
             "callback_data": DeleteCategoryChooseCategoryCallbackFactory(
                 category_item_id=item.category_item_id,
-            ),
+            ).pack(),
         }
 
 
 class EditCategoryChooseCategoryCallbackFactory(CallbackData, prefix="edit_category_id"):  # type: ignore[call-arg]
-    category_item_id: UUID | None
+    category_item_id: UUID
 
 
 @dataclass
@@ -93,7 +93,7 @@ class EditCategoryListKeyboardBuilder(
             "text": item.name,
             "callback_data": EditCategoryChooseCategoryCallbackFactory(
                 category_item_id=item.category_item_id,
-            ),
+            ).pack(),
         }
 
 
@@ -109,9 +109,9 @@ class DeleteCategoryConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
         return [
             {
                 "text": self.i18n.get(
-                    "manage-category-delete-confirm",
+                    "manage-categories-delete-confirm",
                 ),
-                "callback_data": DeleteCategoryConfirmCallbackFactory(category_item_id=self.category_item_id),
+                "callback_data": DeleteCategoryConfirmCallbackFactory(category_item_id=self.category_item_id).pack(),
             },
         ]
 

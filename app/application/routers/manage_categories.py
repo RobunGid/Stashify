@@ -1,5 +1,3 @@
-from math import ceil
-
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -8,17 +6,14 @@ from aiogram.types import CallbackQuery, Message
 from aiogram_i18n import I18nContext
 from application.exceptions.category_item import CategoryItemNotFoundException
 from application.filters.user_role_filter import UserRoleFilter
-from application.filters_schemas.category_item import CategoryItemFiltersSchema
 from application.keyboards.categories import (
     DeleteCategoryChooseCategoryCallbackFactory,
     DeleteCategoryConfirmCallbackFactory,
     DeleteCategoryConfirmKeyboardBuilder,
-    DeleteCategoryListKeyboardBuilder,
     EditCategoryChooseCategoryCallbackFactory,
     EntryEditCategoryKeyboardBuilder,
     ManageCategoriesBackKeyboardBuilder,
 )
-from application.routers.constants import DELETE_CATEGORY_CATEGORIES_ON_PAGE
 from application.schemas.category_item_schema import BaseCategoryItemSchema, CategoryItemUpdateSchema
 from application.services.category_item import CategoryItemService
 from dishka import FromDishka
@@ -62,6 +57,7 @@ async def edit_category_choose(
     callback_data: EditCategoryChooseCategoryCallbackFactory,
     state: FSMContext,
     i18n: I18nContext,
+    service: FromDishka[CategoryItemService],
 ):
     if not callback.from_user or not callback.from_user.language_code or not callback.message or not callback.data:
         return
@@ -70,17 +66,23 @@ async def edit_category_choose(
         message_id=callback.message.message_id,
     )
 
+    category_item_id = callback_data.category_item_id
+    category_item = await service.get_one(category_item_id)
+    if not category_item:
+        raise CategoryItemNotFoundException(category_item_id)
+
     keyboard_builder = ManageCategoriesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    await callback.message.answer(
-        text=i18n.get(
-            "manage-categories-edit-text",
-        ),
+    answer_message = await callback.message.answer(
+        text=i18n.get("manage-categories-edit-text", category_name=category_item.name),
         reply_markup=keyboard,
     )
 
-    await state.update_data(category_item_id=callback_data.category_item_id)
+    await state.update_data(
+        category_item_id=category_item_id,
+        message_ids_to_delete=[answer_message.message_id],
+    )
     await state.set_state(EditCategoryState.name)
 
 
@@ -93,6 +95,9 @@ async def new_category_name_choose(
 ):
     if not message.from_user or not message.from_user.language_code:
         return
+
+    await message.delete()
+
     state_data = await state.get_data()
     category_item_id = state_data["category_item_id"]
     category_item_entity = await service.get_one(category_item_id)
@@ -117,43 +122,6 @@ class DeleteCategoryState(StatesGroup):
     total_pages = State()
     categories = State()
     category_item_id = State()
-
-
-@router.callback_query(F.data == "delete_category", UserRoleFilter([Role.admin]))
-async def delete_category_callback_handler(
-    callback: CallbackQuery,
-    state: FSMContext,
-    i18n: I18nContext,
-    service: FromDishka[CategoryItemService],
-):
-    if not callback.from_user or not callback.from_user.language_code or not callback.message:
-        return
-    await bot.delete_message(
-        chat_id=callback.message.chat.id,
-        message_id=callback.message.message_id,
-    )
-    filters = CategoryItemFiltersSchema(
-        count=DELETE_CATEGORY_CATEGORIES_ON_PAGE,
-    )
-    category_entities, count = await service.get_many(filters.to_entity())
-    total_pages = ceil(count / DELETE_CATEGORY_CATEGORIES_ON_PAGE)
-    await state.update_data(total_pages=total_pages, category_items=category_entities)
-
-    keyboard_builder = DeleteCategoryListKeyboardBuilder(
-        i18n=i18n,
-        total_pages=total_pages,
-        current_page=1,
-        items=category_entities,
-    )
-    keyboard = keyboard_builder.build()
-
-    await callback.message.answer(
-        text=i18n.get(
-            "manage-categories-delete-choose",
-        ),
-        reply_markup=keyboard,
-    )
-    await state.set_state("category_item_id")
 
 
 @router.callback_query(
@@ -211,7 +179,7 @@ async def delete_resource_name_confirm(
 
     await service.delete_by_id(item_id=category_item_id)
     await callback.message.answer(
-        text=i18n.get("manage-categories-delete-success", name=category_item_entity.name),
+        text=i18n.get("manage-categories-delete-success", category_name=category_item_entity.name),
         reply_markup=keyboard,
     )
 

@@ -5,6 +5,14 @@ from application.keyboards.menu import (
     ManagerMenuKeyboardBuilder,
     UserMenuKeyboardBuilder,
 )
+from application.keyboards.quizes import (
+    CreateQuizCategoryListKeyboardBuilder,
+    CreateQuizResourceListKeyboardBuilder,
+    DeleteQuizCategoryListKeyboardBuilder,
+    DeleteQuizResourceListKeyboardBuilder,
+    EditQuizCategoryListKeyboardBuilder,
+    EditQuizResourceListKeyboardBuilder,
+)
 from application.keyboards.resources import (
     CategoryListKeyboardBuilder,
     CreateResourceCategoryListKeyboardBuilder,
@@ -14,6 +22,7 @@ from application.keyboards.resources import (
     EditResourceResourceListKeyboardBuilder,
     ResourceListKeyboardBuilder,
 )
+from application.keyboards.search_resource import SearchResourceListKeyboardBuilder
 from infrastructure.models.user_account import Role
 
 ROLE_MENU_KEYBOARD_BUILDER_MAP: dict[Role, type[BaseMenuKeyboardBuilder]] = {
@@ -29,12 +38,19 @@ CATEGORY_LIST_KEYBOARD_BUILDER_MAP = {
     "dlt_rsc": DeleteResourceCategoryListKeyboardBuilder,
     "edt_ctg": EditCategoryListKeyboardBuilder,
     "dlt_ctg": DeleteCategoryListKeyboardBuilder,
+    "crt_qz": CreateQuizCategoryListKeyboardBuilder,
+    "edt_qz": EditQuizCategoryListKeyboardBuilder,
+    "dlt_qz": DeleteQuizCategoryListKeyboardBuilder,
 }
 
 RESOURCE_LIST_KEYBOARD_BUILDER_MAP = {
     "menu": ResourceListKeyboardBuilder,
     "edt_rsc": EditResourceResourceListKeyboardBuilder,
     "dlt_rsc": DeleteResourceResourceListKeyboardBuilder,
+    "crt_qz": CreateQuizResourceListKeyboardBuilder,
+    "edt_qz": EditQuizResourceListKeyboardBuilder,
+    "dlt_qz": DeleteQuizResourceListKeyboardBuilder,
+    "src_rsc": SearchResourceListKeyboardBuilder,
 }
 
 

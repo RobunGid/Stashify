@@ -159,6 +159,12 @@ manage-categories-text =
 manage-categories-keyboard-create = ➕ Create Category
 manage-categories-keyboard-edit = ✏️ Edit Category
 manage-categories-keyboard-delete = 🗑️ Delete Category
+manage-categories-delete-confirm = ❌ Delete category
+manage-categories-delete-choose-to-delete =
+    📤 Are you sure?
+
+    Category and all its resources will be deleted:
+    Category name: { $name }
 
 manage-categories-create-text = 📤 Send category name
 
@@ -176,7 +182,10 @@ manage-categories-create-no-resources = ❌ No resources in this category
 manage-categories-create-no-categories = ❌ No categories
 
 manage-categories-edit-choose = 📤 Choose category to edit
-manage-categories-edit-text = 📤 Send new category name
+manage-categories-edit-text = 
+    📤 Send new category name
+    
+    Category name: { $category_name }
 
 manage-categories-edit-success =
     ✅ Category name changed successfully

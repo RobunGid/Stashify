@@ -6,12 +6,12 @@ from application.containers.factories import get_container
 from application.middlewares.create_user import CreateUserMiddleware
 from application.middlewares.delete_message import DeleteOldMessagesMiddleware
 from application.routers import common, menu
-from application.routers.manage_categories.router import router as manage_categories_router
-from application.routers.manage_quizes.router import router as manage_quizes_router
-from application.routers.manage_resources.router import router as manage_resources_router
+from application.routers.manage_categories import router as manage_categories_router
+from application.routers.manage_quizes import router as manage_quizes_router
+from application.routers.manage_resources import router as manage_resources_router
 from application.routers.manage_users import router as manage_users_router
-from application.routers.resources.router import router as list_resources_router
-from application.routers.search_resource.router import router as search_resource_router
+from application.routers.resources import router as list_resources_router
+from application.routers.search_resource import router as search_resource_router
 from dishka.integrations.aiogram import setup_dishka
 
 from database.init import init_models
