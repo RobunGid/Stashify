@@ -9,7 +9,7 @@ type ResourceItemSortType = BaseSortType | Literal["name"]
 
 @dataclass
 class ResourceItemFilters(BaseFilters):
-    text: str | None = None
+    query: str | None = None
     category_item_id: UUID | None = None
     sort: ResourceItemSortType = "created_at"
     order: SortOrder = SortOrder.desc

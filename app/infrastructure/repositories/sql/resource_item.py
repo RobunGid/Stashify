@@ -8,7 +8,7 @@ from domain.repositories.resource_item import BaseResourceItemRepository
 from infrastructure.mappers.resource_item import ResourceItemMapper
 from infrastructure.models.resource_item import ResourceItemModel
 from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 
 
 @dataclass
@@ -36,6 +36,16 @@ class SQLResourceItemRepository(BaseResourceItemRepository, SQLAlchemyRepository
 
         if filters.category_item_id is not None:
             statement = statement.where(ResourceItemModel.category_item_id == filters.category_item_id)
+
+        if filters.query is not None:
+            statement = statement.where(
+                or_(
+                    ResourceItemModel.name.ilike(f"%{filters.query}%"),
+                    ResourceItemModel.description.ilike(f"%{filters.query}%"),
+                    ResourceItemModel.links.ilike(f"%{filters.query}%"),
+                    ResourceItemModel.tags.ilike(f"%{filters.query}%"),
+                ),
+            )
 
         count_statement = select(func.count()).select_from(statement.subquery())
 
@@ -112,6 +122,16 @@ class SQLResourceItemRepository(BaseResourceItemRepository, SQLAlchemyRepository
 
         if filters.category_item_id is not None:
             statement = statement.where(ResourceItemModel.category_item_id == filters.category_item_id)
+
+        if filters.query is not None:
+            statement = statement.where(
+                or_(
+                    ResourceItemModel.name.ilike(f"%{filters.query}%"),
+                    ResourceItemModel.description.ilike(f"%{filters.query}%"),
+                    ResourceItemModel.links.ilike(f"%{filters.query}%"),
+                    ResourceItemModel.tags.ilike(f"%{filters.query}%"),
+                ),
+            )
 
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()

@@ -24,7 +24,7 @@ from application.keyboards.resource_quizes import (
 )
 from application.keyboards.resources import (
     ListCategoriesItemCallbackFactory,
-    ListResourcesItemCallbackFactory,
+    ListCategoryResourcesItemCallbackFactory,
     ResourceItemDetailsCallbackFactory,
     ResourceItemKeyboardBuilder,
     ResourceQuizConfirmKeyboardBuilder,
@@ -100,11 +100,11 @@ async def list_resources_category_page(
 
 
 @router.callback_query(
-    ListResourcesItemCallbackFactory.filter(),
+    ListCategoryResourcesItemCallbackFactory.filter(),
 )
-async def list_resource_resource_page(
+async def category_resources_list_page(
     callback: CallbackQuery,
-    callback_data: ListResourcesItemCallbackFactory,
+    callback_data: ListCategoryResourcesItemCallbackFactory,
     i18n: I18nContext,
     resource_item_service: FromDishka[ResourceItemService],
     message: Message,

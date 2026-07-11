@@ -1,11 +1,6 @@
-from application.keyboards.base import BackToMenuKeyboardBuilderMixin
-from application.keyboards.resources import ResourceItemKeyboardBuilder, ResourceListKeyboardBuilder
+from application.keyboards.base import BackToSearchResourcesKeyboardBuilderMixin
+from application.keyboards.resources import ResourceItemKeyboardBuilder
 
 
-class SearchResourceItemKeyboardBuilder(ResourceItemKeyboardBuilder):
-    def _back_callback(self) -> str:
-        return "search_resource"
-
-
-class SearchResourceListKeyboardBuilder(ResourceListKeyboardBuilder, BackToMenuKeyboardBuilderMixin):
+class SearchResourceItemKeyboardBuilder(ResourceItemKeyboardBuilder, BackToSearchResourcesKeyboardBuilderMixin):
     pass

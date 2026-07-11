@@ -15,14 +15,13 @@ from application.keyboards.quizes import (
 )
 from application.keyboards.resources import (
     CategoryListKeyboardBuilder,
+    CategoryResourceListKeyboardBuilder,
     CreateResourceCategoryListKeyboardBuilder,
     DeleteResourceCategoryListKeyboardBuilder,
     DeleteResourceResourceListKeyboardBuilder,
     EditResourceCategoryListKeyboardBuilder,
     EditResourceResourceListKeyboardBuilder,
-    ResourceListKeyboardBuilder,
 )
-from application.keyboards.search_resource import SearchResourceListKeyboardBuilder
 from infrastructure.models.user_account import Role
 
 ROLE_MENU_KEYBOARD_BUILDER_MAP: dict[Role, type[BaseMenuKeyboardBuilder]] = {
@@ -44,13 +43,12 @@ CATEGORY_LIST_KEYBOARD_BUILDER_MAP = {
 }
 
 RESOURCE_LIST_KEYBOARD_BUILDER_MAP = {
-    "menu": ResourceListKeyboardBuilder,
+    "menu": CategoryResourceListKeyboardBuilder,
     "edt_rsc": EditResourceResourceListKeyboardBuilder,
     "dlt_rsc": DeleteResourceResourceListKeyboardBuilder,
     "crt_qz": CreateQuizResourceListKeyboardBuilder,
     "edt_qz": EditQuizResourceListKeyboardBuilder,
     "dlt_qz": DeleteQuizResourceListKeyboardBuilder,
-    "src_rsc": SearchResourceListKeyboardBuilder,
 }
 
 
@@ -72,4 +70,4 @@ EDIT_QUIZ_RESOURCES_ON_PAGE = 5
 
 LIST_RESOURCES_RESOURCES_ON_PAGE = 5
 
-FIND_RESOURCE_RESOURCES_ON_PAGE = 5
+SEARCH_RESOURCES_RESOURCES_ON_PAGE = 5

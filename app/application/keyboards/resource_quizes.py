@@ -10,7 +10,7 @@ from application.keyboards.base import (
     BaseQuizQuestionKeyboardBuilder,
 )
 from application.keyboards.resources import (
-    ListResourcesItemCallbackFactory,
+    ListCategoryResourcesItemCallbackFactory,
 )
 from domain.entities.quiz_item import QuizItemEntity
 from domain.entities.quiz_question import QuizQuestionEntity
@@ -52,7 +52,7 @@ class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceItem
         return [
             {
                 "text": self.i18n.get("start-quiz-retry"),
-                "callback_data": ListResourcesItemCallbackFactory(
+                "callback_data": ListCategoryResourcesItemCallbackFactory(
                     action="start_quiz",
                     resource_item_id=self.item.resource_item_id,
                     rating=0,
@@ -63,7 +63,7 @@ class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceItem
         ]
 
     def _back_callback(self) -> CallbackData:
-        return ListResourcesItemCallbackFactory(
+        return ListCategoryResourcesItemCallbackFactory(
             action="change_page",
             page=self.page,
             resource_item_id=self.item.resource_item_id,
@@ -85,7 +85,7 @@ class ResourceQuizQuestionKeyboardBuilder(
         )
 
     def _back_callback(self) -> str | CallbackData | None:
-        return ListResourcesItemCallbackFactory(
+        return ListCategoryResourcesItemCallbackFactory(
             action="change_page",
             resource_item_id=self.item.resource_item_id,
             page=self.page,

@@ -7,7 +7,7 @@ from pydantic import Field
 
 
 class ResourceItemFiltersSchema(BaseFiltersSchema[ResourceItemFilters]):
-    text: str | None = Field(default=None)
+    query: str | None = Field(default=None)
     category_item_id: UUID | None = Field(default=None)
     entity_cls: type[ResourceItemFilters] = ResourceItemFilters
     sort: ResourceItemSortType = "created_at"
@@ -17,7 +17,7 @@ class ResourceItemFiltersSchema(BaseFiltersSchema[ResourceItemFilters]):
         return ResourceItemFilters(
             count=self.count,
             offset=self.offset,
-            text=self.text,
+            query=self.query,
             category_item_id=self.category_item_id,
             sort=self.sort,
             order=self.order,

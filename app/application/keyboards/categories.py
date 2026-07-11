@@ -4,9 +4,9 @@ from uuid import UUID
 from aiogram.filters.callback_data import CallbackData
 
 from application.keyboards.base import (
-    BackKeyboardBuilderMixin,
     BackToMenuKeyboardBuilderMixin,
     BaseBackKeyboardBuilder,
+    BaseBackKeyboardBuilderMixin,
     BaseConfirmKeyboardBuilder,
     BaseListKeyboardBuilder,
     BaseManageEntryKeyboardBuilder,
@@ -71,7 +71,7 @@ class ManageCategoriesBackKeyboardBuilder(BaseBackKeyboardBuilder):
 
 
 @dataclass
-class ManageCategoriesBackKeyboardBuilderMixin(BackKeyboardBuilderMixin):
+class ManageCategoriesBackKeyboardBuilderMixin(BaseBackKeyboardBuilderMixin):
     def _back_callback(self) -> str:
         return "manage_categories"
 

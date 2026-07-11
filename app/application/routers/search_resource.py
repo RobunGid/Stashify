@@ -6,16 +6,18 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from aiogram_i18n import I18nContext
+from application.filters.valid_callback_filter import ValidCallbackFilter
 from application.filters_schemas.resource_item import ResourceItemFiltersSchema
 from application.keyboards.menu import MenuBackKeyboardBuilder
-from application.keyboards.search_resource import SearchResourceListKeyboardBuilder
-from application.routers.constants import FIND_RESOURCE_RESOURCES_ON_PAGE
+from application.keyboards.resources import ListSearchResourcesItemCallbackFactory, SearchResourceListKeyboardBuilder
+from application.routers.constants import SEARCH_RESOURCES_RESOURCES_ON_PAGE
 from application.services.resource_item import ResourceItemService
 from dishka import FromDishka
 
 from settings.aiogram import bot
 
 router = Router()
+router.callback_query.filter(ValidCallbackFilter())
 
 
 class SearchResourceState(StatesGroup):
@@ -36,8 +38,11 @@ async def search_resource_item_start(callback: CallbackQuery, state: FSMContext,
     keyboard_builder = MenuBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    await callback.message.answer(text=i18n.get("search-resource-enter-text"), reply_markup=keyboard)
+    answer_message = await callback.message.answer(text=i18n.get("search-resource-enter-text"), reply_markup=keyboard)
     await state.set_state(SearchResourceState.text)
+    await state.update_data(
+        message_ids_to_delete=[answer_message.message_id],
+    )
 
 
 @router.message(SearchResourceState.text)
@@ -45,22 +50,74 @@ async def search_resource_item_search(
     message: Message,
     state: FSMContext,
     i18n: I18nContext,
-    service: FromDishka[ResourceItemService],
+    resource_item_service: FromDishka[ResourceItemService],
 ):
-    if not message.from_user or not message.from_user.language_code or not message or not message.text:
-        return
-
-    filters = ResourceItemFiltersSchema(text=message.text, count=FIND_RESOURCE_RESOURCES_ON_PAGE)
-    resources, count = await service.get_many(filters=filters.to_entity())
-    total_pages = ceil(count / FIND_RESOURCE_RESOURCES_ON_PAGE)
-    await state.update_data(total_pages=total_pages, resources=resources)
+    await bot.delete_message(
+        chat_id=message.chat.id,
+        message_id=message.message_id,
+    )
+    filters = ResourceItemFiltersSchema(
+        count=SEARCH_RESOURCES_RESOURCES_ON_PAGE,
+        query=message.text,
+    )
+    resource_item_entities, count = await resource_item_service.get_many(filters.to_entity())
+    total_resources_pages = ceil(count / SEARCH_RESOURCES_RESOURCES_ON_PAGE)
 
     keyboard_builder = SearchResourceListKeyboardBuilder(
-        i18n=i18n,
-        items=resources,
-        current_page=1,
-        total_pages=total_pages,
+        i18n,
+        items=resource_item_entities,
+        current_page=0,
+        total_pages=total_resources_pages,
+        query=message.text or " ",
     )
     keyboard = keyboard_builder.build()
 
-    await message.answer(text=i18n.get("search-resource-select"), reply_markup=keyboard)
+    await message.answer(
+        text=i18n.get(
+            "list-resources-change-page",
+        ),
+        reply_markup=keyboard,
+    )
+
+
+@router.callback_query(
+    ListSearchResourcesItemCallbackFactory.filter(),
+)
+async def search_resources_list_page(
+    callback: CallbackQuery,
+    callback_data: ListSearchResourcesItemCallbackFactory,
+    i18n: I18nContext,
+    resource_item_service: FromDishka[ResourceItemService],
+    message: Message,
+):
+
+    await bot.delete_message(
+        chat_id=message.chat.id,
+        message_id=message.message_id,
+    )
+    current_page = callback_data.page
+    query = callback_data.query
+
+    filters = ResourceItemFiltersSchema(
+        count=SEARCH_RESOURCES_RESOURCES_ON_PAGE,
+        query=query,
+        offset=current_page * SEARCH_RESOURCES_RESOURCES_ON_PAGE,
+    )
+    resource_item_entities, count = await resource_item_service.get_many(filters.to_entity())
+    total_resources_pages = ceil(count / SEARCH_RESOURCES_RESOURCES_ON_PAGE)
+
+    keyboard_builder = SearchResourceListKeyboardBuilder(
+        i18n,
+        items=resource_item_entities,
+        current_page=current_page,
+        total_pages=total_resources_pages,
+        query=query,
+    )
+    keyboard = keyboard_builder.build()
+
+    await message.answer(
+        text=i18n.get(
+            "list-resources-change-page",
+        ),
+        reply_markup=keyboard,
+    )

@@ -23,7 +23,7 @@ class CallbackDataResolverMixin(ABC):
 
 
 @dataclass
-class BackKeyboardBuilderMixin(CallbackDataResolverMixin, ABC):
+class BaseBackKeyboardBuilderMixin(CallbackDataResolverMixin, ABC):
     i18n: I18nContext
 
     def _append_back_button(self, builder: InlineKeyboardBuilder):
@@ -40,9 +40,15 @@ class BackKeyboardBuilderMixin(CallbackDataResolverMixin, ABC):
 
 
 @dataclass
-class BackToMenuKeyboardBuilderMixin(BackKeyboardBuilderMixin):
+class BackToMenuKeyboardBuilderMixin(BaseBackKeyboardBuilderMixin):
     def _back_callback(self) -> str:
         return "menu"
+
+
+@dataclass
+class BackToSearchResourcesKeyboardBuilderMixin(BaseBackKeyboardBuilderMixin):
+    def _back_callback(self) -> str:
+        return "search_resource"
 
 
 @dataclass
@@ -55,7 +61,7 @@ class BaseKeyboardBuilder(ABC):
 
 
 @dataclass
-class BaseBackKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, ABC):
+class BaseBackKeyboardBuilder(BaseKeyboardBuilder, BaseBackKeyboardBuilderMixin, ABC):
     def build(self) -> InlineKeyboardMarkup:
         builder = InlineKeyboardBuilder()
         self._append_back_button(builder)
@@ -72,7 +78,7 @@ Qz = TypeVar("Qz")
 
 
 @dataclass
-class BaseListKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, Generic[It]):
+class BaseListKeyboardBuilder(BaseKeyboardBuilder, BaseBackKeyboardBuilderMixin, Generic[It]):
     items: list[It]
     current_page: int
     total_pages: int
@@ -143,7 +149,7 @@ class NavigationKeyboardBuilderMixin(ABC):
 class BaseItemKeyboardBuilder(
     NavigationKeyboardBuilderMixin,
     BaseKeyboardBuilder,
-    BackKeyboardBuilderMixin,
+    BaseBackKeyboardBuilderMixin,
     Generic[It],
 ):
     item_ids: tuple[UUID | None, UUID | None, UUID | None, UUID | None]
@@ -249,7 +255,7 @@ class BaseItemKeyboardBuilder(
 
 @dataclass
 class BaseConfirmKeyboardBuilder(
-    BackKeyboardBuilderMixin,
+    BaseBackKeyboardBuilderMixin,
     BaseKeyboardBuilder,
     ABC,
 ):
@@ -272,7 +278,7 @@ class BaseQuizConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder, ABC, Generic[It
 
 
 @dataclass
-class BaseManageEntryKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, ABC):
+class BaseManageEntryKeyboardBuilder(BaseKeyboardBuilder, BaseBackKeyboardBuilderMixin, ABC):
     def build(self) -> InlineKeyboardMarkup:
         builder = InlineKeyboardBuilder()
         btns = self._build_entry_buttons()
@@ -290,7 +296,7 @@ class BaseManageEntryKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMix
 
 
 @dataclass
-class BaseQuizFinalKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, ABC, Generic[It]):
+class BaseQuizFinalKeyboardBuilder(BaseKeyboardBuilder, BaseBackKeyboardBuilderMixin, ABC, Generic[It]):
     item: It
     page: int
 
@@ -312,7 +318,7 @@ class BaseQuizFinalKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin
 @dataclass
 class BaseQuizQuestionKeyboardBuilder(
     BaseKeyboardBuilder,
-    BackKeyboardBuilderMixin,
+    BaseBackKeyboardBuilderMixin,
     ABC,
     Generic[It, Qs, Qz],
 ):
@@ -346,7 +352,7 @@ class BaseQuizQuestionKeyboardBuilder(
 
 
 @dataclass
-class BaseEditKeyboardBuilder(BaseKeyboardBuilder, BackKeyboardBuilderMixin, ABC):
+class BaseEditKeyboardBuilder(BaseKeyboardBuilder, BaseBackKeyboardBuilderMixin, ABC):
     def build(self) -> InlineKeyboardMarkup:
         builder = InlineKeyboardBuilder()
         btns = self._build_edit_buttons()
