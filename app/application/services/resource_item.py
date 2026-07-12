@@ -1,3 +1,4 @@
+from typing import overload
 from uuid import UUID
 
 from application.exceptions.resource_item import ResourceItemNotFoundException
@@ -16,20 +17,34 @@ class ResourceItemService(BaseService[ResourceItemEntity, ResourceItemUpdateEnti
         resource_item_entities, _ = await self.repository.get_many(filters)
         return resource_item_entities[0] if len(resource_item_entities) else None
 
-    async def get_resource_item_index_in_category(
+    async def get_resource_item_index_by_filters(
         self,
         resource_item_id: UUID,
         filters: ResourceItemFilters,
     ) -> int | None:
-        return await self.repository.get_resource_item_index_in_category(resource_item_id, filters)
+        return await self.repository.get_resource_item_index_by_filters(resource_item_id, filters)
 
-    async def get_resource_pagination(self, category_item_id: UUID, resource_item_id: UUID):
+    @overload
+    async def get_resource_item_pagination(self, resource_item_id: UUID, category_item_id: UUID, query: None):
+        pass
+
+    @overload
+    async def get_resource_item_pagination(self, resource_item_id: UUID, category_item_id: None, query: str):
+        pass
+
+    async def get_resource_item_pagination(
+        self,
+        resource_item_id: UUID,
+        category_item_id: UUID | None,
+        query: str | None,
+    ):
         filters = ResourceItemFilters(
             count=1,
             category_item_id=category_item_id,
+            query=query,
         )
 
-        index = await self.get_resource_item_index_in_category(resource_item_id, filters)
+        index = await self.get_resource_item_index_by_filters(resource_item_id, filters)
 
         if index is None:
             raise ResourceItemNotFoundException(resource_item_id)
@@ -37,6 +52,7 @@ class ResourceItemService(BaseService[ResourceItemEntity, ResourceItemUpdateEnti
         total_count = await self.get_count(
             ResourceItemFilters(
                 category_item_id=category_item_id,
+                query=query,
                 count=0,
             ),
         )
@@ -50,6 +66,7 @@ class ResourceItemService(BaseService[ResourceItemEntity, ResourceItemUpdateEnti
                     count=1,
                     offset=index - 1,
                     category_item_id=category_item_id,
+                    query=query,
                 ),
             )
             prev_id = getattr(prev_entity, "resource_item_id", None)
@@ -60,6 +77,7 @@ class ResourceItemService(BaseService[ResourceItemEntity, ResourceItemUpdateEnti
                     count=1,
                     offset=index + 1,
                     category_item_id=category_item_id,
+                    query=query,
                 ),
             )
             next_id = getattr(next_entity, "resource_item_id", None)
@@ -73,6 +91,7 @@ class ResourceItemService(BaseService[ResourceItemEntity, ResourceItemUpdateEnti
                     count=1,
                     offset=0,
                     category_item_id=category_item_id,
+                    query=query,
                 ),
             )
             first_id = getattr(first_entity, "resource_item_id", None)
@@ -83,6 +102,7 @@ class ResourceItemService(BaseService[ResourceItemEntity, ResourceItemUpdateEnti
                     count=1,
                     offset=total_count - 1,
                     category_item_id=category_item_id,
+                    query=query,
                 ),
             )
             last_id = getattr(last_entity, "resource_item_id", None)

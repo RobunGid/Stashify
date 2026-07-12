@@ -1,3 +1,5 @@
+from typing import TypedDict
+
 from application.keyboards.categories import DeleteCategoryListKeyboardBuilder, EditCategoryListKeyboardBuilder
 from application.keyboards.menu import (
     AdminMenuKeyboardBuilder,
@@ -21,7 +23,9 @@ from application.keyboards.resources import (
     DeleteResourceResourceListKeyboardBuilder,
     EditResourceCategoryListKeyboardBuilder,
     EditResourceResourceListKeyboardBuilder,
+    ResourceItemKeyboardBuilder,
 )
+from application.keyboards.search_resource import SearchResourceItemKeyboardBuilder
 from infrastructure.models.user_account import Role
 
 ROLE_MENU_KEYBOARD_BUILDER_MAP: dict[Role, type[BaseMenuKeyboardBuilder]] = {
@@ -30,7 +34,20 @@ ROLE_MENU_KEYBOARD_BUILDER_MAP: dict[Role, type[BaseMenuKeyboardBuilder]] = {
     Role.user: UserMenuKeyboardBuilder,
 }
 
-CATEGORY_LIST_KEYBOARD_BUILDER_MAP = {
+
+class CategoryListKeyboardBuilerMapType(TypedDict):
+    menu: type[CategoryListKeyboardBuilder]
+    crt_rsc: type[CreateResourceCategoryListKeyboardBuilder]
+    edt_rsc: type[EditResourceCategoryListKeyboardBuilder]
+    dlt_rsc: type[DeleteResourceCategoryListKeyboardBuilder]
+    edt_ctg: type[EditCategoryListKeyboardBuilder]
+    dlt_ctg: type[DeleteCategoryListKeyboardBuilder]
+    crt_qz: type[CreateQuizCategoryListKeyboardBuilder]
+    edt_qz: type[EditQuizCategoryListKeyboardBuilder]
+    dlt_qz: type[DeleteQuizCategoryListKeyboardBuilder]
+
+
+CATEGORY_LIST_KEYBOARD_BUILDER_MAP: CategoryListKeyboardBuilerMapType = {
     "menu": CategoryListKeyboardBuilder,
     "crt_rsc": CreateResourceCategoryListKeyboardBuilder,
     "edt_rsc": EditResourceCategoryListKeyboardBuilder,
@@ -42,7 +59,17 @@ CATEGORY_LIST_KEYBOARD_BUILDER_MAP = {
     "dlt_qz": DeleteQuizCategoryListKeyboardBuilder,
 }
 
-RESOURCE_LIST_KEYBOARD_BUILDER_MAP = {
+
+class ResoruceListKeyboardBuilderMapType(TypedDict):
+    menu: type[CategoryResourceListKeyboardBuilder]
+    edt_rsc: type[EditResourceResourceListKeyboardBuilder]
+    dlt_rsc: type[DeleteResourceResourceListKeyboardBuilder]
+    crt_qz: type[CreateQuizResourceListKeyboardBuilder]
+    edt_qz: type[EditQuizResourceListKeyboardBuilder]
+    dlt_qz: type[DeleteQuizResourceListKeyboardBuilder]
+
+
+RESOURCE_LIST_KEYBOARD_BUILDER_MAP: ResoruceListKeyboardBuilderMapType = {
     "menu": CategoryResourceListKeyboardBuilder,
     "edt_rsc": EditResourceResourceListKeyboardBuilder,
     "dlt_rsc": DeleteResourceResourceListKeyboardBuilder,
@@ -51,6 +78,16 @@ RESOURCE_LIST_KEYBOARD_BUILDER_MAP = {
     "dlt_qz": DeleteQuizResourceListKeyboardBuilder,
 }
 
+
+class ResourceItemKeyboardBuilderMapType(TypedDict):
+    menu: type[ResourceItemKeyboardBuilder]
+    srch: type[SearchResourceItemKeyboardBuilder]
+
+
+RESOURCE_ITEM_KEYBOARD_BUILDER_MAP: ResourceItemKeyboardBuilderMapType = {
+    "menu": ResourceItemKeyboardBuilder,
+    "srch": SearchResourceItemKeyboardBuilder,
+}
 
 CREATE_RESOURCE_CATEGORIES_ON_PAGE = 5
 EDIT_RESOURCE_CATEGORIES_ON_PAGE = 5

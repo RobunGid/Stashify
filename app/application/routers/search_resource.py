@@ -38,11 +38,8 @@ async def search_resource_item_start(callback: CallbackQuery, state: FSMContext,
     keyboard_builder = MenuBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    answer_message = await callback.message.answer(text=i18n.get("search-resource-enter-text"), reply_markup=keyboard)
+    await callback.message.answer(text=i18n.get("search-resource-enter-text"), reply_markup=keyboard)
     await state.set_state(SearchResourceState.text)
-    await state.update_data(
-        message_ids_to_delete=[answer_message.message_id],
-    )
 
 
 @router.message(SearchResourceState.text)
@@ -56,6 +53,7 @@ async def search_resource_item_search(
         chat_id=message.chat.id,
         message_id=message.message_id,
     )
+    await state.update_data(query=message.text)
     filters = ResourceItemFiltersSchema(
         count=SEARCH_RESOURCES_RESOURCES_ON_PAGE,
         query=message.text,

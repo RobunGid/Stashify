@@ -26,13 +26,13 @@ from application.keyboards.resources import (
     ListCategoriesItemCallbackFactory,
     ListCategoryResourcesItemCallbackFactory,
     ResourceItemDetailsCallbackFactory,
-    ResourceItemKeyboardBuilder,
     ResourceQuizConfirmKeyboardBuilder,
 )
 from application.routers.constants import (
     CATEGORY_LIST_KEYBOARD_BUILDER_MAP,
     LIST_RESOURCES_CATEGORIES_ON_PAGE,
     LIST_RESOURCES_RESOURCES_ON_PAGE,
+    RESOURCE_ITEM_KEYBOARD_BUILDER_MAP,
     RESOURCE_LIST_KEYBOARD_BUILDER_MAP,
 )
 from application.schemas.quiz_result_schema import BaseQuizResultSchema
@@ -159,6 +159,7 @@ async def list_resource_resource_select(
     quiz_item_service: FromDishka[QuizItemService],
     quiz_result_service: FromDishka[QuizResultService],
     user_account: UserAccountSchema,
+    state: FSMContext,
 ):
     if not callback.message or not callback.data or not callback_data.resource_item_id:
         return
@@ -186,14 +187,29 @@ async def list_resource_resource_select(
     resource_rating_number = resource_rating.rating if resource_rating else None
     quiz_result_percent = quiz_result_entity.percent if quiz_result_entity else None
 
-    (
-        resource_item_index_in_category,
-        resource_item_entities_navigation_ids_tuple,
-        total_resource_item_count,
-    ) = await resource_item_service.get_resource_pagination(
-        category_item_id=resource_item_entity.category_item_id,
-        resource_item_id=resource_item_id,
-    )
+    state_data = await state.get_data()
+    query: str | None = state_data.get("query", None)
+
+    if query:
+        (
+            resource_item_index_in_category,
+            resource_item_entities_navigation_ids_tuple,
+            total_resource_item_count,
+        ) = await resource_item_service.get_resource_item_pagination(
+            category_item_id=None,
+            resource_item_id=resource_item_id,
+            query=query,
+        )
+    else:
+        (
+            resource_item_index_in_category,
+            resource_item_entities_navigation_ids_tuple,
+            total_resource_item_count,
+        ) = await resource_item_service.get_resource_item_pagination(
+            category_item_id=resource_item_entity.category_item_id,
+            resource_item_id=resource_item_id,
+            query=None,
+        )
 
     category_item_entity = await category_item_service.get_one(resource_item_entity.category_item_id)
     if not category_item_entity:
@@ -228,7 +244,9 @@ async def list_resource_resource_select(
         resource_item_id,
     )
 
-    keyboard_builder = ResourceItemKeyboardBuilder(
+    keyboard_builder_class = RESOURCE_ITEM_KEYBOARD_BUILDER_MAP[callback_data.context]
+
+    keyboard_builder = keyboard_builder_class(
         i18n=i18n,
         item_ids=resource_item_entities_navigation_ids_tuple,
         current_item=resource_item_entity,
@@ -238,6 +256,7 @@ async def list_resource_resource_select(
         rating=resource_rating_number,
         current_item_index=resource_item_index_in_category,
         quiz_percent=quiz_result_percent,
+        query=query or "",
     )
     keyboard = keyboard_builder.build()
 
@@ -246,9 +265,11 @@ async def list_resource_resource_select(
         for photo in resource_image_entities:
             media_group.add_photo(type="photo", media=str(photo.image))
 
-        await callback.message.answer_media_group(
+        answer_image_messages = await callback.message.answer_media_group(
             media=list(media_group.build()),
         )
+        answer_image_message_ids = [message.message_id for message in answer_image_messages]
+        await state.update_data(message_ids_to_delete=answer_image_message_ids)
 
     await callback.message.answer(
         text=ResourceItemFormatter.translate_resource_item(
