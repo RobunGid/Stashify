@@ -17,6 +17,8 @@ class DeleteOldMessagesMiddleware(BaseMiddleware):
         bot = data["bot"]
         if isinstance(event, CallbackQuery):
             chat_id = event.message.chat.id if event.message else None
+            if event.data == " ":
+                return
         if isinstance(event, Message):
             chat_id = event.chat.id
 

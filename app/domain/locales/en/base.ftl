@@ -327,6 +327,9 @@ list-resources-item =
 list-resources-choose-category = 📤 Select category
 list-resources-choose-resource = 📤 Select resource
 list-resources-change-page = 📤 Select resource
+list-search-resources-change-page = 
+    📤 Search results for query: "{ $query }"
+list-search-resources-not-found = 📤 No resources found for query: "{ $query }"
 
 list-resources-start-quiz-question =
     ✏️ Start quiz?

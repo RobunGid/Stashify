@@ -3,6 +3,7 @@ from uuid import UUID
 
 from aiogram.filters.callback_data import CallbackData
 
+from application.keyboards.base import BackToSearchResourcesKeyboardBuilderMixin, BaseBackKeyboardBuilder
 from application.keyboards.resources import (
     ListSearchResourcesItemCallbackFactory,
     ResourceItemDetailsCallbackFactory,
@@ -22,3 +23,8 @@ class SearchResourceItemKeyboardBuilder(ResourceItemKeyboardBuilder):
             context="srch",
             rating=None,
         )
+
+
+@dataclass
+class BackToSearchResourcesKeyboardBuilder(BaseBackKeyboardBuilder, BackToSearchResourcesKeyboardBuilderMixin):
+    pass

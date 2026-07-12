@@ -10,6 +10,7 @@ from application.filters.valid_callback_filter import ValidCallbackFilter
 from application.filters_schemas.resource_item import ResourceItemFiltersSchema
 from application.keyboards.menu import MenuBackKeyboardBuilder
 from application.keyboards.resources import ListSearchResourcesItemCallbackFactory, SearchResourceListKeyboardBuilder
+from application.keyboards.search_resource import BackToSearchResourcesKeyboardBuilder
 from application.routers.constants import SEARCH_RESOURCES_RESOURCES_ON_PAGE
 from application.services.resource_item import ResourceItemService
 from dishka import FromDishka
@@ -38,7 +39,8 @@ async def search_resource_item_start(callback: CallbackQuery, state: FSMContext,
     keyboard_builder = MenuBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    await callback.message.answer(text=i18n.get("search-resource-enter-text"), reply_markup=keyboard)
+    answer_message = await callback.message.answer(text=i18n.get("search-resource-enter-text"), reply_markup=keyboard)
+    await state.update_data(message_ids_to_delete=[answer_message.message_id])
     await state.set_state(SearchResourceState.text)
 
 
@@ -61,21 +63,30 @@ async def search_resource_item_search(
     resource_item_entities, count = await resource_item_service.get_many(filters.to_entity())
     total_resources_pages = ceil(count / SEARCH_RESOURCES_RESOURCES_ON_PAGE)
 
-    keyboard_builder = SearchResourceListKeyboardBuilder(
-        i18n,
-        items=resource_item_entities,
-        current_page=0,
-        total_pages=total_resources_pages,
-        query=message.text or " ",
-    )
-    keyboard = keyboard_builder.build()
+    if count == 0:
+        keyboard_builder = BackToSearchResourcesKeyboardBuilder(
+            i18n,
+        )
+        keyboard = keyboard_builder.build()
 
-    await message.answer(
-        text=i18n.get(
-            "list-resources-change-page",
-        ),
-        reply_markup=keyboard,
-    )
+        await message.answer(
+            text=i18n.get("list-search-resources-not-found", query=message.text),
+            reply_markup=keyboard,
+        )
+    else:
+        keyboard_builder = SearchResourceListKeyboardBuilder(
+            i18n,
+            items=resource_item_entities,
+            current_page=0,
+            total_pages=total_resources_pages,
+            query=message.text or " ",
+        )
+        keyboard = keyboard_builder.build()
+
+        await message.answer(
+            text=i18n.get("list-search-resources-change-page", query=message.text),
+            reply_markup=keyboard,
+        )
 
 
 @router.callback_query(
