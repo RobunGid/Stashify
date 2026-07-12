@@ -145,7 +145,7 @@ async def category_resources_list_page(
 
 
 @router.callback_query(
-    ResourceItemDetailsCallbackFactory.filter(),
+    ResourceItemDetailsCallbackFactory.filter(F.action == "select"),
 )
 async def list_resource_resource_select(
     callback: CallbackQuery,
