@@ -11,7 +11,7 @@ class BaseResourceItemRepository(
     ABC,
 ):
     @abstractmethod
-    async def get_resource_item_index_in_category(
+    async def get_resource_item_index_by_filters(
         self,
         resource_item_id: UUID,
         filters: ResourceItemFilters,

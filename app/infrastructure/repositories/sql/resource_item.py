@@ -85,7 +85,7 @@ class SQLResourceItemRepository(BaseResourceItemRepository, SQLAlchemyRepository
         await self.session.execute(statement)
         await self.session.commit()
 
-    async def get_resource_item_index_in_category(
+    async def get_resource_item_index_by_filters(
         self,
         resource_item_id: UUID,
         filters: ResourceItemFilters,
@@ -106,6 +106,16 @@ class SQLResourceItemRepository(BaseResourceItemRepository, SQLAlchemyRepository
 
         if filters.category_item_id is not None:
             subquery = subquery.where(ResourceItemModel.category_item_id == filters.category_item_id)
+
+        if filters.query is not None:
+            subquery = subquery.where(
+                or_(
+                    ResourceItemModel.name.ilike(f"%{filters.query}%"),
+                    ResourceItemModel.description.ilike(f"%{filters.query}%"),
+                    ResourceItemModel.links.ilike(f"%{filters.query}%"),
+                    ResourceItemModel.tags.ilike(f"%{filters.query}%"),
+                ),
+            )
 
         subquery = subquery.subquery()
 

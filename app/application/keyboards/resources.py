@@ -34,7 +34,7 @@ class ListCategoriesItemCallbackFactory(CallbackData, prefix="ctg_lst"):  # type
 
 
 class ListCategoryResourcesItemCallbackFactory(CallbackData, prefix="rsc_lst"):  # type: ignore[call-arg]
-    category_item_id: UUID | None
+    category_item_id: UUID
     page: int
     context: Union[
         Literal["menu"],
@@ -61,7 +61,7 @@ class ResourceItemDetailsCallbackFactory(CallbackData, prefix="rsc_itm"):  # typ
     ]
     context: Union[
         Literal["menu"],
-        Literal["search"],
+        Literal["srch"],
     ]
     rating: int | None
 
@@ -105,7 +105,7 @@ class SearchResourceListKeyboardBuilder(
             "callback_data": ResourceItemDetailsCallbackFactory(
                 resource_item_id=item.resource_item_id,
                 action="select",
-                context="search",
+                context="srch",
                 rating=None,
             ).pack(),
         }
@@ -140,6 +140,8 @@ class CategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity], B
 
 @dataclass
 class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemEntity]):
+    query: str
+
     def _get_item_id(self, item: ResourceItemEntity) -> UUID:
         return item.resource_item_id
 
@@ -336,7 +338,7 @@ class DeleteResourceResourceListKeyboardBuilder(BaseListKeyboardBuilder[Resource
 
     def _pagination_callback(self, page: int) -> CallbackData:
         return ListCategoryResourcesItemCallbackFactory(
-            category_item_id=None,
+            category_item_id=self.category_item_id,
             page=page,
             context="dlt_rsc",
         )
