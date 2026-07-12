@@ -53,42 +53,36 @@ class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceItem
             {
                 "text": self.i18n.get("start-quiz-retry"),
                 "callback_data": ListCategoryResourcesItemCallbackFactory(
-                    action="start_quiz",
-                    resource_item_id=self.item.resource_item_id,
-                    rating=0,
                     page=0,
-                    context="view",
-                ),
+                    context="menu",
+                    category_item_id=self.item.category_item_id,
+                ).pack(),
             },
         ]
 
-    def _back_callback(self) -> CallbackData:
+    def _back_callback(self) -> str:
         return ListCategoryResourcesItemCallbackFactory(
-            action="change_page",
-            page=self.page,
-            resource_item_id=self.item.resource_item_id,
-            rating=None,
-            context="view",
-        )
+            context="menu",
+            category_item_id=self.item.category_item_id,
+            page=0,
+        ).pack()
 
 
 @dataclass
 class ResourceQuizQuestionKeyboardBuilder(
     BaseQuizQuestionKeyboardBuilder[ResourceItemEntity, QuizQuestionEntity, QuizItemEntity],
 ):
-    def _build_quiz_callback(self, option_number: int, question_number: int) -> CallbackData:
+    def _build_quiz_callback(self, option_number: int, question_number: int) -> str:
         return ListResourcesQuizQuestionCallbackFactory(
             action="answer",
             option_number=option_number,
             question_number=question_number,
             quiz_item_id=self.quiz_item.quiz_item_id,
-        )
+        ).pack()
 
-    def _back_callback(self) -> str | CallbackData | None:
+    def _back_callback(self) -> str:
         return ListCategoryResourcesItemCallbackFactory(
-            action="change_page",
-            resource_item_id=self.item.resource_item_id,
             page=self.page,
-            context="view",
-            rating=None,
-        )
+            context="menu",
+            category_item_id=self.item.category_item_id,
+        ).pack()

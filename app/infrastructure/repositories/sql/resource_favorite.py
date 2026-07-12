@@ -14,8 +14,8 @@ from sqlalchemy import and_, exists, func, select, update
 @dataclass
 class SQLResourceFavoriteRepository(BaseResourceFavoriteRepository, SQLAlchemyRepositoryMixin):
     async def create(self, resource_favorite: ResourceFavoriteEntity) -> None:
-        item = ResourceFavoriteModel(resource_favorite)
-        self.session.add(item)
+        model = ResourceFavoriteMapper.to_model(resource_favorite)
+        self.session.add(model)
         await self.session.commit()
 
     async def get_one(self, resource_favorite_id: UUID) -> ResourceFavoriteEntity | None:

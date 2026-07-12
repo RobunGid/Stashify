@@ -34,7 +34,7 @@ manage-resources-keyboard-create = ➕ Create Resource
 manage-resources-keyboard-edit = ✏️ Edit Resource
 manage-resources-keyboard-delete = 🗑️ Delete Resource
 
-manage-resources-create-choose-category = 📤 Select category
+manage-resources-create-choose-category = 
 manage-resources-create-wait-name = 📤 Send resource name
 manage-resources-create-wait-description = 📤 Send resource description
 manage-resources-create-wait-images = 📤 Send resource images

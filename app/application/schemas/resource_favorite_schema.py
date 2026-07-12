@@ -2,11 +2,10 @@ from uuid import UUID
 
 from application.schemas.base_schema import BaseSchema
 from domain.entities.resource_favorite import ResourceFavoriteEntity
-from pydantic import Field
 
 
 class BaseResourceFavoriteSchema(BaseSchema[ResourceFavoriteEntity]):
-    resource_favorite_id: UUID = Field(default_factory=UUID)
+    resource_favorite_id: UUID
 
     user_account_id: UUID
 

@@ -145,7 +145,7 @@ async def category_resources_list_page(
 
 
 @router.callback_query(
-    ResourceItemDetailsCallbackFactory.filter(F.action == "select"),
+    ResourceItemDetailsCallbackFactory.filter(),
 )
 async def list_resource_resource_select(
     callback: CallbackQuery,
@@ -220,6 +220,7 @@ async def list_resource_resource_select(
             ...
         case "add_favorite":
             resource_favorite_schema = BaseResourceFavoriteSchema(
+                resource_favorite_id=uuid4(),
                 user_account_id=user_account.user_account_id,
                 resource_item_id=resource_item_id,
             )
@@ -231,6 +232,11 @@ async def list_resource_resource_select(
             )
         case "rate":
             if callback_data.rating:
+                if resource_rating is not None:
+                    await resource_rating_service.delete_by_user_account_id_and_resource_item_id(
+                        user_account_id=user_account.user_account_id,
+                        resource_item_id=resource_item_id,
+                    )
                 resource_item_rating = BaseResourceRatingSchema(
                     resource_rating_id=uuid4(),
                     resource_item_id=resource_item_id,
@@ -238,6 +244,7 @@ async def list_resource_resource_select(
                     user_account_id=user_account.user_account_id,
                 )
                 await resource_rating_service.create(resource_item_rating.to_entity())
+                resource_rating_number = callback_data.rating
 
     is_favorite = await resource_favorite_service.check_exists_by_user_account_id_and_resource_item_id(
         user_account.user_account_id,

@@ -2,7 +2,7 @@ from dataclasses import asdict, dataclass
 from uuid import UUID
 
 from domain.entities.base import GetManyResult
-from domain.entities.user_account import Role, UserAccountEntity, UserAccountUpdateEntity
+from domain.entities.user_account import UserAccountEntity, UserAccountUpdateEntity
 from domain.filters.user_account import UserAccountFilters
 from domain.repositories.user_account import BaseUserAccountRepository
 from infrastructure.mappers.user_account import UserAccountMapper
@@ -65,18 +65,12 @@ class SQLUserAccountRepository(BaseUserAccountRepository, SQLAlchemyRepositoryMi
             UserAccountModel.user_telegram_id == user_telegram_id,
         )
 
-        item = (await self.session.execute(statement)).scalars().first()
+        model = (await self.session.execute(statement)).scalars().first()
 
-        if item is None:
+        if model is None:
             return None
 
-        return UserAccountEntity(
-            created_at=item.created_at,
-            user_account_id=item.user_account_id,
-            username=item.username,
-            user_telegram_id=item.user_telegram_id,
-            role=Role(item.role),
-        )
+        return UserAccountMapper.to_entity(model)
 
     async def get_count(self, filters: UserAccountFilters) -> int:
         statement = select(UserAccountModel)

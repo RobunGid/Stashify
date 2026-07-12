@@ -12,30 +12,19 @@ from domain.entities.base import BaseEntity
 
 
 @dataclass
-class CallbackDataResolverMixin(ABC):
-    @staticmethod
-    def _resolve_callback_data(
-        callback: str | None | CallbackData,
-    ) -> str | None:
-        if isinstance(callback, CallbackData):
-            return callback.pack()
-        return callback
-
-
-@dataclass
-class BaseBackKeyboardBuilderMixin(CallbackDataResolverMixin, ABC):
+class BaseBackKeyboardBuilderMixin(ABC):
     i18n: I18nContext
 
     def _append_back_button(self, builder: InlineKeyboardBuilder):
         builder.row(
             InlineKeyboardButton(
                 text=self.i18n.get("common-back"),
-                callback_data=self._resolve_callback_data(self._back_callback()),
+                callback_data=self._back_callback(),
             ),
         )
 
     @abstractmethod
-    def _back_callback(self) -> str | None | CallbackData:
+    def _back_callback(self) -> str:
         """callback_data for 'Back' button"""
 
 
@@ -103,34 +92,22 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BaseBackKeyboardBuilderMixin,
 
         if current_page > 0:
             buttons += [
-                {
-                    "text": self.i18n.get("items-start"),
-                    "callback_data": self._pagination_callback(0).pack(),
-                },
-                {
-                    "text": self.i18n.get("items-back"),
-                    "callback_data": self._pagination_callback(current_page - 1).pack(),
-                },
+                {"text": self.i18n.get("items-start"), "callback_data": self._pagination_callback(0)},
+                {"text": self.i18n.get("items-back"), "callback_data": self._pagination_callback(current_page - 1)},
             ]
 
         buttons.append({"text": f"{current_page + 1}/{total_pages}", "callback_data": " "})
 
         if current_page < (total_pages - 1):
             buttons += [
-                {
-                    "text": self.i18n.get("items-forward"),
-                    "callback_data": self._pagination_callback(current_page + 1).pack(),
-                },
-                {
-                    "text": self.i18n.get("items-end"),
-                    "callback_data": self._pagination_callback(total_pages - 1).pack(),
-                },
+                {"text": self.i18n.get("items-forward"), "callback_data": self._pagination_callback(current_page + 1)},
+                {"text": self.i18n.get("items-end"), "callback_data": self._pagination_callback(total_pages - 1)},
             ]
 
         return buttons
 
     @abstractmethod
-    def _pagination_callback(self, page: int) -> CallbackData:
+    def _pagination_callback(self, page: int) -> str:
         """Return callback_data for pagination button"""
 
     @abstractmethod
@@ -141,7 +118,7 @@ class BaseListKeyboardBuilder(BaseKeyboardBuilder, BaseBackKeyboardBuilderMixin,
 @dataclass
 class NavigationKeyboardBuilderMixin(ABC):
     @abstractmethod
-    def _navigation_callback(self, item_id: UUID) -> CallbackData:
+    def _navigation_callback(self, item_id: UUID) -> str:
         """Return callback_data for pagination button"""
 
 
@@ -167,18 +144,21 @@ class BaseItemKeyboardBuilder(
 
         nav_buttons = self._build_navigation_buttons()
         builder.row(*[InlineKeyboardButton(**btn) for btn in nav_buttons])
+        favorite_buttons = self._build_favorite_buttons()
+        builder.row(*[InlineKeyboardButton(**btn) for btn in favorite_buttons])
+        rating_buttons = self._build_rating_buttons()
+        builder.row(*[InlineKeyboardButton(**btn) for btn in rating_buttons])
+        quiz_buttons = self._build_quiz_buttons()
+        builder.row(*[InlineKeyboardButton(**btn) for btn in quiz_buttons])
         self._append_back_button(builder)
-        builder.adjust(len(nav_buttons), 1)
+        builder.adjust(len(nav_buttons), 1, len(rating_buttons))
         return builder.as_markup()
 
     def _build_navigation_buttons(self) -> list[dict]:
         buttons: list[dict] = []
         if self.item_ids[0] is not None:
             buttons += [
-                {
-                    "text": self.i18n.get("items-start"),
-                    "callback_data": self._navigation_callback(self.item_ids[0]).pack(),
-                },
+                {"text": self.i18n.get("items-start"), "callback_data": self._navigation_callback(self.item_ids[0])},
             ]
         if self.item_ids[1] is not None:
             buttons += [
@@ -186,7 +166,7 @@ class BaseItemKeyboardBuilder(
                     "text": self.i18n.get("items-back"),
                     "callback_data": self._navigation_callback(
                         self.item_ids[1],
-                    ).pack(),
+                    ),
                 },
             ]
         buttons.append({"text": f"{self.current_item_index + 1}/{self.total_items}", "callback_data": " "})
@@ -196,14 +176,14 @@ class BaseItemKeyboardBuilder(
                     "text": self.i18n.get("items-forward"),
                     "callback_data": self._navigation_callback(
                         self.item_ids[2],
-                    ).pack(),
+                    ),
                 },
             ]
         if self.item_ids[3] is not None:
             buttons += [
                 {
                     "text": self.i18n.get("items-end"),
-                    "callback_data": self._navigation_callback(self.item_ids[3]).pack(),
+                    "callback_data": self._navigation_callback(self.item_ids[3]),
                 },
             ]
         return buttons
@@ -213,21 +193,18 @@ class BaseItemKeyboardBuilder(
             return [
                 {
                     "text": self.i18n.get("favorite-remove"),
-                    "callback_data": self._remove_favorite_callback(self.current_item).pack(),
+                    "callback_data": self._remove_favorite_callback(self.current_item),
                 },
             ]
         return [
-            {
-                "text": self.i18n.get("favorite-add"),
-                "callback_data": self._add_favorite_callback(self.current_item).pack(),
-            },
+            {"text": self.i18n.get("favorite-add"), "callback_data": self._add_favorite_callback(self.current_item)},
         ]
 
     def _build_rating_buttons(self) -> list[dict]:
         return [
             {
                 "text": "⭐" if self.rating and i <= self.rating else "☆",
-                "callback_data": self._rating_callback(self.current_item, i).pack(),
+                "callback_data": self._rating_callback(self.current_item, i),
             }
             for i in range(1, 6)
         ]
@@ -241,15 +218,15 @@ class BaseItemKeyboardBuilder(
         """Get item id callback"""
 
     @abstractmethod
-    def _remove_favorite_callback(self, item: It) -> CallbackData:
+    def _remove_favorite_callback(self, item: It) -> str:
         """Return callback_data for removing item from favorites"""
 
     @abstractmethod
-    def _add_favorite_callback(self, item: It) -> CallbackData:
+    def _add_favorite_callback(self, item: It) -> str:
         """Return callback_data for adding item in favorites"""
 
     @abstractmethod
-    def _rating_callback(self, item: It, rating: int) -> CallbackData:
+    def _rating_callback(self, item: It, rating: int) -> str:
         """Return callback_data for rate item"""
 
 

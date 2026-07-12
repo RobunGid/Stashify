@@ -26,11 +26,19 @@ class EntryEditCategoryKeyboardBuilder(BaseManageEntryKeyboardBuilder, BackToMen
             },
             {
                 "text": self.i18n.get("manage-categories-keyboard-edit"),
-                "callback_data": ListCategoriesItemCallbackFactory(action="change_page", context="edt_ctg", page=0),
+                "callback_data": ListCategoriesItemCallbackFactory(
+                    action="change_page",
+                    context="edt_ctg",
+                    page=0,
+                ).pack(),
             },
             {
                 "text": self.i18n.get("manage-categories-keyboard-delete"),
-                "callback_data": "delete_category",
+                "callback_data": ListCategoriesItemCallbackFactory(
+                    action="change_page",
+                    context="dlt_ctg",
+                    page=0,
+                ).pack(),
             },
         ]
 
@@ -44,16 +52,16 @@ class DeleteCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEnti
     def _back_callback(self) -> str:
         return "manage_categories"
 
-    def _pagination_callback(self, page: int) -> CallbackData:
+    def _pagination_callback(self, page: int) -> str:
         return ListCategoriesItemCallbackFactory(
             action="change_page",
             page=page,
             context="dlt_ctg",
-        )
+        ).pack()
 
     def _item_button(self, item: CategoryItemSchema) -> dict:
         return {
-            "text": item.name,
+            "text": f"{item.name} ({item.resource_item_count})",
             "callback_data": DeleteCategoryChooseCategoryCallbackFactory(
                 category_item_id=item.category_item_id,
             ).pack(),
@@ -66,7 +74,7 @@ class EditCategoryChooseCategoryCallbackFactory(CallbackData, prefix="edit_categ
 
 @dataclass
 class ManageCategoriesBackKeyboardBuilder(BaseBackKeyboardBuilder):
-    def _back_callback(self) -> str | CallbackData | None:
+    def _back_callback(self) -> str:
         return "manage_categories"
 
 
@@ -81,16 +89,16 @@ class EditCategoryListKeyboardBuilder(
     BaseListKeyboardBuilder[CategoryItemEntity],
     ManageCategoriesBackKeyboardBuilderMixin,
 ):
-    def _pagination_callback(self, page: int) -> CallbackData:
+    def _pagination_callback(self, page: int) -> str:
         return ListCategoriesItemCallbackFactory(
             action="change_page",
             page=page,
             context="edt_ctg",
-        )
+        ).pack()
 
     def _item_button(self, item: CategoryItemSchema) -> dict:
         return {
-            "text": item.name,
+            "text": f"{item.name} ({item.resource_item_count})",
             "callback_data": EditCategoryChooseCategoryCallbackFactory(
                 category_item_id=item.category_item_id,
             ).pack(),

@@ -1,9 +1,11 @@
 from aiogram import F, Router
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 from aiogram_i18n import I18nContext
 from application.exceptions.user_account import UserAccountNotFoundException
+from application.filters.valid_callback_filter import ValidCallbackFilter
 from application.routers.constants import ROLE_MENU_KEYBOARD_BUILDER_MAP
 from application.services.user_account import UserAccountService
 from dishka import FromDishka
@@ -11,6 +13,7 @@ from dishka import FromDishka
 from settings.aiogram import bot
 
 router = Router()
+router.callback_query.filter(ValidCallbackFilter())
 
 
 @router.message(Command("menu"))
@@ -44,20 +47,22 @@ async def main_menu_callback_handler(
     callback: CallbackQuery,
     i18n: I18nContext,
     service: FromDishka[UserAccountService],
+    message: Message,
 ):
-    if not callback.from_user or not callback.message:
-        return
-    await bot.delete_message(
-        chat_id=callback.message.chat.id,
-        message_id=callback.message.message_id,
-    )
+    try:
+        await bot.delete_message(
+            chat_id=message.chat.id,
+            message_id=message.message_id,
+        )
+    except TelegramBadRequest:
+        pass
 
     existing_user = await service.get_one_by_telegram_id(
-        telegram_id=callback.message.chat.id,
+        telegram_id=message.chat.id,
     )
 
     if existing_user is None:
-        raise UserAccountNotFoundException(identifier=callback.message.chat.id)
+        raise UserAccountNotFoundException(identifier=message.chat.id)
 
     existing_user_role = existing_user.role
 
@@ -65,7 +70,7 @@ async def main_menu_callback_handler(
     keyboard_builder = KeyboardBuilder(i18n)
     keyboard = keyboard_builder.build()
 
-    await callback.message.answer(
+    await message.answer(
         i18n.get("main-menu-text"),
         reply_markup=keyboard,
     )

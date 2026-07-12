@@ -14,8 +14,8 @@ from sqlalchemy import and_, func, select, update
 @dataclass
 class SQLResourceRatingRepository(BaseResourceRatingRepository, SQLAlchemyRepositoryMixin):
     async def create(self, resource_rating: ResourceRatingEntity) -> None:
-        item = ResourceRatingModel(resource_rating)
-        self.session.add(item)
+        model = ResourceRatingMapper.to_model(resource_rating)
+        self.session.add(model)
         await self.session.commit()
 
     async def get_one(self, resource_rating_id: UUID) -> ResourceRatingEntity | None:
