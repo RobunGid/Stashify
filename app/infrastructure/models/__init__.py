@@ -1,5 +1,6 @@
 from infrastructure.models.category_item import *  # noqa
 from infrastructure.models.quiz_item import *  # noqa
+from infrastructure.models.quiz_option import *  # noqa
 from infrastructure.models.quiz_question import *  # noqa
 from infrastructure.models.quiz_rating import *  # noqa
 from infrastructure.models.quiz_result import *  # noqa

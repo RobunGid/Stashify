@@ -92,13 +92,6 @@ class SQLQuizQuestionRepository(BaseQuizQuestionRepository, SQLAlchemyRepository
 
         return QuizQuestionMapper.to_entity(quiz_question_model)
 
-    async def get_count_by_quiz_item_id(self, quiz_item_id: UUID) -> int:
-        statement = select(QuizQuestionModel).where(QuizQuestionModel.quiz_item_id == quiz_item_id)
-        count_statement = select(func.count()).select_from(statement.subquery())
-
-        total = (await self.session.execute(count_statement)).scalar_one()
-        return total
-
     async def get_count(self, filters: QuizQuestionFilters) -> int:
 
         statement = select(QuizQuestionModel)

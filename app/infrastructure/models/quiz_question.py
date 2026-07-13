@@ -1,8 +1,7 @@
 from datetime import datetime
 from uuid import UUID as PyUUID, uuid4
 
-from sqlalchemy import ForeignKey, String, UniqueConstraint
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.base import Base
@@ -17,8 +16,11 @@ class QuizQuestionModel(Base):
     quiz_item_id: Mapped[PyUUID] = mapped_column(ForeignKey("quiz_item.quiz_item_id"))
     quiz_item: Mapped["QuizItemModel"] = relationship(back_populates="quiz_questions")  # noqa: F821 # pyright: ignore
 
-    options: Mapped[list[str]] = mapped_column(ARRAY(String))
-    right_options: Mapped[list[int]] = mapped_column(ARRAY(String))
+    quiz_options: Mapped[list["QuizOptionModel"]] = relationship(  # noqa: F821 # pyright: ignore
+        "QuizOptionModel",
+        back_populates="quiz_question",
+        cascade="all, delete-orphan",
+    )
     index: Mapped[int]
 
     image: Mapped[str | None]

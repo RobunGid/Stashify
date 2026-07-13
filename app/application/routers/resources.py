@@ -328,7 +328,8 @@ async def list_resource_start_quiz(
     if not quiz_item_entity:
         raise QuizItemNotFoundException(resource_item_id)
 
-    quiz_question_count = await quiz_question_service.get_count_by_quiz_item_id(quiz_item_entity.quiz_item_id)
+    filters = QuizQuestionFiltersSchema(quiz_item_id=quiz_item_entity.quiz_item_id)
+    quiz_question_count = await quiz_question_service.get_count(filters.to_entity())
 
     keyboard_builder = ResourceQuizConfirmKeyboardBuilder(i18n=i18n, current_item=resource_item_entity)
     keyboard = keyboard_builder.build()

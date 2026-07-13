@@ -8,7 +8,7 @@ Fils = TypeVar("Fils", bound=BaseFilters)
 
 
 class BaseFiltersSchema(BaseModel, Generic[Fils]):
-    count: int
+    count: int | None
     offset: int = 0
     sort: BaseSortType = "created_at"
     order: SortOrder = SortOrder.asc

@@ -1,9 +1,17 @@
+import asyncio
 from typing import Any, Awaitable, Callable, Dict
 
-from aiogram import BaseMiddleware
+from aiogram import BaseMiddleware, Bot
 from aiogram.exceptions import TelegramAPIError
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message, TelegramObject
+from aiogram.types import CallbackQuery, ChatIdUnion, Message, TelegramObject
+
+
+async def delete_message(message_id: int, bot: Bot, chat_id: ChatIdUnion):
+    try:
+        await bot.delete_message(chat_id=chat_id, message_id=message_id)
+    except TelegramAPIError:
+        pass
 
 
 class DeleteOldMessagesMiddleware(BaseMiddleware):
@@ -22,12 +30,11 @@ class DeleteOldMessagesMiddleware(BaseMiddleware):
         if isinstance(event, Message):
             chat_id = event.chat.id
 
+        if not chat_id:
+            return await handler(event, data)
+
         state_data = await state.get_data()
         message_ids_to_delete = state_data.get("message_ids_to_delete", [])
-        for message_id in message_ids_to_delete:
-            try:
-                await bot.delete_message(chat_id=chat_id, message_id=message_id)
-            except TelegramAPIError:
-                pass
+        await asyncio.gather(*(delete_message(message_id, bot, chat_id) for message_id in message_ids_to_delete))
 
         return await handler(event, data)

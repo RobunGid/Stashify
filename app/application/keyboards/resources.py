@@ -202,7 +202,7 @@ class ResourceItemKeyboardBuilder(BaseItemKeyboardBuilder[ResourceItemEntity]):
                     rating=None,
                     resource_item_id=self.current_item.resource_item_id,
                     context="menu",
-                ),
+                ).pack(),
             },
         ]
 

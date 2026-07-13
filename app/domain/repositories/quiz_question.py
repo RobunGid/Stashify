@@ -21,7 +21,3 @@ class BaseQuizQuestionRepository(
         quiz_question_number: int,
     ) -> QuizQuestionEntity | None:
         pass
-
-    @abstractmethod
-    async def get_count_by_quiz_item_id(self, quiz_item_id: UUID) -> int:
-        pass
