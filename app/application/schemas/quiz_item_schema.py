@@ -6,7 +6,7 @@ from pydantic import ConfigDict, Field
 
 
 class BaseQuizItemSchema(BaseSchema[QuizItemEntity]):
-    quiz_item_id: UUID = Field()
+    quiz_item_id: UUID
     resource_item_id: UUID
 
     model_config = ConfigDict(from_attributes=True)
@@ -18,9 +18,9 @@ class BaseQuizItemSchema(BaseSchema[QuizItemEntity]):
         )
 
 
-class QuizSchema(BaseQuizItemSchema):
-    resource: ResourceItemSchema
-    questions: list[BaseQuizQuestionSchema] = Field(default_factory=list)
+class QuizItemSchema(BaseQuizItemSchema):
+    resource_item: ResourceItemSchema
+    quiz_questions: list[BaseQuizQuestionSchema] = Field(default_factory=list)
 
 
 from application.schemas.quiz_question_schema import BaseQuizQuestionSchema  # noqa

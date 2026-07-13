@@ -10,7 +10,6 @@ class QuizQuestionEntity(BaseEntity):
     text: str
 
     quiz_item_id: UUID
-    index: int
 
     options: list[str]
     right_options: list[int]
@@ -24,6 +23,5 @@ class QuizQuestionUpdateEntity(BaseUpdateEntity):
 
     options: list[str] | None
     right_options: list[int] | None
-    index: int
 
     image: str | None

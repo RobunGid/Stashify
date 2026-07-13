@@ -41,7 +41,7 @@ router = Router()
     F.data == "manage_resources",
     UserRoleFilter([Role.admin, Role.manager]),
 )
-async def manage_resources(
+async def manage_resources_entry_handler(
     callback: CallbackQuery,
     i18n: I18nContext,
 ):

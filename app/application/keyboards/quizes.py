@@ -5,230 +5,82 @@ from uuid import UUID
 from aiogram.filters.callback_data import CallbackData
 
 from application.keyboards.base import (
-    BaseBackKeyboardBuilder,
-    BaseConfirmKeyboardBuilder,
-    BaseListKeyboardBuilder,
+    BackToMenuKeyboardBuilderMixin,
     BaseManageEntryKeyboardBuilder,
+    BaseQuizFinalKeyboardBuilder,
+    BaseQuizQuestionKeyboardBuilder,
 )
-from domain.entities.category_item import CategoryItemEntity
+from application.keyboards.resources import (
+    ListCategoryResourcesItemCallbackFactory,
+)
+from domain.entities.quiz_item import QuizItemEntity
+from domain.entities.quiz_question import QuizQuestionEntity
 from domain.entities.resource_item import ResourceItemEntity
 
 
-class EditQuizActionCallbackFactory(CallbackData, prefix="edit_quiz_actn"):  # type: ignore[call-arg]
-    action: Union[Literal["edit"], Literal["delete"], Literal["add"]]
-    resource_item_id: UUID | None
+class ListResourcesQuizQuestionCallbackFactory(CallbackData, prefix="lst_rsc_qstn"):  # type: ignore[call-arg]
+    action: Union[Literal["answer"], None]
+    option_number: int
+    question_number: int
+    quiz_item_id: UUID
 
 
 @dataclass
-class QuizManageEntryKeyboardBuilder(BaseManageEntryKeyboardBuilder):
+class ResourceQuizManageEntryKeyboardBuilder(BaseManageEntryKeyboardBuilder, BackToMenuKeyboardBuilderMixin):
     def _build_entry_buttons(self) -> list[dict]:
         return [
             {
-                "text": self.i18n.get("manage-quizes-keyboard-add-question"),
-                "callback_data": EditQuizActionCallbackFactory(
-                    action="add",
-                    resource_item_id=None,
-                ),
+                "text": self.i18n.get("manage-quizes-keyboard-create"),
+                "callback_data": "create_quiz",
             },
             {
-                "text": self.i18n.get("manage-quizes-keyboard-edit-question"),
-                "callback_data": EditQuizActionCallbackFactory(
-                    action="edit",
-                    resource_item_id=None,
-                ),
+                "text": self.i18n.get("manage-quizes-keyboard-edit"),
+                "callback_data": "edit_quiz",
             },
             {
-                "text": self.i18n.get("manage-quizes-keyboard-delete-question"),
-                "callback_data": EditQuizActionCallbackFactory(
-                    action="delete",
-                    resource_item_id=None,
-                ),
+                "text": self.i18n.get("manage-quizes-keyboard-delete"),
+                "callback_data": "delete_quiz",
             },
         ]
-
-    def _back_callback(self) -> str:
-        return "menu"
-
-
-class EditQuizChooseResourceCallbackFactory(CallbackData, prefix="edit_quiz_rsc"):  # type: ignore[call-arg]
-    action: Union[Literal["select"], Literal["change_page"]]
-    resource_item_id: UUID | None
-    page: int
-
-
-class EditQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
-    def _back_callback(self) -> str:
-        return EditQuizChooseResourceCallbackFactory(
-            action="change_page",
-            resource_item_id=None,
-            page=self.current_page - 1,
-        ).pack()
-
-    def _pagination_callback(self, page: int) -> str:
-        return EditQuizChooseResourceCallbackFactory(action="change_page", resource_item_id=None, page=page).pack()
-
-    def _item_button(self, item: ResourceItemEntity) -> dict:
-        return {
-            "text": item.name,
-            "callback_data": EditQuizChooseResourceCallbackFactory(
-                action="select",
-                resource_item_id=item.resource_item_id,
-                page=0,
-            ),
-        }
-
-
-class EditQuizChooseCategoryCallbackFactory(CallbackData, prefix="edit_quiz_ctg"):  # type: ignore[call-arg]
-    action: Union[Literal["select"], Literal["change_page"]]
-    category_item_id: UUID | None
-    page: int
-
-
-class EditQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
-    def _back_callback(self) -> str:
-        return EditQuizChooseCategoryCallbackFactory(
-            action="change_page",
-            category_item_id=None,
-            page=self.current_page - 1,
-        ).pack()
-
-    def _pagination_callback(self, page: int) -> str:
-        return EditQuizChooseCategoryCallbackFactory(action="change_page", category_item_id=None, page=page).pack()
-
-    def _item_button(self, item: CategoryItemEntity) -> dict:
-        return {
-            "text": f"{item.name} ({item.resource_item_count})",
-            "callback_data": EditQuizChooseCategoryCallbackFactory(
-                action="select",
-                category_item_id=item.category_item_id,
-                page=0,
-            ),
-        }
 
 
 @dataclass
-class ManageQuizesBackKeyboardBuilder(BaseBackKeyboardBuilder):
-    def _back_callback(self) -> str:
-        return "manage_quizes"
-
-
-class DeleteQuizChooseResourceCallbackFactory(CallbackData, prefix="delete_quiz_rsc"):  # type: ignore[call-arg]
-    action: Union[Literal["select"], Literal["change_page"]]
-    resource_item_id: UUID | None
-    page: int
-
-
-class DeleteQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
-    def _back_callback(self) -> str:
-        return "manage_quizes"
-
-    def _pagination_callback(self, page: int) -> str:
-        return DeleteQuizChooseResourceCallbackFactory(action="change_page", resource_item_id=None, page=page).pack()
-
-    def _item_button(self, item: ResourceItemEntity) -> dict:
-        return {
-            "text": item.name,
-            "callback_data": DeleteQuizChooseResourceCallbackFactory(
-                action="select",
-                resource_item_id=item.resource_item_id,
-                page=0,
-            ),
-        }
-
-
-class DeleteQuizChooseCategoryCallbackFactory(CallbackData, prefix="delete_quiz_ctg"):  # type: ignore[call-arg]
-    action: Union[Literal["select"], Literal["change_page"]]
-    category_item_id: UUID | None
-    page: int
-
-
-class DeleteQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
-    def _back_callback(self) -> str:
-        return "manage_quizes"
-
-    def _pagination_callback(self, page: int) -> str:
-        return DeleteQuizChooseCategoryCallbackFactory(action="change_page", category_item_id=None, page=page).pack()
-
-    def _item_button(self, item: CategoryItemEntity) -> dict:
-        return {
-            "text": f"{item.name} ({item.resource_item_count})",
-            "callback_data": DeleteQuizChooseCategoryCallbackFactory(
-                action="select",
-                category_item_id=item.category_item_id,
-                page=0,
-            ),
-        }
-
-
-class CreateQuizChooseCategoryCallbackFactory(CallbackData, prefix="create_quiz_ctg"):  # type: ignore[call-arg]
-    action: Union[Literal["select"], Literal["change_page"]]
-    category_item_id: UUID | None
-    page: int
-
-
-class CreateQuizCategoryListKeyboardBuilder(BaseListKeyboardBuilder[CategoryItemEntity]):
-    def _back_callback(self) -> str:
-        return "manage_quizes"
-
-    def _pagination_callback(self, page: int) -> str:
-        return CreateQuizChooseCategoryCallbackFactory(action="change_page", category_item_id=None, page=page).pack()
-
-    def _item_button(self, item: CategoryItemEntity) -> dict:
-        return {
-            "text": f"{item.name} ({item.resource_item_count})",
-            "callback_data": CreateQuizChooseCategoryCallbackFactory(
-                action="select",
-                category_item_id=item.category_item_id,
-                page=0,
-            ),
-        }
-
-
-class CreateQuizChooseResourceCallbackFactory(CallbackData, prefix="create_quiz_rsc"):  # type: ignore[call-arg]
-    action: Union[Literal["select"], Literal["change_page"]]
-    resource_item_id: UUID | None
-    page: int
-
-
-class CreateQuizResourceListKeyboardBuilder(BaseListKeyboardBuilder[ResourceItemEntity]):
-    def _back_callback(self) -> str:
-        return "manage_quizes"
-
-    def _pagination_callback(self, page: int) -> str:
-        return CreateQuizChooseResourceCallbackFactory(action="change_page", resource_item_id=None, page=page).pack()
-
-    def _item_button(self, item: ResourceItemEntity) -> dict:
-        return {
-            "text": item.name,
-            "callback_data": CreateQuizChooseResourceCallbackFactory(
-                action="select",
-                resource_item_id=item.resource_item_id,
-                page=0,
-            ),
-        }
-
-
-class DeleteQuizConfirmKeyboardBuilder(BaseConfirmKeyboardBuilder):
-    def _build_confirm_buttons(self) -> list[dict]:
+class ResourceQuizFinalKeyboardBuilder(BaseQuizFinalKeyboardBuilder[ResourceItemEntity]):
+    def _build_retry_buttons(self) -> list[dict]:
         return [
             {
-                "text": self.i18n.get("manage-quizes-delete-confirm"),
-                "callback_data": "delete_quiz_confirm",
+                "text": self.i18n.get("start-quiz-retry"),
+                "callback_data": ListCategoryResourcesItemCallbackFactory(
+                    page=0,
+                    context="menu",
+                    category_item_id=self.item.category_item_id,
+                ).pack(),
             },
         ]
 
     def _back_callback(self) -> str:
-        return "manage_quizes"
+        return ListCategoryResourcesItemCallbackFactory(
+            context="menu",
+            category_item_id=self.item.category_item_id,
+            page=0,
+        ).pack()
 
 
-class QuizConfirmFinishKeyboardBuilder(BaseConfirmKeyboardBuilder):
-    def _build_confirm_buttons(self) -> list[dict]:
-        return [
-            {
-                "text": self.i18n.get("manage-quizes-create-stop-questions"),
-                "callback_data": "delete_quiz_confirm",
-            },
-        ]
+@dataclass
+class ResourceQuizQuestionKeyboardBuilder(
+    BaseQuizQuestionKeyboardBuilder[ResourceItemEntity, QuizQuestionEntity, QuizItemEntity],
+):
+    def _build_quiz_callback(self, option_number: int, question_number: int) -> str:
+        return ListResourcesQuizQuestionCallbackFactory(
+            action="answer",
+            option_number=option_number,
+            question_number=question_number,
+            quiz_item_id=self.quiz_item.quiz_item_id,
+        ).pack()
 
     def _back_callback(self) -> str:
-        return "manage_quizes"
+        return ListCategoryResourcesItemCallbackFactory(
+            page=self.page,
+            context="menu",
+            category_item_id=self.item.category_item_id,
+        ).pack()

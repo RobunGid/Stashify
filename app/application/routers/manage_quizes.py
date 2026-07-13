@@ -1,4 +1,4 @@
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
@@ -6,28 +6,25 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from aiogram_i18n import I18nContext
-from application.exceptions.quiz_item import QuizItemNotFoundException
+from application.exceptions.resource_item import ResourceItemNotFoundException
 from application.filters.user_role_filter import UserRoleFilter
 from application.filters.valid_callback_filter import ValidCallbackFilter
 from application.filters_schemas.quiz_question import QuizQuestionFiltersSchema
-from application.keyboards.quizes import (
+from application.keyboards.manage_quizes import (
+    BackToManageQuizesKeyboardBuilder,
     CreateQuizChooseResourceCallbackFactory,
     DeleteQuizChooseResourceCallbackFactory,
-    DeleteQuizConfirmKeyboardBuilder,
-    EditQuizActionCallbackFactory,
-    EditQuizChooseResourceCallbackFactory,
-    ManageQuizesBackKeyboardBuilder,
-    QuizConfirmFinishKeyboardBuilder,
+    EditQuizQuestionChooseResourceCallbackFactory,
+    FinishQuizConfirmKeyboardBuilder,
     QuizManageEntryKeyboardBuilder,
 )
-from application.schemas.quiz_item_schema import BaseQuizItemSchema, QuizSchema
+from application.schemas.quiz_item_schema import BaseQuizItemSchema
 from application.schemas.quiz_question_schema import (
     BaseQuizQuestionSchema,
-    QuizQuestionSchema,
-    QuizQuestionUpdateSchema,
 )
 from application.services.quiz_item import QuizItemService
 from application.services.quiz_question import QuizQuestionService
+from application.services.resource_item import ResourceItemService
 from dishka import FromDishka
 from infrastructure.models.user_account import Role
 from sqlalchemy.exc import IntegrityError
@@ -35,14 +32,10 @@ from sqlalchemy.exc import IntegrityError
 from settings.aiogram import bot
 
 router = Router()
-router.callback_query.filter(ValidCallbackFilter())
 
 
-@router.callback_query(
-    F.data == "manage_quizes",
-    UserRoleFilter([Role.admin, Role.manager]),
-)
-async def manage_quizes(callback: CallbackQuery, i18n: I18nContext, message: Message):
+@router.callback_query(F.data == "manage_quizes", UserRoleFilter([Role.admin, Role.manager]), ValidCallbackFilter())
+async def manage_quizes_entry_callback_handler(callback: CallbackQuery, i18n: I18nContext, message: Message):
     await bot.delete_message(
         chat_id=message.chat.id,
         message_id=message.message_id,
@@ -60,7 +53,6 @@ async def manage_quizes(callback: CallbackQuery, i18n: I18nContext, message: Mes
 
 
 class CreateQuizState(StatesGroup):
-    resource_item_id = State()
     name = State()
     description = State()
     image = State()
@@ -70,37 +62,35 @@ class CreateQuizState(StatesGroup):
 
 
 @router.callback_query(
-    CreateQuizChooseResourceCallbackFactory.filter(F.action == "select"),
+    CreateQuizChooseResourceCallbackFactory.filter(),
     UserRoleFilter([Role.admin, Role.manager]),
+    ValidCallbackFilter(),
 )
-async def create_quiz_choose(
+async def create_quiz_callback_handler(
     callback: CallbackQuery,
     callback_data: CreateQuizChooseResourceCallbackFactory,
     state: FSMContext,
     i18n: I18nContext,
     message: Message,
+    service: FromDishka[ResourceItemService],
 ):
     await bot.delete_message(
         chat_id=message.chat.id,
         message_id=message.message_id,
     )
     resource_item_id = callback_data.resource_item_id
-    state_data = await state.get_data()
     if not resource_item_id:
         return
 
-    quiz_resource = next(
-        resource for resource in state_data["resources"] if resource.resource_item_id == resource_item_id
-    )
-    quiz = QuizSchema(
-        quiz_item_id=uuid4(),
-        resource_item_id=resource_item_id,
-        questions=[],
-        resource=quiz_resource,
-    )
-    await state.update_data(quiz=quiz, questions=[], resource_item_id=resource_item_id)
+    resource_item_id = callback_data.resource_item_id
+    if not resource_item_id:
+        return
+    resource_item_entity = await service.get_one(resource_item_id)
+    if not resource_item_entity:
+        raise ResourceItemNotFoundException(resource_item_id)
+    await state.update_data(resource_item_id=resource_item_id, quiz_item_id=uuid4())
 
-    keyboard_builder = ManageQuizesBackKeyboardBuilder(i18n=i18n)
+    keyboard_builder = BackToManageQuizesKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
     await message.answer(
@@ -120,21 +110,21 @@ async def create_quiz_add_question(message: Message, state: FSMContext, i18n: I1
     question_text = question_data[0]
     question_options = question_data[1:]
     right_options = [index for index, option in enumerate(question_options) if option.startswith("!")]
+    quiz_item_id = state_data["quiz_item_id"]
 
-    question = QuizQuestionSchema(
+    question = BaseQuizQuestionSchema(
         quiz_question_id=uuid4(),
         image=message.photo[0].file_id if message.photo else None,
-        quiz=state_data["quiz"],
         options=question_options,
-        quiz_item_id=state_data["quiz"].id,
+        quiz_item_id=quiz_item_id,
         right_options=right_options,
         text=question_text,
     )
 
-    await state.update_data(questions=[*state_data["questions"], question])
-    await state.set_state(CreateQuizState.questions)
+    existing_questions = state_data.get("questions", [])
+    await state.update_data(questions=[*existing_questions, question])
 
-    keyboard_builder = QuizConfirmFinishKeyboardBuilder(i18n=i18n)
+    keyboard_builder = FinishQuizConfirmKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
     await message.answer(
@@ -143,86 +133,59 @@ async def create_quiz_add_question(message: Message, state: FSMContext, i18n: I1
         ),
         reply_markup=keyboard,
     )
+    await state.set_state(CreateQuizState.questions)
 
 
 @router.callback_query(
-    F.data == "manage_quizes.stop",
+    F.data == "finish_quiz_confirm",
     UserRoleFilter([Role.admin, Role.manager]),
+    ValidCallbackFilter(),
 )
-async def create_quiz_finish(
+async def create_quiz_finish_callback_handler(
     callback: CallbackQuery,
     state: FSMContext,
     i18n: I18nContext,
-    service: FromDishka[QuizItemService],
+    quiz_item_service: FromDishka[QuizItemService],
+    quiz_question_service: FromDishka[QuizQuestionService],
+    resource_item_service: FromDishka[ResourceItemService],
     message: Message,
 ):
     state_data = await state.get_data()
-    quiz = state_data["quiz"]
+
     quiz_questions = state_data["questions"]
-    quiz.questions = quiz_questions
+    quiz_item_id = state_data["quiz_item_id"]
+    resource_item_id = state_data["resource_item_id"]
 
-    keyboard_builder = ManageQuizesBackKeyboardBuilder(i18n=i18n)
+    resource_item_entity = await resource_item_service.get_one(resource_item_id)
+    if resource_item_entity is None:
+        raise ResourceItemNotFoundException(resource_item_id)
+
+    quiz_item_schema = BaseQuizItemSchema(quiz_item_id=quiz_item_id, resource_item_id=resource_item_id)
+    quiz_questions_schemas = [
+        BaseQuizQuestionSchema(
+            quiz_question_id=uuid4(),
+            text=quiz_question.text,
+            quiz_item_id=quiz_item_id,
+            options=quiz_question.options,
+            right_options=quiz_question.right_options,
+            image=quiz_question.image,
+        )
+        for quiz_question in quiz_questions
+    ]
+
+    keyboard_builder = BackToManageQuizesKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    try:
-        await service.create(item=quiz)
-    except IntegrityError:
-        await message.answer(
-            text=i18n.get(
-                "manage-quizes-create-fail",
-                resource_name=quiz.resource.name,
-                question_count=len(quiz_questions),
-            ),
-            reply_markup=keyboard,
-        )
-    else:
-        await message.answer(
-            text=i18n.get(
-                "manage-quizes-create-success",
-                resource_name=quiz.resource.name,
-                question_count=len(quiz_questions),
-            ),
-            reply_markup=keyboard,
-        )
+    await quiz_item_service.create(item=quiz_item_schema.to_entity())
 
-
-class DeleteQuizState(StatesGroup):
-    resource_item_id = State()
-    category_item_id = State()
-    confirm = State()
-
-
-@router.callback_query(
-    DeleteQuizChooseResourceCallbackFactory.filter(F.action == "select"),
-    UserRoleFilter([Role.admin, Role.manager]),
-)
-async def delete_quiz_choose(
-    callback: CallbackQuery,
-    callback_data: DeleteQuizChooseResourceCallbackFactory,
-    state: FSMContext,
-    i18n: I18nContext,
-    message: Message,
-):
-    await bot.delete_message(
-        chat_id=message.chat.id,
-        message_id=message.message_id,
-    )
-    resource_item_id = callback_data.resource_item_id
-    if not resource_item_id:
-        return
-
-    quiz = BaseQuizItemSchema(
-        quiz_item_id=uuid4(),
-        resource_item_id=resource_item_id,
-    )
-    await state.update_data(quiz=quiz, questions=[], resource_item_id=resource_item_id)
-
-    keyboard_builder = DeleteQuizConfirmKeyboardBuilder(i18n=i18n)
-    keyboard = keyboard_builder.build()
+    for quiz_question_schema in quiz_questions_schemas:
+        await quiz_question_service.create(quiz_question_schema.to_entity())
 
     await message.answer(
         text=i18n.get(
-            "manage-quizes-delete-choose-to-delete",
+            "manage-quizes-create-success",
+            resource_name=resource_item_entity.name,
+            question_count=len(quiz_questions),
         ),
         reply_markup=keyboard,
     )
@@ -247,7 +210,7 @@ async def delete_quiz_confirm(
     resource_item_id = state_data["resource_item_id"]
     resource = next(resource for resource in state_data["resources"] if resource.resource_item_id == resource_item_id)
 
-    keyboard_builder = ManageQuizesBackKeyboardBuilder(i18n=i18n)
+    keyboard_builder = BackToManageQuizesKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
     try:
@@ -264,21 +227,13 @@ async def delete_quiz_confirm(
         )
 
 
-class EditQuizState(StatesGroup):
-    resource_item_id = State()
-    delete_question_number = State()
-    edit_question_number = State()
-    new_question_text = State()
-    edit_question_text = State()
-
-
 @router.callback_query(
-    EditQuizChooseResourceCallbackFactory.filter(F.action == "select"),
+    EditQuizQuestionChooseResourceCallbackFactory.filter(F.action == "select"),
     UserRoleFilter([Role.admin, Role.manager]),
 )
 async def edit_resource_choose(
     callback: CallbackQuery,
-    callback_data: EditQuizChooseResourceCallbackFactory,
+    callback_data: EditQuizQuestionChooseResourceCallbackFactory,
     state: FSMContext,
     i18n: I18nContext,
     message: Message,
@@ -302,95 +257,45 @@ async def edit_resource_choose(
 
 
 @router.callback_query(
-    EditQuizActionCallbackFactory.filter(F.action == "delete"),
+    DeleteQuizChooseResourceCallbackFactory.filter(),
     UserRoleFilter([Role.admin, Role.manager]),
+    ValidCallbackFilter(),
 )
-async def edit_resource_delete_question(
+async def delete_quiz_callback_handler(
     callback: CallbackQuery,
     state: FSMContext,
     i18n: I18nContext,
     service: FromDishka[QuizQuestionService],
     message: Message,
+    callback_data: DeleteQuizChooseResourceCallbackFactory,
 ):
     await bot.delete_message(
         chat_id=message.chat.id,
         message_id=message.message_id,
     )
-    state_data = await state.get_data()
-    resource_item_id = state_data["resource_item_id"]
+    resource_item_id = callback_data.resource_item_id
+    if resource_item_id is None:
+        return
     filters = QuizQuestionFiltersSchema(resource_item_id=resource_item_id)
     quiz_questions, _ = await service.get_many(filters.to_entity())
 
-    formatted_questions = ""
-
-    for index, question in enumerate(quiz_questions):
-        formatted_question = f"{index + 1}. {question.text}\n"
-
-        for option in question.options:
-            if index in question.right_options:
-                formatted_question += f"!{option}\n"
-            else:
-                formatted_question += f"{option}\n"
-
-        formatted_questions += formatted_question + "\n"
-
-    keyboard_builder = ManageQuizesBackKeyboardBuilder(i18n=i18n)
+    keyboard_builder = BackToManageQuizesKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
     await message.answer(
-        text=i18n.get("manage-quizes-edit-delete-question-number", questions=formatted_questions),
+        text=i18n.get("manage-quizes-edit-delete-confirm"),
         reply_markup=keyboard,
     )
-    await state.set_state(EditQuizState.delete_question_number)
-
-
-@router.message(
-    EditQuizState.delete_question_number,
-    F.text,
-    UserRoleFilter([Role.admin, Role.manager]),
-)
-async def delete_question_confirm(
-    message: Message,
-    state: FSMContext,
-    i18n: I18nContext,
-    service: FromDishka[QuizQuestionService],
-):
-    state_data = await state.get_data()
-    resource_item_id = UUID(state_data["resource_item_id"])
-    quiz_question_number = int(message.text or "1") - 1
-
-    keyboard_builder = ManageQuizesBackKeyboardBuilder(i18n=i18n)
-    keyboard = keyboard_builder.build()
-
-    try:
-        await service.delete_by_question_number(
-            resource_item_id=resource_item_id,
-            quiz_question_number=quiz_question_number,
-        )
-    except IntegrityError:
-        await message.answer(
-            text=i18n.get(
-                "manage-quizes-edit-delete-question-fail",
-            ),
-            reply_markup=keyboard,
-        )
-    else:
-        await message.answer(
-            text=i18n.get(
-                "manage-quizes-edit-delete-question-success",
-            ),
-            reply_markup=keyboard,
-        )
-    finally:
-        await state.clear()
 
 
 @router.callback_query(
-    EditQuizActionCallbackFactory.filter(F.action == "add"),
+    CreateQuizChooseResourceCallbackFactory.filter(),
     UserRoleFilter([Role.admin, Role.manager]),
+    ValidCallbackFilter(),
 )
 async def edit_resource_add_question(
     callback: CallbackQuery,
+    callback_data: CreateQuizChooseResourceCallbackFactory,
     state: FSMContext,
     i18n: I18nContext,
     service: FromDishka[QuizQuestionService],
@@ -400,8 +305,10 @@ async def edit_resource_add_question(
         chat_id=message.chat.id,
         message_id=message.message_id,
     )
-    state_data = await state.get_data()
-    resource_item_id = state_data["resource_item_id"]
+    await state.get_data()
+    resource_item_id = callback_data.resource_item_id
+    if not resource_item_id:
+        return
     filters = QuizQuestionFiltersSchema(resource_item_id=resource_item_id)
     quiz_question_enttiies, _ = await service.get_many(filters.to_entity())
 
@@ -418,179 +325,10 @@ async def edit_resource_add_question(
 
         formatted_questions += formatted_question + "\n"
 
-    keyboard_builder = ManageQuizesBackKeyboardBuilder(i18n=i18n)
+    keyboard_builder = BackToManageQuizesKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
     await message.answer(
         text=i18n.get("manage-quizes-edit-add-question-text", questions=formatted_questions),
-        reply_markup=keyboard,
-    )
-    await state.set_state(EditQuizState.new_question_text)
-
-
-@router.message(
-    EditQuizState.new_question_text,
-    F.text,
-    UserRoleFilter([Role.admin, Role.manager]),
-)
-async def add_question_confirm(
-    message: Message,
-    state: FSMContext,
-    i18n: I18nContext,
-    quiz_item_service: FromDishka[QuizItemService],
-    quiz_question_service: FromDishka[QuizQuestionService],
-):
-    state_data = await state.get_data()
-    resource_item_id = state_data["resource_item_id"]
-    quiz_item_entity = await quiz_item_service.get_one_by_resource_item_id(resource_item_id)
-    if not quiz_item_entity:
-        raise QuizItemNotFoundException(resource_item_id)
-
-    quiz_item_id = UUID(str(quiz_item_entity.quiz_item_id))
-    question_data = message.html_text.split("\n")
-    question_text = question_data[0]
-    question_options = question_data[1:]
-    right_options = [index for index, option in enumerate(question_options) if option.startswith("!")]
-
-    question = BaseQuizQuestionSchema(
-        quiz_question_id=uuid4(),
-        quiz_item_id=quiz_item_id,
-        image=message.photo[0].file_id if message.photo else None,
-        options=question_options,
-        right_options=right_options,
-        text=question_text,
-    )
-
-    keyboard_builder = ManageQuizesBackKeyboardBuilder(i18n=i18n)
-    keyboard = keyboard_builder.build()
-
-    try:
-        await quiz_question_service.create(question.to_entity())
-    except IntegrityError:
-        await message.answer(
-            text=i18n.get(
-                "manage-quizes-edit-add-question-fail",
-            ),
-            reply_markup=keyboard,
-        )
-    else:
-        await message.answer(
-            text=i18n.get(
-                "manage-quizes-edit-add-question-success",
-            ),
-            reply_markup=keyboard,
-        )
-    finally:
-        await state.clear()
-
-
-@router.callback_query(
-    EditQuizActionCallbackFactory.filter(F.action == "edit"),
-    UserRoleFilter([Role.admin, Role.manager]),
-)
-async def edit_resource_edit_question(
-    callback: CallbackQuery,
-    state: FSMContext,
-    i18n: I18nContext,
-    service: FromDishka[QuizQuestionService],
-    message: Message,
-):
-    await bot.delete_message(
-        chat_id=message.chat.id,
-        message_id=message.message_id,
-    )
-    state_data = await state.get_data()
-    resource_item_id = state_data["resource_item_id"]
-    filters = QuizQuestionFiltersSchema(resource_item_id=resource_item_id)
-    quiz_questions, _ = await service.get_many(filters.to_entity())
-
-    formatted_questions = ""
-
-    for index, question in enumerate(quiz_questions):
-        formatted_question = f"{index + 1}. {question.text}\n"
-
-        for option in question.options:
-            if index in question.right_options:
-                formatted_question += f"!{option}\n"
-            else:
-                formatted_question += f"{option}\n"
-
-        formatted_questions += formatted_question + "\n"
-
-    keyboard_builder = ManageQuizesBackKeyboardBuilder(i18n=i18n)
-    keyboard = keyboard_builder.build()
-
-    await message.answer(
-        text=i18n.get(
-            "manage-quizes-edit-edit-question-number",
-            callback.from_user.language_code,
-            questions=formatted_questions,
-        ),
-        reply_markup=keyboard,
-    )
-    await state.set_state(EditQuizState.edit_question_number)
-
-
-@router.message(
-    EditQuizState.edit_question_number,
-    F.text,
-    UserRoleFilter([Role.admin, Role.manager]),
-)
-async def edit_question_number(message: Message, state: FSMContext, i18n: I18nContext):
-    await state.update_data(edit_question_number=message.text)
-
-    keyboard_builder = ManageQuizesBackKeyboardBuilder(i18n=i18n)
-    keyboard = keyboard_builder.build()
-
-    await message.answer(
-        text=i18n.get(
-            "manage_quizes.edit.edit_question.text",
-        ),
-        reply_markup=keyboard,
-    )
-    await state.set_state(EditQuizState.edit_question_text)
-
-
-@router.message(
-    EditQuizState.edit_question_text,
-    F.text,
-    UserRoleFilter([Role.admin, Role.manager]),
-)
-async def edit_question_text(
-    message: Message,
-    state: FSMContext,
-    i18n: I18nContext,
-    quiz_question_service: FromDishka[QuizQuestionService],
-    quiz_item_service: FromDishka[QuizItemService],
-):
-    state_data = await state.get_data()
-    question_number = int(state_data["edit_question_number"])
-    resource_item_id = state_data["resource_item_id"]
-    filters = QuizQuestionFiltersSchema(resource_item_id=resource_item_id)
-    questions, _ = await quiz_question_service.get_many(filters.to_entity())
-    question_id = questions[question_number].quiz_question_id
-    quiz = await quiz_item_service.get_one_by_resource_item_id(resource_item_id)
-    if not quiz:
-        raise QuizItemNotFoundException(resource_item_id)
-    question_data = message.html_text.split("\n")
-    question_text = question_data[0]
-    question_options = question_data[1:]
-    right_options = [index for index, option in enumerate(question_options) if option.startswith("!")]
-
-    question = QuizQuestionUpdateSchema(
-        image=message.photo[0].file_id if message.photo else None,
-        options=question_options,
-        right_options=right_options,
-        text=question_text,
-    )
-
-    keyboard_builder = ManageQuizesBackKeyboardBuilder(i18n=i18n)
-    keyboard = keyboard_builder.build()
-
-    await quiz_question_service.update(question_id, question.to_entity())
-    await message.answer(
-        text=i18n.get(
-            "manage_quizes.edit.edit_question.fail",
-        ),
         reply_markup=keyboard,
     )

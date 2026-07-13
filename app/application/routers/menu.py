@@ -17,7 +17,7 @@ router.callback_query.filter(ValidCallbackFilter())
 
 
 @router.message(Command("menu"))
-async def main_menu_command_message_handler(
+async def menu_command_message_handler(
     message: Message,
     i18n: I18nContext,
     service: FromDishka[UserAccountService],
@@ -43,7 +43,7 @@ async def main_menu_command_message_handler(
 
 
 @router.callback_query(F.data == "menu")
-async def main_menu_callback_handler(
+async def menu_callback_handler(
     callback: CallbackQuery,
     i18n: I18nContext,
     service: FromDishka[UserAccountService],

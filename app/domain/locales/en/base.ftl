@@ -221,8 +221,10 @@ manage-quizes-text =
     Choose action:
 
 manage-quizes-keyboard-create = ➕ Create Quiz
-manage-quizes-keyboard-edit = ✏️ Edit Quiz
+manage-quizes-keyboard-create-question = ➕ Add Quiz Question
+manage-quizes-keyboard-edit-question = ✏️ Edit Quiz Question
 manage-quizes-keyboard-delete = 🗑️ Delete Quiz
+manage-quizes-keyboard-delete-question = 🗑️ Delete Quiz Question
 
 manage-quizes-create-choose-category = 📤 Select category to create quiz
 manage-quizes-create-choose = 📤 Select resource
@@ -265,7 +267,7 @@ manage-quizes-delete-fail =
 
     Resource name: { $resource_name }
 
-manage-quizes-delete-choose-to-delete =
+manage-quizes-edit-delete-confirm =
     📤 Are you sure?
 
     Quiz will be deleted:
@@ -282,6 +284,7 @@ manage-quizes-edit-choose-to-change = 📤 Choose what to edit
 manage-quizes-keyboard-delete-question = ❌ Delete question
 manage-quizes-keyboard-edit-question = ✏️ Edit question
 manage-quizes-keyboard-add-question = ➕ Add question
+manage-quizes-keyboard-add-quiz = ➕ Add quiz to resource
 
 manage-quizes-edit-delete-question-number =
     Enter question number to delete:

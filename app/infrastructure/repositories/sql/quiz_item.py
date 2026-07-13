@@ -13,9 +13,9 @@ from sqlalchemy import exists, func, select, update
 
 @dataclass
 class SQLQuizItemRepository(BaseQuizItemRepository, SQLAlchemyRepositoryMixin):
-    async def create(self, quiz_item: QuizItemEntity) -> None:
-        item = QuizItemModel(quiz_item)
-        self.session.add(item)
+    async def create(self, quiz_item_entity: QuizItemEntity) -> None:
+        model = QuizItemMapper.to_model(quiz_item_entity)
+        self.session.add(model)
         await self.session.commit()
 
     async def get_one(self, quiz_item_id: UUID) -> QuizItemEntity | None:

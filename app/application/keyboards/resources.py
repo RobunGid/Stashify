@@ -30,6 +30,11 @@ class ListCategoriesItemCallbackFactory(CallbackData, prefix="ctg_lst"):  # type
         Literal["dlt_rsc"],
         Literal["edt_ctg"],
         Literal["dlt_ctg"],
+        Literal["crt_quiz"],
+        Literal["dlt_quiz"],
+        Literal["crt_quiz_qstn"],
+        Literal["edt_quiz_qstn"],
+        Literal["dlt_quiz_qstn"],
     ]
 
 
@@ -40,6 +45,11 @@ class ListCategoryResourcesItemCallbackFactory(CallbackData, prefix="rsc_lst"): 
         Literal["menu"],
         Literal["edt_rsc"],
         Literal["dlt_rsc"],
+        Literal["dlt_quiz"],
+        Literal["crt_quiz"],
+        Literal["edt_quiz_qst"],
+        Literal["crt_quiz_qst"],
+        Literal["dlt_quiz_qst"],
     ]
 
 

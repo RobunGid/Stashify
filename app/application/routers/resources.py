@@ -17,7 +17,7 @@ from application.filters_schemas.quiz_question import QuizQuestionFiltersSchema
 from application.filters_schemas.resource_image import ResourceImageFiltersSchema
 from application.filters_schemas.resource_item import ResourceItemFiltersSchema
 from application.formaters.resource_item import ResourceItemFormatter
-from application.keyboards.resource_quizes import (
+from application.keyboards.quizes import (
     ListResourcesQuizQuestionCallbackFactory,
     ResourceQuizFinalKeyboardBuilder,
     ResourceQuizQuestionKeyboardBuilder,
@@ -73,10 +73,16 @@ async def list_resources_category_page(
     has_resource_items: bool | None = True
     if callback_data.context == "crt_rsc":
         has_resource_items = None
+    has_quiz_items: bool | None = None
+    if callback_data.context == "crt_quiz":
+        has_quiz_items = False
+    elif callback_data.context in ("dlt_quiz", "crt_quiz_qstn", "edt_quiz_qstn", "dlt_quiz_qstn"):
+        has_quiz_items = True
     filters = CategoryItemFiltersSchema(
         count=LIST_RESOURCES_CATEGORIES_ON_PAGE,
         has_resource_items=has_resource_items,
         offset=current_page * LIST_RESOURCES_CATEGORIES_ON_PAGE,
+        has_quiz_items=has_quiz_items,
     )
     category_item_entities, count = await category_item_service.get_many(filters.to_entity())
     total_category_items_pages = ceil(count / LIST_RESOURCES_CATEGORIES_ON_PAGE)

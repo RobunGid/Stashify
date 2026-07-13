@@ -1,19 +1,23 @@
 from typing import TypedDict
 
 from application.keyboards.categories import DeleteCategoryListKeyboardBuilder, EditCategoryListKeyboardBuilder
+from application.keyboards.manage_quizes import (
+    CreateQuizCategoryListKeyboardBuilder,
+    CreateQuizQuestionCategoryListKeyboardBuilder,
+    CreateQuizQuestionResourceListKeyboardBuilder,
+    CreateQuizResourceListKeyboardBuilder,
+    DeleteQuizCategoryListKeyboardBuilder,
+    DeleteQuizQuestionCategoryListKeyboardBuilder,
+    DeleteQuizQuestionResourceListKeyboardBuilder,
+    DeleteQuizResourceListKeyboardBuilder,
+    EditQuizQuestionCategoryListKeyboardBuilder,
+    EditQuizQuestionResourceListKeyboardBuilder,
+)
 from application.keyboards.menu import (
     AdminMenuKeyboardBuilder,
     BaseMenuKeyboardBuilder,
     ManagerMenuKeyboardBuilder,
     UserMenuKeyboardBuilder,
-)
-from application.keyboards.quizes import (
-    CreateQuizCategoryListKeyboardBuilder,
-    CreateQuizResourceListKeyboardBuilder,
-    DeleteQuizCategoryListKeyboardBuilder,
-    DeleteQuizResourceListKeyboardBuilder,
-    EditQuizCategoryListKeyboardBuilder,
-    EditQuizResourceListKeyboardBuilder,
 )
 from application.keyboards.resources import (
     CategoryListKeyboardBuilder,
@@ -42,9 +46,11 @@ class CategoryListKeyboardBuilerMapType(TypedDict):
     dlt_rsc: type[DeleteResourceCategoryListKeyboardBuilder]
     edt_ctg: type[EditCategoryListKeyboardBuilder]
     dlt_ctg: type[DeleteCategoryListKeyboardBuilder]
-    crt_qz: type[CreateQuizCategoryListKeyboardBuilder]
-    edt_qz: type[EditQuizCategoryListKeyboardBuilder]
-    dlt_qz: type[DeleteQuizCategoryListKeyboardBuilder]
+    crt_quiz: type[CreateQuizCategoryListKeyboardBuilder]
+    dlt_quiz: type[DeleteQuizCategoryListKeyboardBuilder]
+    crt_quiz_qstn: type[CreateQuizQuestionCategoryListKeyboardBuilder]
+    dlt_quiz_qstn: type[DeleteQuizQuestionCategoryListKeyboardBuilder]
+    edt_quiz_qstn: type[EditQuizQuestionCategoryListKeyboardBuilder]
 
 
 CATEGORY_LIST_KEYBOARD_BUILDER_MAP: CategoryListKeyboardBuilerMapType = {
@@ -54,9 +60,11 @@ CATEGORY_LIST_KEYBOARD_BUILDER_MAP: CategoryListKeyboardBuilerMapType = {
     "dlt_rsc": DeleteResourceCategoryListKeyboardBuilder,
     "edt_ctg": EditCategoryListKeyboardBuilder,
     "dlt_ctg": DeleteCategoryListKeyboardBuilder,
-    "crt_qz": CreateQuizCategoryListKeyboardBuilder,
-    "edt_qz": EditQuizCategoryListKeyboardBuilder,
-    "dlt_qz": DeleteQuizCategoryListKeyboardBuilder,
+    "crt_quiz": CreateQuizCategoryListKeyboardBuilder,
+    "dlt_quiz": DeleteQuizCategoryListKeyboardBuilder,
+    "crt_quiz_qstn": CreateQuizQuestionCategoryListKeyboardBuilder,
+    "dlt_quiz_qstn": DeleteQuizQuestionCategoryListKeyboardBuilder,
+    "edt_quiz_qstn": EditQuizQuestionCategoryListKeyboardBuilder,
 }
 
 
@@ -64,18 +72,22 @@ class ResoruceListKeyboardBuilderMapType(TypedDict):
     menu: type[CategoryResourceListKeyboardBuilder]
     edt_rsc: type[EditResourceResourceListKeyboardBuilder]
     dlt_rsc: type[DeleteResourceResourceListKeyboardBuilder]
-    crt_qz: type[CreateQuizResourceListKeyboardBuilder]
-    edt_qz: type[EditQuizResourceListKeyboardBuilder]
-    dlt_qz: type[DeleteQuizResourceListKeyboardBuilder]
+    crt_quiz: type[CreateQuizResourceListKeyboardBuilder]
+    dlt_quiz: type[DeleteQuizResourceListKeyboardBuilder]
+    edt_quiz_qst: type[EditQuizQuestionResourceListKeyboardBuilder]
+    crt_quiz_qst: type[CreateQuizQuestionResourceListKeyboardBuilder]
+    dlt_quiz_qst: type[DeleteQuizQuestionResourceListKeyboardBuilder]
 
 
 RESOURCE_LIST_KEYBOARD_BUILDER_MAP: ResoruceListKeyboardBuilderMapType = {
     "menu": CategoryResourceListKeyboardBuilder,
     "edt_rsc": EditResourceResourceListKeyboardBuilder,
     "dlt_rsc": DeleteResourceResourceListKeyboardBuilder,
-    "crt_qz": CreateQuizResourceListKeyboardBuilder,
-    "edt_qz": EditQuizResourceListKeyboardBuilder,
-    "dlt_qz": DeleteQuizResourceListKeyboardBuilder,
+    "crt_quiz": CreateQuizResourceListKeyboardBuilder,
+    "dlt_quiz": DeleteQuizResourceListKeyboardBuilder,
+    "edt_quiz_qst": EditQuizQuestionResourceListKeyboardBuilder,
+    "crt_quiz_qst": CreateQuizQuestionResourceListKeyboardBuilder,
+    "dlt_quiz_qst": DeleteQuizQuestionResourceListKeyboardBuilder,
 }
 
 

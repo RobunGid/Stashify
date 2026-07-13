@@ -26,7 +26,7 @@ router = Router()
 
 
 @router.callback_query(F.data == "manage_categories", UserRoleFilter([Role.admin]))
-async def manage_categories(callback: CallbackQuery, i18n: I18nContext):
+async def manage_categories_entry_handler(callback: CallbackQuery, i18n: I18nContext):
     if not callback.from_user or not callback.from_user.language_code or not callback.message:
         return
 
