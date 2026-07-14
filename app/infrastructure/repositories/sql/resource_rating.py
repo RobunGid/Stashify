@@ -8,6 +8,7 @@ from domain.repositories.resource_rating import BaseResourceRatingRepository
 from infrastructure.mappers.resource_rating import ResourceRatingMapper
 from infrastructure.models.resource_rating import ResourceRatingModel
 from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
+from infrastructure.repositories.sql.utils.apply_pagination import apply_pagination_to_statement
 from sqlalchemy import and_, func, select, update
 
 
@@ -36,10 +37,7 @@ class SQLResourceRatingRepository(BaseResourceRatingRepository, SQLAlchemyReposi
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()
 
-        if filters.offset is not None:
-            statement = statement.offset(filters.offset)
-        if filters.count is not None:
-            statement = statement.limit(filters.count)
+        statement = apply_pagination_to_statement(statement, filters)
 
         resource_rating_models = (await self.session.execute(statement)).scalars().all()
         resource_ratings_entities = [

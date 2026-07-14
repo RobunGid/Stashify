@@ -11,8 +11,73 @@ from infrastructure.models.quiz_item import QuizItemModel
 from infrastructure.models.resource_favorite import ResourceFavoriteModel
 from infrastructure.models.resource_item import ResourceItemModel
 from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
-from sqlalchemy import func, select, update
+from infrastructure.repositories.sql.utils.apply_pagination import apply_pagination_to_statement
+from sqlalchemy import func, Select, select, update
 from sqlalchemy.orm import selectinload
+
+
+def apply_category_item_filters_to_statement(statement: Select, filters: CategoryItemFilters):
+    if filters.has_resource_items is not None:
+        subquery = (
+            select(ResourceItemModel.category_item_id)
+            .select_from(CategoryItemModel)
+            .outerjoin(
+                ResourceItemModel,
+                ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
+            )
+        )
+        if filters.has_resource_items is True:
+            statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))
+        else:
+            statement = statement.where(~CategoryItemModel.category_item_id.in_(subquery))
+
+        if filters.has_quiz_items is not None:
+            if filters.has_quiz_items:
+                quiz_exists = (
+                    select(1)
+                    .select_from(ResourceItemModel)
+                    .join(
+                        QuizItemModel,
+                        QuizItemModel.resource_item_id == ResourceItemModel.resource_item_id,
+                    )
+                    .where(ResourceItemModel.category_item_id == CategoryItemModel.category_item_id)
+                    .exists()
+                )
+                statement = statement.where(quiz_exists)
+            else:
+                resource_without_quiz_exists = (
+                    select(1)
+                    .select_from(ResourceItemModel)
+                    .outerjoin(
+                        QuizItemModel,
+                        QuizItemModel.resource_item_id == ResourceItemModel.resource_item_id,
+                    )
+                    .where(
+                        ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
+                        QuizItemModel.quiz_item_id.is_(None),
+                    )
+                    .exists()
+                )
+                statement = statement.where(resource_without_quiz_exists)
+
+    if filters.favorite_user_id is not None:
+        subquery = (
+            select(ResourceItemModel.category_item_id)
+            .select_from(CategoryItemModel)
+            .outerjoin(
+                ResourceItemModel,
+                ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
+            )
+            .outerjoin(
+                ResourceFavoriteModel,
+                ResourceFavoriteModel.resource_item_id == ResourceItemModel.resource_item_id,
+            )
+            .where(
+                ResourceFavoriteModel.user_account_id == filters.favorite_user_id,
+            )
+        )
+        statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))
+    return statement
 
 
 @dataclass
@@ -45,74 +110,13 @@ class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepository
             .selectinload(ResourceItemModel.quiz_item)
             .selectinload(QuizItemModel.quiz_questions),
         )
-        if filters.has_resource_items is not None:
-            subquery = (
-                select(ResourceItemModel.category_item_id)
-                .select_from(CategoryItemModel)
-                .outerjoin(
-                    ResourceItemModel,
-                    ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
-                )
-            )
-            if filters.has_resource_items is True:
-                statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))
-            else:
-                statement = statement.where(~CategoryItemModel.category_item_id.in_(subquery))
 
-            if filters.has_quiz_items is not None:
-                if filters.has_quiz_items:
-                    quiz_exists = (
-                        select(1)
-                        .select_from(ResourceItemModel)
-                        .join(
-                            QuizItemModel,
-                            QuizItemModel.resource_item_id == ResourceItemModel.resource_item_id,
-                        )
-                        .where(ResourceItemModel.category_item_id == CategoryItemModel.category_item_id)
-                        .exists()
-                    )
-                    statement = statement.where(quiz_exists)
-                else:
-                    resource_without_quiz_exists = (
-                        select(1)
-                        .select_from(ResourceItemModel)
-                        .outerjoin(
-                            QuizItemModel,
-                            QuizItemModel.resource_item_id == ResourceItemModel.resource_item_id,
-                        )
-                        .where(
-                            ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
-                            QuizItemModel.quiz_item_id.is_(None),
-                        )
-                        .exists()
-                    )
-                    statement = statement.where(resource_without_quiz_exists)
-
-        if filters.favorite_user_id is not None:
-            subquery = (
-                select(ResourceItemModel.category_item_id)
-                .select_from(CategoryItemModel)
-                .outerjoin(
-                    ResourceItemModel,
-                    ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
-                )
-                .outerjoin(
-                    ResourceFavoriteModel,
-                    ResourceFavoriteModel.resource_item_id == ResourceItemModel.resource_item_id,
-                )
-                .where(
-                    ResourceFavoriteModel.user_account_id == filters.favorite_user_id,
-                )
-            )
-            statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))
+        statement = apply_category_item_filters_to_statement(statement, filters)
 
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()
 
-        if filters.offset is not None:
-            statement = statement.offset(filters.offset)
-        if filters.count is not None:
-            statement = statement.limit(filters.count)
+        statement = apply_pagination_to_statement(statement, filters)
 
         category_item_models = (await self.session.execute(statement)).scalars().all()
         categories_entities = [
@@ -141,73 +145,12 @@ class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepository
             .selectinload(ResourceItemModel.quiz_item)
             .selectinload(QuizItemModel.quiz_questions),
         )
-        if filters.has_resource_items is not None:
-            subquery = (
-                select(ResourceItemModel.category_item_id)
-                .select_from(CategoryItemModel)
-                .outerjoin(
-                    ResourceItemModel,
-                    ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
-                )
-            )
-            if filters.has_resource_items is True:
-                statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))
-            else:
-                statement = statement.where(~CategoryItemModel.category_item_id.in_(subquery))
 
-            if filters.has_quiz_items is not None:
-                if filters.has_quiz_items:
-                    quiz_exists = (
-                        select(1)
-                        .select_from(ResourceItemModel)
-                        .join(
-                            QuizItemModel,
-                            QuizItemModel.resource_item_id == ResourceItemModel.resource_item_id,
-                        )
-                        .where(ResourceItemModel.category_item_id == CategoryItemModel.category_item_id)
-                        .exists()
-                    )
-                    statement = statement.where(quiz_exists)
-                else:
-                    resource_without_quiz_exists = (
-                        select(1)
-                        .select_from(ResourceItemModel)
-                        .outerjoin(
-                            QuizItemModel,
-                            QuizItemModel.resource_item_id == ResourceItemModel.resource_item_id,
-                        )
-                        .where(
-                            ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
-                            QuizItemModel.quiz_item_id.is_(None),
-                        )
-                        .exists()
-                    )
-                    statement = statement.where(resource_without_quiz_exists)
-
-        if filters.favorite_user_id is not None:
-            subquery = (
-                select(ResourceItemModel.category_item_id)
-                .select_from(CategoryItemModel)
-                .outerjoin(
-                    ResourceItemModel,
-                    ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
-                )
-                .outerjoin(
-                    ResourceFavoriteModel,
-                    ResourceFavoriteModel.resource_item_id == ResourceItemModel.resource_item_id,
-                )
-                .where(
-                    ResourceFavoriteModel.user_account_id == filters.favorite_user_id,
-                )
-            )
-            statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))
+        statement = apply_category_item_filters_to_statement(statement, filters)
 
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()
 
-        if filters.offset is not None:
-            statement = statement.offset(filters.offset)
-        if filters.count is not None:
-            statement = statement.limit(filters.count)
+        statement = apply_pagination_to_statement(statement, filters)
 
         return total

@@ -8,7 +8,14 @@ from domain.repositories.resource_image import BaseResourceImageRepository
 from infrastructure.mappers.resource_image import ResourceImageMapper
 from infrastructure.models.resource_image import ResourceImageModel
 from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
-from sqlalchemy import delete, func, select, update
+from infrastructure.repositories.sql.utils.apply_pagination import apply_pagination_to_statement
+from sqlalchemy import delete, func, Select, select, update
+
+
+def apply_resource_image_filters_to_statement(statement: Select, filters: ResourceImageFilters):
+    if filters.resource_item_id is not None:
+        statement = statement.where(ResourceImageModel.resource_item_id == filters.resource_item_id)
+    return statement
 
 
 @dataclass
@@ -36,12 +43,9 @@ class SQLResourceImageRepository(BaseResourceImageRepository, SQLAlchemyReposito
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()
 
-        if filters.resource_item_id is not None:
-            statement = statement.where(ResourceImageModel.resource_item_id == filters.resource_item_id)
-        if filters.offset is not None:
-            statement = statement.offset(filters.offset)
-        if filters.count is not None:
-            statement = statement.limit(filters.count)
+        statement = apply_resource_image_filters_to_statement(statement, filters)
+
+        statement = apply_pagination_to_statement(statement, filters)
 
         resource_image_models = (await self.session.execute(statement)).scalars().all()
         resource_images_entities = [
@@ -67,6 +71,7 @@ class SQLResourceImageRepository(BaseResourceImageRepository, SQLAlchemyReposito
     async def get_count(self, filters: ResourceImageFilters) -> int:
 
         statement = select(ResourceImageModel)
+        statement = apply_resource_image_filters_to_statement(statement, filters)
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()
 

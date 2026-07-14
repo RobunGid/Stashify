@@ -8,6 +8,7 @@ from domain.repositories.quiz_rating import BaseQuizRatingRepository
 from infrastructure.models.category_item import CategoryItemModel
 from infrastructure.models.quiz_rating import QuizRatingModel
 from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
+from infrastructure.repositories.sql.utils.apply_pagination import apply_pagination_to_statement
 from sqlalchemy import func, select, update
 
 
@@ -36,10 +37,7 @@ class SQLQuizRatingRepository(BaseQuizRatingRepository, SQLAlchemyRepositoryMixi
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()
 
-        if filters.offset is not None:
-            statement = statement.offset(filters.offset)
-        if filters.count is not None:
-            statement = statement.limit(filters.count)
+        statement = apply_pagination_to_statement(statement, filters)
 
         quiz_ratings = (await self.session.execute(statement)).scalars().all()
         quiz_ratings_entities = [QuizRatingEntity(**category) for category in quiz_ratings]

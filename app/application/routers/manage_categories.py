@@ -6,7 +6,7 @@ from aiogram.types import CallbackQuery, Message
 from aiogram_i18n import I18nContext
 from application.exceptions.category_item import CategoryItemNotFoundException
 from application.filters.user_role_filter import UserRoleFilter
-from application.keyboards.categories import (
+from application.keyboards.manage_category import (
     DeleteCategoryChooseCategoryCallbackFactory,
     DeleteCategoryConfirmCallbackFactory,
     DeleteCategoryConfirmKeyboardBuilder,
@@ -18,7 +18,6 @@ from application.schemas.category_item_schema import BaseCategoryItemSchema, Cat
 from application.services.category_item import CategoryItemService
 from dishka import FromDishka
 from infrastructure.models.user_account import Role
-from sqlalchemy.exc import IntegrityError
 
 from settings.aiogram import bot
 
@@ -220,15 +219,8 @@ async def create_category_final(message: Message, i18n: I18nContext, service: Fr
     keyboard_builder = ManageCategoriesBackKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
-    try:
-        await service.create(category_schema.to_entity())
-    except IntegrityError:
-        await message.answer(
-            text=i18n.get("manage-categories-create-fail", category_name=category_schema.name),
-            reply_markup=keyboard,
-        )
-    else:
-        await message.answer(
-            text=i18n.get("manage-categories-create-success", category_name=category_schema.name),
-            reply_markup=keyboard,
-        )
+    await service.create(category_schema.to_entity())
+    await message.answer(
+        text=i18n.get("manage-categories-create-success", category_name=category_schema.name),
+        reply_markup=keyboard,
+    )

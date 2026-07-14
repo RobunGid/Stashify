@@ -193,7 +193,6 @@ class DeleteQuizChooseResourceCallbackFactory(CallbackData, prefix="edt_quiz_qst
 @dataclass
 class DeleteQuizResourceListKeyboardBuilder(
     BaseListKeyboardBuilder[ResourceItemEntity],
-    BackToManageQuizesKeyboardBuilder,
 ):
     category_item_id: UUID
 
@@ -211,6 +210,9 @@ class DeleteQuizResourceListKeyboardBuilder(
                 resource_item_id=item.resource_item_id,
             ).pack(),
         }
+
+    def _back_callback(self) -> str:
+        return ListCategoriesItemCallbackFactory(page=0, context="dlt_quiz", action="change_page").pack()
 
 
 @dataclass
@@ -258,7 +260,6 @@ class CreateQuizChooseResourceCallbackFactory(CallbackData, prefix="crt_quiz_chs
 @dataclass
 class CreateQuizResourceListKeyboardBuilder(
     BaseListKeyboardBuilder[ResourceItemEntity],
-    BackToManageQuizesKeyboardBuilder,
 ):
     category_item_id: UUID
 
@@ -277,14 +278,23 @@ class CreateQuizResourceListKeyboardBuilder(
             ).pack(),
         }
 
+    def _back_callback(self) -> str:
+        return ListCategoriesItemCallbackFactory(context="crt_quiz", page=0, action="change_page").pack()
+
+
+class DeleteQuizConfirmResourceCallbackFactory(CallbackData, prefix="dlt_quiz_chs"):  # type: ignore[call-arg]
+    resource_item_id: UUID
+
 
 @dataclass
 class DeleteQuizConfirmKeyboardBuilder(BackToManageQuizesKeyboardBuilderMixin, BaseConfirmKeyboardBuilder):
+    resource_item_id: UUID
+
     def _build_confirm_buttons(self) -> list[dict]:
         return [
             {
                 "text": self.i18n.get("manage-quizes-delete-confirm"),
-                "callback_data": "delete_quiz_confirm",
+                "callback_data": DeleteQuizConfirmResourceCallbackFactory(resource_item_id=self.resource_item_id),
             },
         ]
 

@@ -8,6 +8,7 @@ from domain.repositories.resource_favorite import BaseResourceFavoriteRepository
 from infrastructure.mappers.resource_favorite import ResourceFavoriteMapper
 from infrastructure.models.resource_favorite import ResourceFavoriteModel
 from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
+from infrastructure.repositories.sql.utils.apply_pagination import apply_pagination_to_statement
 from sqlalchemy import and_, exists, func, select, update
 
 
@@ -36,10 +37,7 @@ class SQLResourceFavoriteRepository(BaseResourceFavoriteRepository, SQLAlchemyRe
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()
 
-        if filters.offset is not None:
-            statement = statement.offset(filters.offset)
-        if filters.count is not None:
-            statement = statement.limit(filters.count)
+        statement = apply_pagination_to_statement(statement, filters)
 
         resource_favorite_models = (await self.session.execute(statement)).scalars().all()
         resource_favorites_entities = [

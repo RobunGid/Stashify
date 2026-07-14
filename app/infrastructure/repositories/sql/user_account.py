@@ -9,6 +9,7 @@ from infrastructure.mappers.user_account import UserAccountMapper
 from infrastructure.models.category_item import CategoryItemModel
 from infrastructure.models.user_account import UserAccountModel
 from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
+from infrastructure.repositories.sql.utils.apply_pagination import apply_pagination_to_statement
 from sqlalchemy import func, select, update
 
 
@@ -36,10 +37,7 @@ class SQLUserAccountRepository(BaseUserAccountRepository, SQLAlchemyRepositoryMi
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()
 
-        if filters.offset is not None:
-            statement = statement.offset(filters.offset)
-        if filters.count is not None:
-            statement = statement.limit(filters.count)
+        statement = apply_pagination_to_statement(statement, filters)
 
         user_accounts = (await self.session.execute(statement)).scalars().all()
         user_accounts_entities = [UserAccountEntity(**category) for category in user_accounts]

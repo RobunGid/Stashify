@@ -14,7 +14,7 @@ from application.exceptions.category_item import CategoryItemNotFoundException
 from application.exceptions.resource_item import ResourceItemNotFoundException
 from application.filters.user_role_filter import UserRoleFilter
 from application.filters_schemas.resource_image import ResourceImageFiltersSchema
-from application.keyboards.resources import (
+from application.keyboards.manage_resources import (
     CreateResourceCallbackFactory,
     DeleteResourceChooseResourceCallbackFactory,
     DeleteResourceConfirmCallbackFactory,

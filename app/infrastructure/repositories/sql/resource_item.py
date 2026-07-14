@@ -8,6 +8,7 @@ from domain.repositories.resource_item import BaseResourceItemRepository
 from infrastructure.mappers.resource_item import ResourceItemMapper
 from infrastructure.models.resource_item import ResourceItemModel
 from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
+from infrastructure.repositories.sql.utils.apply_pagination import apply_pagination_to_statement
 from sqlalchemy import func, or_, Select, select, update
 
 
@@ -62,10 +63,7 @@ class SQLResourceItemRepository(BaseResourceItemRepository, SQLAlchemyRepository
 
         total = (await self.session.execute(count_statement)).scalar_one()
 
-        if filters.offset is not None:
-            statement = statement.offset(filters.offset)
-        if filters.count is not None:
-            statement = statement.limit(filters.count)
+        statement = apply_pagination_to_statement(statement, filters)
 
         match filters.sort:
             case "created_at":

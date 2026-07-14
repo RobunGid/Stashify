@@ -8,6 +8,7 @@ from domain.repositories.quiz_item import BaseQuizItemRepository
 from infrastructure.mappers.quiz_item import QuizItemMapper
 from infrastructure.models.quiz_item import QuizItemModel
 from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
+from infrastructure.repositories.sql.utils.apply_pagination import apply_pagination_to_statement
 from sqlalchemy import exists, func, select, update
 
 
@@ -36,10 +37,7 @@ class SQLQuizItemRepository(BaseQuizItemRepository, SQLAlchemyRepositoryMixin):
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()
 
-        if filters.offset is not None:
-            statement = statement.offset(filters.offset)
-        if filters.count is not None:
-            statement = statement.limit(filters.count)
+        statement = apply_pagination_to_statement(statement, filters)
 
         quiz_item_models = (await self.session.execute(statement)).scalars().all()
         quiz_items_entities = [QuizItemMapper.to_entity(quiz_item_model) for quiz_item_model in quiz_item_models]
