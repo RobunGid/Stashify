@@ -8,7 +8,29 @@ from domain.repositories.resource_item import BaseResourceItemRepository
 from infrastructure.mappers.resource_item import ResourceItemMapper
 from infrastructure.models.resource_item import ResourceItemModel
 from infrastructure.repositories.sql.base import SQLAlchemyRepositoryMixin
-from sqlalchemy import func, or_, select, update
+from sqlalchemy import func, or_, Select, select, update
+
+
+def apply_resource_item_filters_to_statement(statement: Select, filters: ResourceItemFilters):
+    if filters.category_item_id is not None:
+        statement = statement.where(ResourceItemModel.category_item_id == filters.category_item_id)
+
+    if filters.query is not None:
+        statement = statement.where(
+            or_(
+                ResourceItemModel.name.ilike(f"%{filters.query}%"),
+                ResourceItemModel.description.ilike(f"%{filters.query}%"),
+                ResourceItemModel.links.ilike(f"%{filters.query}%"),
+                ResourceItemModel.tags.ilike(f"%{filters.query}%"),
+            ),
+        )
+
+    if filters.with_quiz_item is not None:
+        if filters.with_quiz_item:
+            statement = statement.where(ResourceItemModel.quiz_item.has())
+        else:
+            statement = statement.where(~ResourceItemModel.quiz_item.has())
+    return statement
 
 
 @dataclass
@@ -34,18 +56,7 @@ class SQLResourceItemRepository(BaseResourceItemRepository, SQLAlchemyRepository
 
         statement = select(ResourceItemModel)
 
-        if filters.category_item_id is not None:
-            statement = statement.where(ResourceItemModel.category_item_id == filters.category_item_id)
-
-        if filters.query is not None:
-            statement = statement.where(
-                or_(
-                    ResourceItemModel.name.ilike(f"%{filters.query}%"),
-                    ResourceItemModel.description.ilike(f"%{filters.query}%"),
-                    ResourceItemModel.links.ilike(f"%{filters.query}%"),
-                    ResourceItemModel.tags.ilike(f"%{filters.query}%"),
-                ),
-            )
+        statement = apply_resource_item_filters_to_statement(statement, filters)
 
         count_statement = select(func.count()).select_from(statement.subquery())
 
@@ -104,18 +115,7 @@ class SQLResourceItemRepository(BaseResourceItemRepository, SQLAlchemyRepository
             (func.row_number().over(order_by=order_by_field) - 1).label("position"),
         )
 
-        if filters.category_item_id is not None:
-            subquery = subquery.where(ResourceItemModel.category_item_id == filters.category_item_id)
-
-        if filters.query is not None:
-            subquery = subquery.where(
-                or_(
-                    ResourceItemModel.name.ilike(f"%{filters.query}%"),
-                    ResourceItemModel.description.ilike(f"%{filters.query}%"),
-                    ResourceItemModel.links.ilike(f"%{filters.query}%"),
-                    ResourceItemModel.tags.ilike(f"%{filters.query}%"),
-                ),
-            )
+        subquery = apply_resource_item_filters_to_statement(subquery, filters)
 
         subquery = subquery.subquery()
 
@@ -130,18 +130,7 @@ class SQLResourceItemRepository(BaseResourceItemRepository, SQLAlchemyRepository
 
         statement = select(ResourceItemModel)
 
-        if filters.category_item_id is not None:
-            statement = statement.where(ResourceItemModel.category_item_id == filters.category_item_id)
-
-        if filters.query is not None:
-            statement = statement.where(
-                or_(
-                    ResourceItemModel.name.ilike(f"%{filters.query}%"),
-                    ResourceItemModel.description.ilike(f"%{filters.query}%"),
-                    ResourceItemModel.links.ilike(f"%{filters.query}%"),
-                    ResourceItemModel.tags.ilike(f"%{filters.query}%"),
-                ),
-            )
+        statement = apply_resource_item_filters_to_statement(statement, filters)
 
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.execute(count_statement)).scalar_one()

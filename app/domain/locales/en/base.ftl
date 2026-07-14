@@ -1,3 +1,8 @@
+# Common
+verified-no = ✅ Verified
+verified-yes = ⚠️ Not Verified
+
+
 # Navigation
 common-back = ⬅️ Back
 items-end = ⏩

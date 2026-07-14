@@ -6,5 +6,5 @@ from domain.filters.base import BaseFilters
 
 @dataclass
 class ResourceImageFilters(BaseFilters):
-    resource_item_id: UUID | None
-    count: int | None
+    resource_item_id: UUID | None = None
+    count: int | None = None

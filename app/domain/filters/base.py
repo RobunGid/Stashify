@@ -12,7 +12,7 @@ class SortOrder(Enum):
 
 @dataclass
 class BaseFilters:
-    count: int
+    count: int | None = None
     offset: int = field(default=0, kw_only=True)
     order: SortOrder = field(default=SortOrder.asc, kw_only=True)
     sort: BaseSortType = field(default="created_at", kw_only=True)

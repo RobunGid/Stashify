@@ -38,7 +38,7 @@ class ListCategoriesItemCallbackFactory(CallbackData, prefix="ctg_lst"):  # type
     ]
 
 
-class ListCategoryResourcesItemCallbackFactory(CallbackData, prefix="rsc_lst"):  # type: ignore[call-arg]
+class ListCategoryResourcesItemCallbackFactory(CallbackData, prefix="rsc_lst_ctg"):  # type: ignore[call-arg]
     category_item_id: UUID
     page: int
     context: Union[
@@ -53,7 +53,7 @@ class ListCategoryResourcesItemCallbackFactory(CallbackData, prefix="rsc_lst"): 
     ]
 
 
-class ListSearchResourcesItemCallbackFactory(CallbackData, prefix="rsc_lst"):  # type: ignore[call-arg]
+class ListSearchResourcesItemCallbackFactory(CallbackData, prefix="rsc_lst_srch"):  # type: ignore[call-arg]
     query: str
     page: int
     context: Union[Literal["menu"], Literal["..."]]

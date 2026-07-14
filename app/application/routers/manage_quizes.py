@@ -19,10 +19,12 @@ from application.keyboards.manage_quizes import (
     QuizManageEntryKeyboardBuilder,
 )
 from application.schemas.quiz_item_schema import BaseQuizItemSchema
+from application.schemas.quiz_option_schema import BaseQuizOptionSchema
 from application.schemas.quiz_question_schema import (
     BaseQuizQuestionSchema,
 )
 from application.services.quiz_item import QuizItemService
+from application.services.quiz_option import QuizOptionService
 from application.services.quiz_question import QuizQuestionService
 from application.services.resource_item import ResourceItemService
 from dishka import FromDishka
@@ -108,21 +110,30 @@ async def create_quiz_add_question(message: Message, state: FSMContext, i18n: I1
 
     question_data = message.html_text.split("\n")
     question_text = question_data[0]
-    question_options = question_data[1:]
-    right_options = [index for index, option in enumerate(question_options) if option.startswith("!")]
+    quiz_question_options = question_data[1:]
     quiz_item_id = state_data["quiz_item_id"]
 
-    question = BaseQuizQuestionSchema(
+    quiz_question_schema = BaseQuizQuestionSchema(
         quiz_question_id=uuid4(),
         image=message.photo[0].file_id if message.photo else None,
-        options=question_options,
         quiz_item_id=quiz_item_id,
-        right_options=right_options,
         text=question_text,
     )
+    question_options_schemas = [
+        BaseQuizOptionSchema(
+            quiz_question_id=quiz_question_schema.quiz_question_id,
+            is_right=quiz_question_option.startswith("!"),
+            text=quiz_question_option[1:] if quiz_question_option.startswith("!") else quiz_question_option,
+        )
+        for quiz_question_option in quiz_question_options
+    ]
 
     existing_questions = state_data.get("questions", [])
-    await state.update_data(questions=[*existing_questions, question])
+    existing_question_options = state_data.get("question_options", [])
+    await state.update_data(
+        questions=[*existing_questions, quiz_question_schema],
+        question_options=[*existing_question_options, *question_options_schemas],
+    )
 
     keyboard_builder = FinishQuizConfirmKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
@@ -147,12 +158,14 @@ async def create_quiz_finish_callback_handler(
     i18n: I18nContext,
     quiz_item_service: FromDishka[QuizItemService],
     quiz_question_service: FromDishka[QuizQuestionService],
+    quiz_option_service: FromDishka[QuizOptionService],
     resource_item_service: FromDishka[ResourceItemService],
     message: Message,
 ):
     state_data = await state.get_data()
 
-    quiz_questions = state_data["questions"]
+    quiz_question_schemas = state_data["questions"]
+    quiz_option_schemas = state_data["question_options"]
     quiz_item_id = state_data["quiz_item_id"]
     resource_item_id = state_data["resource_item_id"]
 
@@ -161,31 +174,23 @@ async def create_quiz_finish_callback_handler(
         raise ResourceItemNotFoundException(resource_item_id)
 
     quiz_item_schema = BaseQuizItemSchema(quiz_item_id=quiz_item_id, resource_item_id=resource_item_id)
-    quiz_questions_schemas = [
-        BaseQuizQuestionSchema(
-            quiz_question_id=uuid4(),
-            text=quiz_question.text,
-            quiz_item_id=quiz_item_id,
-            options=quiz_question.options,
-            right_options=quiz_question.right_options,
-            image=quiz_question.image,
-        )
-        for quiz_question in quiz_questions
-    ]
 
     keyboard_builder = BackToManageQuizesKeyboardBuilder(i18n=i18n)
     keyboard = keyboard_builder.build()
 
     await quiz_item_service.create(item=quiz_item_schema.to_entity())
 
-    for quiz_question_schema in quiz_questions_schemas:
+    for quiz_question_schema in quiz_question_schemas:
         await quiz_question_service.create(quiz_question_schema.to_entity())
+
+    for quiz_option_schema in quiz_option_schemas:
+        await quiz_option_service.create(quiz_option_schema.to_entity())
 
     await message.answer(
         text=i18n.get(
             "manage-quizes-create-success",
             resource_name=resource_item_entity.name,
-            question_count=len(quiz_questions),
+            question_count=len(quiz_question_schemas),
         ),
         reply_markup=keyboard,
     )

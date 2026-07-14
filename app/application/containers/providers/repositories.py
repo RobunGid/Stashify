@@ -1,6 +1,7 @@
 from dishka import AnyOf, provide, Provider, Scope
 from domain.repositories.category_item import BaseCategoryItemRepository
 from domain.repositories.quiz_item import BaseQuizItemRepository
+from domain.repositories.quiz_option import BaseQuizOptionRepository
 from domain.repositories.quiz_question import BaseQuizQuestionRepository
 from domain.repositories.quiz_rating import BaseQuizRatingRepository
 from domain.repositories.quiz_result import BaseQuizResultRepository
@@ -11,6 +12,7 @@ from domain.repositories.resource_rating import BaseResourceRatingRepository
 from domain.repositories.user_account import BaseUserAccountRepository
 from infrastructure.repositories.sql.category_item import SQLCategoryItemRepository
 from infrastructure.repositories.sql.quiz_item import SQLQuizItemRepository
+from infrastructure.repositories.sql.quiz_option import SQLQuizOptionRepository
 from infrastructure.repositories.sql.quiz_question import SQLQuizQuestionRepository
 from infrastructure.repositories.sql.quiz_rating import SQLQuizRatingRepository
 from infrastructure.repositories.sql.quiz_result import SQLQuizResultRepository
@@ -71,6 +73,13 @@ class RepositoriesProvider(Provider):
         session: AsyncSession,
     ) -> AnyOf[BaseQuizQuestionRepository, SQLQuizQuestionRepository]:
         return SQLQuizQuestionRepository(session=session)
+
+    @provide(scope=Scope.REQUEST)
+    def get_quiz_option_repository(
+        self,
+        session: AsyncSession,
+    ) -> AnyOf[BaseQuizOptionRepository, SQLQuizOptionRepository]:
+        return SQLQuizOptionRepository(session=session)
 
     @provide(scope=Scope.REQUEST)
     def get_quiz_result_repository(

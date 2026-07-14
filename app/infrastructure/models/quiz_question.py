@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID as PyUUID, uuid4
 
-from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.base import Base
@@ -21,11 +21,7 @@ class QuizQuestionModel(Base):
         back_populates="quiz_question",
         cascade="all, delete-orphan",
     )
-    index: Mapped[int]
-
     image: Mapped[str | None]
 
     created_at: Mapped[datetime] = mapped_column(default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.now, onupdate=datetime.now)
-
-    __table_args__ = (UniqueConstraint("quiz_item_id", "index", name="uq_quiz_question_item_index"),)

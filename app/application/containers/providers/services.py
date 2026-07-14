@@ -1,5 +1,6 @@
 from application.services.category_item import CategoryItemService
 from application.services.quiz_item import QuizItemService
+from application.services.quiz_option import QuizOptionService
 from application.services.quiz_question import QuizQuestionService
 from application.services.quiz_rating import QuizRatingService
 from application.services.quiz_result import QuizResultService
@@ -11,6 +12,7 @@ from application.services.user_account import UserAccountService
 from dishka import provide, Provider, Scope
 from domain.repositories.category_item import BaseCategoryItemRepository
 from domain.repositories.quiz_item import BaseQuizItemRepository
+from domain.repositories.quiz_option import BaseQuizOptionRepository
 from domain.repositories.quiz_question import BaseQuizQuestionRepository
 from domain.repositories.quiz_rating import BaseQuizRatingRepository
 from domain.repositories.quiz_result import BaseQuizResultRepository
@@ -70,6 +72,13 @@ class ServicesProvider(Provider):
         repository: BaseQuizQuestionRepository,
     ) -> QuizQuestionService:
         return QuizQuestionService(repository=repository)
+
+    @provide(scope=Scope.REQUEST)
+    def get_quiz_option_service(
+        self,
+        repository: BaseQuizOptionRepository,
+    ) -> QuizOptionService:
+        return QuizOptionService(repository=repository)
 
     @provide(scope=Scope.REQUEST)
     def get_quiz_result_service(

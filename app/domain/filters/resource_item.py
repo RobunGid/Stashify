@@ -13,3 +13,4 @@ class ResourceItemFilters(BaseFilters):
     category_item_id: UUID | None = None
     sort: ResourceItemSortType = "created_at"
     order: SortOrder = SortOrder.desc
+    with_quiz_item: bool | None = None

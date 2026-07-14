@@ -59,20 +59,34 @@ class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepository
             else:
                 statement = statement.where(~CategoryItemModel.category_item_id.in_(subquery))
 
-        if filters.has_quiz_items is not None:
-            subquery = (
-                select(ResourceItemModel.category_item_id)
-                .select_from(CategoryItemModel)
-                .join(
-                    ResourceItemModel,
-                    ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
-                )
-                .join(QuizItemModel, QuizItemModel.resource_item_id == ResourceItemModel.resource_item_id)
-            )
-            if filters.has_quiz_items is True:
-                statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))
-            elif filters.has_quiz_items is False:
-                statement = statement.where(~CategoryItemModel.category_item_id.in_(subquery))
+            if filters.has_quiz_items is not None:
+                if filters.has_quiz_items:
+                    quiz_exists = (
+                        select(1)
+                        .select_from(ResourceItemModel)
+                        .join(
+                            QuizItemModel,
+                            QuizItemModel.resource_item_id == ResourceItemModel.resource_item_id,
+                        )
+                        .where(ResourceItemModel.category_item_id == CategoryItemModel.category_item_id)
+                        .exists()
+                    )
+                    statement = statement.where(quiz_exists)
+                else:
+                    resource_without_quiz_exists = (
+                        select(1)
+                        .select_from(ResourceItemModel)
+                        .outerjoin(
+                            QuizItemModel,
+                            QuizItemModel.resource_item_id == ResourceItemModel.resource_item_id,
+                        )
+                        .where(
+                            ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
+                            QuizItemModel.quiz_item_id.is_(None),
+                        )
+                        .exists()
+                    )
+                    statement = statement.where(resource_without_quiz_exists)
 
         if filters.favorite_user_id is not None:
             subquery = (
@@ -141,20 +155,34 @@ class SQLCategoryItemRepository(BaseCategoryItemRepository, SQLAlchemyRepository
             else:
                 statement = statement.where(~CategoryItemModel.category_item_id.in_(subquery))
 
-        if filters.has_quiz_items is not None:
-            subquery = (
-                select(ResourceItemModel.category_item_id)
-                .select_from(CategoryItemModel)
-                .join(
-                    ResourceItemModel,
-                    ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
-                )
-                .join(QuizItemModel, QuizItemModel.resource_item_id == ResourceItemModel.resource_item_id)
-            )
-            if filters.has_quiz_items is True:
-                statement = statement.where(CategoryItemModel.category_item_id.in_(subquery))
-            elif filters.has_quiz_items is False:
-                statement = statement.where(~CategoryItemModel.category_item_id.in_(subquery))
+            if filters.has_quiz_items is not None:
+                if filters.has_quiz_items:
+                    quiz_exists = (
+                        select(1)
+                        .select_from(ResourceItemModel)
+                        .join(
+                            QuizItemModel,
+                            QuizItemModel.resource_item_id == ResourceItemModel.resource_item_id,
+                        )
+                        .where(ResourceItemModel.category_item_id == CategoryItemModel.category_item_id)
+                        .exists()
+                    )
+                    statement = statement.where(quiz_exists)
+                else:
+                    resource_without_quiz_exists = (
+                        select(1)
+                        .select_from(ResourceItemModel)
+                        .outerjoin(
+                            QuizItemModel,
+                            QuizItemModel.resource_item_id == ResourceItemModel.resource_item_id,
+                        )
+                        .where(
+                            ResourceItemModel.category_item_id == CategoryItemModel.category_item_id,
+                            QuizItemModel.quiz_item_id.is_(None),
+                        )
+                        .exists()
+                    )
+                    statement = statement.where(resource_without_quiz_exists)
 
         if filters.favorite_user_id is not None:
             subquery = (
